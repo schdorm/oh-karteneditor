@@ -1,0 +1,2 @@
+MapFrame::initMap() 
+MainWindow::updateItemList(int selectedItemRow) 1 

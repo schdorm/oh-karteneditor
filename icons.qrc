@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/" >
+	<file>.img/icon_new_map_01.png</file>
+	<file>.img/icon_open_map_03.png</file>
+	<file>.img/icon_quit_02.png</file>
+    </qresource>
+</RCC>
