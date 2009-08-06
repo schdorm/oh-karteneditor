@@ -265,7 +265,7 @@ connect(MapView->fd, SIGNAL(accepted()), this, SLOT(openMap()));
 // 	disconnect(saveAct, SIGN/**/AL(triggered()), this, SLOT(save()));
 // 	connect(saveAct, SIGNAL(triggered()), this, SLOT(savef()));
 
-// 	disconnect(MapView->fd, SIGNAL(accepted()), this, SLOT(savef()));
+	disconnect(MapView->fd, SIGNAL(accepted()), this, SLOT(savef()));
 	if(!existingMapFile)
 	{
 	mapfilename = MapView->fd_filename;
