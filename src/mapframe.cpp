@@ -76,6 +76,9 @@
  void MapFrame::newMap()
  {
  maptyp = MapType::sea;
+ bgi_filename = QString();
+ mapnorth = QString(); mapwest = QString();  mapsouth = QString(); mapeast = QString();
+
  szene->clear();
  mapSize = QSize(1000,1000);
  setSceneRect(0,0,1000,1000);
@@ -147,7 +150,7 @@ if(!save_filename.isEmpty())
 	
 	//if(! QFile(save_bgi_filename).exists())
 	//	{
-	if(!bgi_filename.isEmpty())
+	if(!bgi_filename.isEmpty() && szene->backgroundBrush() != Qt::NoBrush)
 	{
 	qWarning() << "Copying Map Background File:" << QString(bgi_filename) << QString(save_bgi_filename).prepend("/").prepend(save_dir_string);
 		if(QFile(bgi_filename).copy(QString(save_bgi_filename).prepend("/").prepend(save_dir_string)))
@@ -158,7 +161,7 @@ if(!save_filename.isEmpty())
 	//	}
 	}
 	else
-	qWarning() << "No map background setted";
+	qWarning() << "No map background set";
 	QFile savefile(save_filename);
 	savefile.open(QIODevice::WriteOnly);
 	QTextStream savestream(&savefile);

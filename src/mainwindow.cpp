@@ -34,9 +34,14 @@
 //#include <QtCore/QDir>
 #include <QtCore/QDebug>
 //#include <QtCore/QSignalMapper>
+#include <QtCore/QTimer>
+#include <QtCore/QDir>
+#include <QtCore/QFile>
 
 MainWindow::MainWindow()
  {
+	QTimer *autoSaveTimer = new QTimer(this);
+	autoSaveTimer->start(10000);
  	existingMapFile = false;
 
 	QWidget *zentralwidget = new QWidget();
@@ -96,7 +101,8 @@ MainWindow::MainWindow()
 	connect(SideBar, SIGNAL(SIG_deleteObject()), this, SLOT(deleteCurrentObject()));
 	SideBar->itemListWidget->setCurrentRow(0);
 
-
+	connect(autoSaveTimer, SIGNAL(timeout()), this, SLOT(autoSave()));
+	loadAutoSaveMap();
 }
 
 void MainWindow::createActions()
@@ -122,6 +128,10 @@ void MainWindow::createActions()
   saveAsAct->setShortcuts(QKeySequence::SaveAs);
   saveAsAct->setStatusTip(tr("Save the map to disk"));
   connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveHandler()));
+  
+  loadAutoSaveAct = new QAction(tr("Load Autosave"), this);
+  loadAutoSaveAct->setStatusTip(tr("Loads the Autosaved Map"));
+  connect(loadAutoSaveAct, SIGNAL(triggered()), this, SLOT(loadAutoSaveMap()));
 
   quitAct = new QAction(tr("&Exit"), this);
   quitAct->setShortcut(tr("Ctrl+Q"));
@@ -167,6 +177,15 @@ void MainWindow::createActions()
 // 	
 //  }
 
+void MainWindow::loadAutoSaveMap()
+{
+	if(QFile(QDir().home().absolutePath().append("/.OpenHanse/automapsave.ohm")).exists())
+	{
+	MapView->fd_filename = QDir().home().absolutePath().append("/.OpenHanse/automapsave.ohm");
+	openMap();
+	}
+}
+
  void MainWindow::open()
  {
  MapView->fileDialog(NameFilters::Map);
@@ -187,6 +206,7 @@ connect(MapView->fd, SIGNAL(accepted()), this, SLOT(openMap()));
  
  void MainWindow::saveHandler()
  {
+ autoSave();
  qWarning() << "saveHandler()" << mapfilename;
  if(existingMapFile)
  {
@@ -200,6 +220,28 @@ connect(MapView->fd, SIGNAL(accepted()), this, SLOT(openMap()));
  return;
  }
  
+ }
+ 
+ void MainWindow::autoSave()
+ {
+ if(!autoSaved)
+ {
+ QDir dir = QDir().home();
+ if(!dir.cd(".OpenHanse"))
+ {
+	if(dir.mkdir(".OpenHanse"))
+	{
+		dir.cd(".OpenHanse");
+	}
+	else	return;
+ }
+ QString savepath = dir.absolutePath();
+ qWarning() << savepath;
+ savepath.append("/automapsave.ohm");
+ MapView->saveMap(savepath);
+ autoSaved = true;
+ }
+
  }
 
  void MainWindow::save()
@@ -235,6 +277,8 @@ void MainWindow::createMenus()
   fileMenu->addAction(saveAct);
   fileMenu->addAction(saveAsAct);
   fileMenu->addSeparator();
+  fileMenu->addAction(loadAutoSaveAct);
+  fileMenu->addSeparator();
   fileMenu->addAction(quitAct);
 
   editMenu = menuBar()->addMenu(tr("&Edit"));
@@ -246,6 +290,7 @@ void MainWindow::createMenus()
  
 void MainWindow::addNewObjectToList(QGraphicsItem *newObject)
 {
+autoSaved = false;
 
 // SideBar->MapEntries << entry->data(0).toString().append(entry->data(1).toString()).append(entry->data(2).toString());
 qWarning() << "MainWindow::addNewObjectToList(QGraphicsItem *newObject)";
@@ -465,6 +510,8 @@ qWarning() << "MainWindow::sideBar_SelectFile()";
 
 void MainWindow::sideBar_FileSelected()
 {
+autoSaved = false;
+
 qWarning() << "MainWindow::sideBar_FileSelected()";
 	disconnect(MapView->fd, SIGNAL(accepted()), this, SLOT(sideBar_FileSelected()));
 	SideBar->fileView->setText(MapView->fd_filename);
@@ -506,6 +553,7 @@ qWarning() << "MainWindow::sideBar_FileSelected()";
 
 void MainWindow::spinboxHandler()
 {
+autoSaved = false;
 qWarning() << "MainWindow::spinboxHandler()";
 	if(SideBar->itemListWidget->currentRow() > 4 && ! MapView->itemSelected && !itemAdded)
 	{
@@ -525,6 +573,7 @@ qWarning() << "MainWindow::spinboxHandler()";
 
 void MainWindow::updateSpinbox()
 {
+
 SideBar->XBox->setValue(MapView->activeItem->x());
 SideBar->YBox->setValue(MapView->activeItem->y());
 }
@@ -533,7 +582,7 @@ SideBar->YBox->setValue(MapView->activeItem->y());
 void MainWindow::typeComboBoxHandler(QString typ)
 {
 qWarning() << "MainWindow::setObjTyp(QString typ)" << typ;
-
+autoSaved = false;
 	if(!SideBar->CB_mapprops)
 	{
 		MapView->setObjectType(typ);
@@ -559,6 +608,7 @@ qWarning() << "MainWindow::setObjTyp(QString typ)" << typ;
 
 void MainWindow::lineEditHandler(QString text)
 {
+autoSaved = false;
 	if(SideBar->itemListWidget->currentRow() == 0 )
 	{
 	MapView->cityname = text;
@@ -585,6 +635,7 @@ SideBar->itemListWidget->setCurrentItem(SideBar->itemListWidget->findItems(selec
 
 void MainWindow::deleteCurrentObject()
 {
+autoSaved = false;
 int currentListRow = SideBar->itemListWidget->currentRow();
 
 if(!MapView->itemMapList.isEmpty() && currentListRow > 4)

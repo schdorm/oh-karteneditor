@@ -51,7 +51,10 @@
  void open();
  void openMap();
  void saveHandler();
+ 
+ void autoSave();
 
+ void loadAutoSaveMap();
  
  void addNewObjectToList(QGraphicsItem *);
 
@@ -82,6 +85,7 @@
  QAction *openAct;
  QAction *saveAct;
  QAction *saveAsAct;
+ QAction *loadAutoSaveAct;
  QAction *quitAct;
  
  QAction *newObjectAct;
@@ -89,7 +93,7 @@
  
  QString mapfilename;
  bool existingMapFile;
- 
+ bool autoSaved;
  };
  #endif
  
