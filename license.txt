@@ -1,12 +1,10 @@
-Jeglicher Quellcode des OpenHanse-Projektes sowie des Karteneditors von OpenHanse steht unter der GPL Version 3. Der Text der GPL ist nachfolgend in dieser Datei enthalten und unter http://www.gnu.org/licenses/gpl.html zu finden.
+Jeglicher Quellcode des OpenHanse-Projektes sowie des Karteneditors von OpenHanse steht unter der GPL (Gnu General Public License) Version 3. Der Text der GPL ist nachfolgend in dieser Datei enthalten und unter http://www.gnu.org/licenses/gpl.html zu finden.
 
 Mediendateien, das beinhaltet Grafiken und Ton (Sound-Dateien), unter der Creative Commons BY NC ND Lizenz (Siehe unten).
 
-Diese Lizenzbestimmungen steht über allen Einzelangaben für einzelne Dateien und ist damit verbindlich für das komplette OpenHanse-Projekt. Urheber/Autor aller dieser Dateien ist das OpenHanse-Entwickler-Team.
 
 
-
-Any sourcecode of the OpenHanse-project, including its map-editor, is protected by the Gnu General Public License (GPL). Media files, including graphic- and soundfiles, are released under the terms of the  Creative Commons License.
+Any sourcecode of the OpenHanse-project, including its map-editor, is protected by the Gnu General Public License (GPL) v3. Media files, including graphic- and soundfiles, are released under the terms of the  Creative Commons BY NC ND License.
 The Author of all files is the OpenHanse-development-team.
 
 
