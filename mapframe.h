@@ -62,7 +62,7 @@ namespace MapType
 //   QString maptypename;
   
  QString bgi_filename; // Backgroundimage-FN
- bool isCity;
+//  bool isCity;
  QString cityname;
  QString mapnorth, mapwest, mapsouth, mapeast;
  QMap <QString, QGraphicsPixmapItem *> pixmapItemList;

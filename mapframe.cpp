@@ -86,6 +86,8 @@
 void MapFrame::saveMap(QString save_filename)
 {
 qWarning() << "Saving Map ..." << save_filename;
+if(!save_filename.isEmpty())
+{
 	if(!save_filename.endsWith(".ohm"))
 	{
 		save_filename.append(".ohm");
@@ -165,11 +167,11 @@ qWarning() << "Saving Map ..." << save_filename;
   savestream << "<maphintergrund>";
   savestream << save_bgi_filename;
   savestream << "</maphintergrund>\n";
-  if(!cityname.isEmpty())
+  if(!cityname.isEmpty() && (maptyp == MapType::coast_city || maptyp == MapType::land_city))
   {
-  savestream << "<stadtname>";
+  savestream << "<cityname>";
   savestream << cityname;
-  savestream << "</stadtname>\n";
+  savestream << "</cityname>\n";
   }
   savestream << "<mapbreite>";
   savestream << mapSize.width();
@@ -242,6 +244,7 @@ foreach(QString foritstring, itemMapList.keys())
  }
  savestream << "</map>";
  }
+ }
  
  void MapFrame::loadMap(QString load_filename)
  {
@@ -290,7 +293,7 @@ foreach(QString foritstring, itemMapList.keys())
 				} status = null;	// status als dieses enum: zeigt an, was fuer ein Wert als naechstes ausgelesen wird
 
 		cityname = QString();
-		QString ofkt = QString();				//Funktion des Objektes
+		int ofkt = -1;				//Funktion des Objektes
 		QString otooltip = QString();				//name/tooltip des objekts
 		QString odatei = QString();				//name des Bildes des Objekts
 		
@@ -315,7 +318,7 @@ foreach(QString foritstring, itemMapList.keys())
 				status=m_prop;
 				break;
 				}
-				if(reader.qualifiedName().toString() =="stadtname")
+				if(reader.qualifiedName().toString() =="cityname")
 				{
 				status=m_stadtname;
 				break;
@@ -363,7 +366,7 @@ foreach(QString foritstring, itemMapList.keys())
 				break;
 				}
 
-				if(reader.qualifiedName().toString() =="maptyp")
+				if(reader.qualifiedName().toString() =="maptype")
 				{
 // 				qWarning() << "Start: mapprops";
 				status=m_typ;
@@ -515,19 +518,28 @@ foreach(QString foritstring, itemMapList.keys())
 				}
 				case m_typ:
 				{
-					if(reader.text().toString() == "sea")
+// 				qWarning() << "m_typ";
+					if(reader.text().toString().toInt() == 0)
 					{
-						
+						maptyp = MapType::sea;
 					}
-					if(reader.text().toString() == "coast")
+					if(reader.text().toString().toInt() == 1)
 					{
-						
+						maptyp = MapType::coast;
 					}
-					if(reader.text().toString() == "land")
+					if(reader.text().toString().toInt() == 2)
 					{
-						
+						maptyp = MapType::land;
 					}
-
+					if(reader.text().toString().toInt() == 3)
+					{
+						maptyp = MapType::coast_city;
+					}
+					if(reader.text().toString().toInt() == 4)
+					{
+						maptyp = MapType::land_city;
+					}
+// 					qWarning() << maptyp << reader.text().toString();
 				}
 
 				case objekt:
@@ -577,7 +589,7 @@ foreach(QString foritstring, itemMapList.keys())
 			case QXmlStreamReader::EndElement:
 			{
 				qWarning() << "Ende :"<< reader.qualifiedName().toString();
-				if(reader.qualifiedName().toString() == "objekt" && !ofkt.isEmpty() && !odatei.isEmpty())
+				if(reader.qualifiedName().toString() == "objekt" && ofkt != -1 && !odatei.isEmpty())
 	//jetzt zeichnen: habe alle Eigenschaften des Objektes erhalten?
 				{
 // 						if(!odatei.contains("img"))
@@ -593,32 +605,32 @@ foreach(QString foritstring, itemMapList.keys())
 // 						int static i;
 						qWarning() << "Malen ....";
 // #ifdef _RELEASE_
-						bool gemalt = false;
-						if(ofkt == "Uhr")
-						{
+// 						bool gemalt = false;
+// 						if(ofkt == "Uhr")
+// 						{
+// 
+// 						QGraphicsItem *zb = szene->addPixmap((QPixmap(odatei)));
+// 						zb->setPos(oposx,oposy);
+// 						zb->setToolTip(otooltip);
+// 						zb->setZValue(0.5);
+// 						zb->setData(0,QVariant(QString("Ziffernblatt")));
+// 						QGraphicsItem *gz = szene-> addPixmap((QPixmap(":/img/objekte/zeiger1.png")));
+// 						gz->setPos(oposx+21,oposy+4);
+// 						gz->setToolTip(tr("grosser Zeiger"));
+// 						gz->setZValue(2);
+// 						gz->setData(0,QVariant(QString("grosser Zeiger")));
+// 
+// 						QGraphicsItem *kz = szene-> addPixmap( (QPixmap(":/img/objekte/zeiger2.png")));
+// 						kz->setPos(oposx+23,oposy+9);
+// 						kz->setToolTip(tr("kleiner Zeiger"));
+// 						kz->setZValue(1);
+// 						kz->setData(0,QVariant(QString("kleiner Zeiger")));
+// 						gemalt = true;
+// 						}
 
-						QGraphicsItem *zb = szene->addPixmap((QPixmap(odatei)));
-						zb->setPos(oposx,oposy);
-						zb->setToolTip(otooltip);
-						zb->setZValue(0.5);
-						zb->setData(0,QVariant(QString("Ziffernblatt")));
-						QGraphicsItem *gz = szene-> addPixmap((QPixmap(":/img/objekte/zeiger1.png")));
-						gz->setPos(oposx+21,oposy+4);
-						gz->setToolTip(tr("grosser Zeiger"));
-						gz->setZValue(2);
-						gz->setData(0,QVariant(QString("grosser Zeiger")));
 
-						QGraphicsItem *kz = szene-> addPixmap( (QPixmap(":/img/objekte/zeiger2.png")));
-						kz->setPos(oposx+23,oposy+9);
-						kz->setToolTip(tr("kleiner Zeiger"));
-						kz->setZValue(1);
-						kz->setData(0,QVariant(QString("kleiner Zeiger")));
-						gemalt = true;
-						}
-
-
-						if(!gemalt)
-						{
+// 						if(!gemalt)
+// 						{
 // 						QGraphicsItem *geb = szene->addPixmap((QPixmap(odatei)));
 // 						geb->setPos(oposx,oposy);
 // 						geb->setData(0,QVariant(ofkt));
@@ -632,13 +644,13 @@ foreach(QString foritstring, itemMapList.keys())
 // 						otooltip = QString();
 // 						odatei = QString();
 // 						geb->setZValue(0.1);
-						object_typ = ofkt.toInt();
+						object_typ = ofkt;
 						object_filename = odatei;
 						object_tooltip = otooltip;
 						ziel = QPoint(oposx, oposy);
 						createObjectDialog = new QDialog();
 						createObject();
-						}
+// 						}
 					}
 					else
 					{
@@ -1049,29 +1061,29 @@ qWarning() << text;
 	if(text == mt_sea)
 	{
 		maptyp = MapType::sea;
-		isCity = false;
+// 		isCity = false;
 	}
 	if(text == mt_coast)
 	{
 		maptyp = MapType::coast;
-		isCity = false;
+// 		isCity = false;
 	}
 	if(text == mt_land)
 	{
 		maptyp = MapType::land;
-		isCity = false;
+// 		isCity = false;
 	}
 
 	if(text == mt_coast_city)
 	{
 		maptyp = MapType::coast_city;
-		isCity = true;
+// 		isCity = true;
 	}
 
 	if(text == mt_land_city)
 	{
 		maptyp = MapType::land_city;
-		isCity = true;
+// 		isCity = true;
 	}
 }
 

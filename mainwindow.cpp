@@ -82,7 +82,7 @@ MainWindow::MainWindow()
 	connect(SideBar->itemListWidget, SIGNAL(currentRowChanged(int)), this, SLOT(updateItemList(int)));
 	connect(SideBar->itemTyp, SIGNAL(activated(QString)), this, SLOT(typeComboBoxHandler(QString)));
 	connect(SideBar->selectFileButton, SIGNAL(clicked()), this, SLOT(sideBar_SelectFile()));
-	connect(SideBar->editToolTip, SIGNAL(textChanged(QString)), this, SLOT(lineEditHandler(QString)));
+	connect(SideBar->editToolTip, SIGNAL(textEdited(QString)), this, SLOT(lineEditHandler(QString)));
 // 	connect(SideBar->XBox, SIGNAL(valueChanged(int)), this, SLOT(spinboxHandler()));
 // 	connect(SideBar->YBox, SIGNAL(valueChanged(int)), this, SLOT(spinboxHandler()));
 	connect(SideBar->XBox, SIGNAL(editingFinished()), this, SLOT(spinboxHandler()));
@@ -94,7 +94,7 @@ MainWindow::MainWindow()
 	
 	connect(MapView, SIGNAL(SIG_deleteObject()), this, SLOT(deleteCurrentObject()));
 	connect(SideBar, SIGNAL(SIG_deleteObject()), this, SLOT(deleteCurrentObject()));
-	SideBar->itemListWidget->setCurrentRow(1);
+	SideBar->itemListWidget->setCurrentRow(0);
 
 
 }
@@ -155,6 +155,8 @@ void MainWindow::createActions()
 	MapView->newMap();
 // 	connect(saveAct, SIGNAL(triggered()), this, SLOT(save()));
 // 	disconnect(saveAct, SIGNAL(triggered()), this, SLOT(savef()));
+	existingMapFile = false;
+
  }
 
 //  void MainWindow::newFile()
@@ -175,6 +177,7 @@ connect(MapView->fd, SIGNAL(accepted()), this, SLOT(openMap()));
  {
  existingMapFile = true;
  mapfilename = MapView->fd_filename;
+ qWarning() << MapView->fd_filename;
  SideBar->itemListWidget->clear();
  SideBar->itemListWidget->addItems(SideBar->staticListEntries);
 
@@ -184,7 +187,7 @@ connect(MapView->fd, SIGNAL(accepted()), this, SLOT(openMap()));
  
  void MainWindow::saveHandler()
  {
- qWarning() << "saveHandler()";
+ qWarning() << "saveHandler()" << mapfilename;
  if(existingMapFile)
  {
  savef();
@@ -216,7 +219,10 @@ connect(MapView->fd, SIGNAL(accepted()), this, SLOT(openMap()));
 // 	connect(saveAct, SIGNAL(triggered()), this, SLOT(savef()));
 
 // 	disconnect(MapView->fd, SIGNAL(accepted()), this, SLOT(savef()));
+	if(!existingMapFile)
+	{
 	mapfilename = MapView->fd_filename;
+	}
 	setWindowTitle(tr("Karteneditor: ").append(mapfilename));
 	MapView->saveMap(mapfilename);
  }
@@ -267,7 +273,7 @@ qWarning() << "MainWindow::updateItemList(int selectedItemRow)" << selectedItemR
 		//SideBar->editToolTip->setToolTip(tr("Comment"));
 // 		SideBar->editToolTip->setEnabled(false);
 // 		SideBar->editToolTip->setText(QString());
-		if(MapView->isCity)
+		if(MapView->maptyp == MapType::land_city || MapView->maptyp == MapType::coast_city)
 		{
 			SideBar->editToolTip->setEnabled(true);
 			SideBar->editToolTip->setText(MapView->cityname);
@@ -411,7 +417,7 @@ qWarning() << "MainWindow::updateItemList(int selectedItemRow)" << selectedItemR
  		MapView->activeItem = MapView->itemMapList.value(SideBar->itemListWidget->currentItem()->text());
 		
 // 		MapView->activeItem->setPos(10000,1000);
-				qWarning() << "DebugMeldung";
+// 				qWarning() << "DebugMeldung";
 		
 		SideBar->XBox->setValue(MapView->activeItem->x());
 		SideBar->YBox->setValue(MapView->activeItem->y());
@@ -420,13 +426,14 @@ qWarning() << "MainWindow::updateItemList(int selectedItemRow)" << selectedItemR
 		
 		
 		int obj_id = MapView->activeItem->data(0).toInt();
+		qWarning() << obj_id;
 		if(obj_id < 100)
 			SideBar->itemTyp->setCurrentIndex(obj_id);
-		if(obj_id > 100 && obj_id < 500)
+		if(obj_id >= 100 && obj_id < 500)
 			SideBar->itemTyp->setCurrentIndex(SideBar->itemTyp->count() - 3);
-		if(obj_id > 500 && obj_id < 1000)
+		if(obj_id >= 500 && obj_id < 1000)
 			SideBar->itemTyp->setCurrentIndex(SideBar->itemTyp->count() - 2);
-		if(obj_id > 1000)
+		if(obj_id >= 1000)
 			SideBar->itemTyp->setCurrentIndex(SideBar->itemTyp->count() - 1);
 		SideBar->editToolTip->setText(MapView->activeItem->data(1).toString());
 		
@@ -537,6 +544,16 @@ qWarning() << "MainWindow::setObjTyp(QString typ)" << typ;
 	{
 		MapView->setMapType(typ);
 		
+		if(MapView->maptyp == MapType::land_city || MapView->maptyp == MapType::coast_city)
+		{
+			SideBar->editToolTip->setEnabled(true);
+			SideBar->editToolTip->setText(MapView->cityname);
+		}
+		else
+		{
+			SideBar->editToolTip->setEnabled(false);
+			SideBar->editToolTip->setText(QString());
+		}
 	}
 }
 
@@ -549,6 +566,7 @@ void MainWindow::lineEditHandler(QString text)
 	if(SideBar->itemListWidget->currentRow() > 4)
 	{
 	MapView->activeItem->setData(1, QVariant(text));
+	MapView->activeItem->setToolTip(text);
 	}
 }
 
