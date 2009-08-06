@@ -116,7 +116,7 @@ void MainWindow::createActions()
   saveAct = new QAction(tr("&Save"), this);
   saveAct->setShortcuts(QKeySequence::Save);
   saveAct->setStatusTip(tr("Save the map with the current name to disk"));
-  connect(saveAct, SIGNAL(triggered()), this, SLOT(save()));
+  connect(saveAct, SIGNAL(triggered()), this, SLOT(saveHandler()));
 
   saveAsAct = new QAction(tr("&Save As ..."), this);
   saveAsAct->setShortcuts(QKeySequence::SaveAs);
@@ -173,16 +173,21 @@ connect(MapView->fd, SIGNAL(accepted()), this, SLOT(openMap()));
  
  void MainWindow::openMap()
  {
+ existingMapFile = true;
+ mapfilename = MapView->fd_filename;
  SideBar->itemListWidget->clear();
  SideBar->itemListWidget->addItems(SideBar->staticListEntries);
+
  MapView->loadMap(MapView->fd_filename);
+ SideBar->itemListWidget->setCurrentRow(0);
  }
  
  void MainWindow::saveHandler()
  {
+ qWarning() << "saveHandler()";
  if(existingMapFile)
  {
- safef();
+ savef();
  return;
  }
  

@@ -50,7 +50,7 @@
  void newMap();
  void open();
  void openMap();
- void savehandler();
+ void saveHandler();
 
  
  void addNewObjectToList(QGraphicsItem *);
