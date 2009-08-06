@@ -534,27 +534,29 @@ foreach(QString foritstring, itemMapList.keys())
 				case m_typ:
 				{
 // 				qWarning() << "m_typ";
-					if(reader.text().toString().toInt() == 0)
-					{
-						maptyp = MapType::sea;
-					}
-					if(reader.text().toString().toInt() == 1)
-					{
-						maptyp = MapType::coast;
-					}
-					if(reader.text().toString().toInt() == 2)
-					{
-						maptyp = MapType::land;
-					}
-					if(reader.text().toString().toInt() == 3)
-					{
-						maptyp = MapType::coast_city;
-					}
-					if(reader.text().toString().toInt() == 4)
-					{
-						maptyp = MapType::land_city;
-					}
+					maptyp = static_cast<MapType::mtyp>(reader.text().toString().toInt());
+// 					if(reader.text().toString().toInt() == 0)
+// 					{
+// 						maptyp = MapType::sea;
+// 					}
+// 					if(reader.text().toString().toInt() == 1)
+// 					{
+// 						maptyp = MapType::coast;
+// 					}
+// 					if(reader.text().toString().toInt() == 2)
+// 					{
+// 						maptyp = MapType::land;
+// 					}
+// 					if(reader.text().toString().toInt() == 3)
+// 					{
+// 						maptyp = MapType::coast_city;
+// 					}
+// 					if(reader.text().toString().toInt() == 4)
+// 					{
+// 						maptyp = MapType::land_city;
+// 					}
 // 					qWarning() << maptyp << reader.text().toString();
+					break;
 				}
 
 				case objekt:
@@ -928,7 +930,7 @@ foreach(QString foritstring, itemMapList.keys())
 		}
 
 
-		if(QGIlistAtClick.size() >1)
+		else if(QGIlistAtClick.size() >1)
 		{
 			if(QGIlistAtClick.contains(activeItem) && itemSelected)
 			{
@@ -1095,24 +1097,22 @@ qWarning() << text;
 		maptyp = MapType::sea;
 // 		isCity = false;
 	}
-	if(text == mt_coast)
+	else if(text == mt_coast)
 	{
 		maptyp = MapType::coast;
 // 		isCity = false;
 	}
-	if(text == mt_land)
+	else if(text == mt_land)
 	{
 		maptyp = MapType::land;
 // 		isCity = false;
 	}
-
-	if(text == mt_coast_city)
+	else if(text == mt_coast_city)
 	{
 		maptyp = MapType::coast_city;
 // 		isCity = true;
 	}
-
-	if(text == mt_land_city)
+	else if(text == mt_land_city)
 	{
 		maptyp = MapType::land_city;
 // 		isCity = true;
@@ -1195,8 +1195,7 @@ object_filename = fd_filename;
 
   emit newObjectCreated(itemtoAdd);
 
-// QGraphicsItem *blah;
-//   
+
 // QGraphicsSvgItem *svgblah = new QGraphicsSvgItem("/home/christian/Dokumente/Physik/LaTeX/absorption_angepasst.svg", blah);
 // szene->addItem(svgblah);
 // svgblah->setPos(20,20);
@@ -1221,13 +1220,12 @@ qWarning() << "MapFrame::fileDialog(int filterarg)" << filterarg;
 		filters	<< "Image files (*.png *.jpg)";
 //		<< "All files (*)";
 	}
-	if(filterarg == NameFilters::Map)
+	else if(filterarg == NameFilters::Map)
 	{
 		filters	<< "OpenHanse Map files (*.ohm)";
 //		<< "All files (*)";
 	}
-
-	if(filterarg == (NameFilters::Map|NameFilters::Save))
+	else if(filterarg == (NameFilters::Map|NameFilters::Save))
 	{
 		fd->setAcceptMode(QFileDialog::AcceptSave);
 		filters	<< "OpenHanse Map files (*.ohm)";

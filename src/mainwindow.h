@@ -76,6 +76,13 @@
  
  void save();
 
+enum itemListItemNames{
+en_mapproperties,
+en_mapnorth,
+en_mapwest,
+en_mapsouth,
+en_mapeast
+};
  
  QMenu *fileMenu;
  QMenu *editMenu;

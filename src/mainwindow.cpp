@@ -311,13 +311,7 @@ SideBar->itemListWidget->setCurrentRow(SideBar->itemListWidget->count() - 1);
 
 void MainWindow::updateItemList(int selectedItemRow)
 {
-enum items{
-en_mapproperties,
-en_mapnorth,
-en_mapwest,
-en_mapsouth,
-en_mapeast
-};
+
 
 qWarning() << "MainWindow::updateItemList(int selectedItemRow)" << selectedItemRow;
 	switch(selectedItemRow)
@@ -521,41 +515,45 @@ autoSaved = false;
 qWarning() << "MainWindow::sideBar_FileSelected()";
 	disconnect(MapView->fd, SIGNAL(accepted()), this, SLOT(sideBar_FileSelected()));
 	SideBar->fileView->setText(MapView->fd_filename);
-	if(SideBar->itemListWidget->currentRow() > 4)
+
+	switch(SideBar->itemListWidget->currentRow())
 	{
-// // 		MapView->itemList.value(SideBar->itemListWidget->currentRow() - 6)->setData(1, QVariant(MapView->fd_filename));
-
-// 		MapView->itemMapList.value(SideBar->itemListWidget->currentItem()->text())->setData(1, QVariant(MapView->fd_filename));
-
-
+	case 0:
+	{
+		MapView->bgi_filename = MapView->fd_filename;
+		MapView->szene->setBackgroundBrush(QBrush(QImage(MapView->bgi_filename)));
+		break;
+	}
+	case 1:
+	{
+		MapView->mapnorth = MapView->fd_filename;
+		break;
+	}
+	case 2:
+	{
+		MapView->mapwest = MapView->fd_filename;
+		break;
+	}
+	case 3:
+	{
+		MapView->mapsouth = MapView->fd_filename;
+		break;
+	}
+	case 4:
+	{
+		MapView->mapeast = MapView->fd_filename;
+		break;
+	}
+	default:
+	{
 
 		MapView->activeItem->setData(2, QVariant(MapView->fd_filename));
 
 		GI2GPMI( MapView->activeItem )->setPixmap(QPixmap(MapView->fd_filename));
 //		MapView->pixmapItemList[MapView->activeItem]->setPixmap(QPixmap(MapView->fd_filename));
+		break;
 	}
-	if(SideBar->itemListWidget->currentRow() == 0)
-	{
-		MapView->bgi_filename = MapView->fd_filename;
-		MapView->szene->setBackgroundBrush(QBrush(QImage(MapView->bgi_filename)));
 	}
-	if(SideBar->itemListWidget->currentRow() == 1)
-	{
-		MapView->mapnorth = MapView->fd_filename;
-	}
-	if(SideBar->itemListWidget->currentRow() == 2)
-	{
-		MapView->mapwest = MapView->fd_filename;
-	}
-	if(SideBar->itemListWidget->currentRow() == 3)
-	{
-		MapView->mapsouth = MapView->fd_filename;
-	}
-	if(SideBar->itemListWidget->currentRow() == 4)
-	{
-		MapView->mapeast = MapView->fd_filename;
-	}
-
 }
 
 void MainWindow::spinboxHandler()
@@ -572,7 +570,7 @@ if(SideBar->XBox->hasFocus() || SideBar->YBox->hasFocus() || SideBar->ZBox->hasF
 		MapView->activeItem->setPos(SideBar->XBox->value(), SideBar->YBox->value());
 		MapView->activeItem->setZValue(SideBar->ZBox->value());
 	}
-	if(SideBar->itemListWidget->currentRow() <= 4)
+	else if(SideBar->itemListWidget->currentRow() <= 4)
 	{
 		MapView->mapSize = QSize(SideBar->XBox->value(), SideBar->YBox->value());
 		MapView->setSceneRect(0, 0, MapView->mapSize.width(), MapView->mapSize.height());
@@ -624,7 +622,7 @@ autoSaved = false;
 	{
 	MapView->cityname = text;
 	}
-	if(SideBar->itemListWidget->currentRow() > 4)
+	else if(SideBar->itemListWidget->currentRow() > 4)
 	{
 	MapView->activeItem->setData(1, QVariant(text));
 	MapView->activeItem->setToolTip(text);
