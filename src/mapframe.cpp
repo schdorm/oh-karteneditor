@@ -1232,9 +1232,9 @@ qWarning() << "MapFrame::fileDialog(int filterarg)" << filterarg;
 	}
 
 	fd->setNameFilters(filters);
-
-
 	fd->show();
+	fd->setFocus();
+	fd->raise();
 	connect(fd,SIGNAL(fileSelected(QString)),this,SLOT(setFileString(QString)));
 	connect(fd,SIGNAL(finished(int)),fd,SLOT(deleteLater()));
 }
