@@ -65,7 +65,7 @@ namespace MapType
 //  bool isCity;
  QString cityname;
  QString mapnorth, mapwest, mapsouth, mapeast;
- QMap <QString, QGraphicsPixmapItem *> pixmapItemList;
+ QMap <QGraphicsItem *, QGraphicsPixmapItem *> pixmapItemList;
  QList <QGraphicsItem *> qgilist;
 //  QMap <QVariant , QGraphicsItem*> itemMapList; 
 QMap <QString , QGraphicsItem*> itemMapList; 

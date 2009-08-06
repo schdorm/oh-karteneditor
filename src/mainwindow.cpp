@@ -529,10 +529,10 @@ qWarning() << "MainWindow::sideBar_FileSelected()";
 // 		MapView->itemMapList.value(SideBar->itemListWidget->currentItem()->text())->setData(1, QVariant(MapView->fd_filename));
 
 // // 		QGraphicsPixmapItem *blah = MapView->itemList.value(SideBar->itemListWidget->currentRow() - 6);
-		MapView->activeItem->setData(1, QVariant(MapView->fd_filename));
+		MapView->activeItem->setData(2, QVariant(MapView->fd_filename));
 		
-		
-//  		MapView->itemList.value(SideBar->itemListWidget->currentRow() - 6)->setPixmap(QPixmap(MapView->fd_filename));
+		MapView->pixmapItemList[MapView->activeItem]->setPixmap(QPixmap(MapView->fd_filename));
+//   		MapView->itemList.value(SideBar->itemListWidget->currentRow() - 6)->setPixmap(QPixmap(MapView->fd_filename));
 	}
 	if(SideBar->itemListWidget->currentRow() == 0)
 	{
@@ -639,7 +639,7 @@ void MainWindow::markListItem(QGraphicsItem *selectedItem)
 // }
 // QList <QListWidgetItem*> matchingListEntry =  SideBar->itemListWidget->findItems(selectedItem->data(0).toString(), Qt::MatchContains);
 qWarning() << "MainWindow::markListItem(QGraphicsItem *selectedItem)";
-SideBar->itemListWidget->setCurrentItem(SideBar->itemListWidget->findItems(selectedItem->data(18).toString(), Qt::MatchStartsWith).first());
+SideBar->itemListWidget->setCurrentItem(SideBar->itemListWidget->findItems(selectedItem->data(17).toString(), Qt::MatchStartsWith).first());
 
 }
 

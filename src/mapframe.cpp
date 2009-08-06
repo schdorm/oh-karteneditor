@@ -1186,11 +1186,13 @@ object_filename = fd_filename;
   itemtoAdd->setData(18, QVariant(itemtoAdd->data(17).toString().append("; ").append(itemtoAdd->data(1).toString()).append(itemtoAdd->data(2).toString().right(14).left(10))));
 
   
-  pixmapItemList[itemtoAdd->data(18).toString()] = itemtoAdd;
  
 //    = itemtoAdd;
     activeItem = itemtoAdd;
   itemMapList[activeItem->data(18).toString()] = activeItem;
+  
+  pixmapItemList[activeItem] = itemtoAdd;
+
   emit newObjectCreated(itemtoAdd);
 
 // QGraphicsItem *blah;
