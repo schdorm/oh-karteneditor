@@ -78,6 +78,8 @@
  maptyp = MapType::sea;
  bgi_filename = QString();
  mapnorth = QString(); mapwest = QString();  mapsouth = QString(); mapeast = QString();
+pixmapItemList.clear();
+itemMapList.clear();
 
  szene->clear();
  mapSize = QSize(1000,1000);
@@ -125,7 +127,11 @@ if(!save_filename.isEmpty())
 		{
 			y++;
 			n = save_dir_string.right(y).count("/");
-			
+			qWarning() << "while 2";
+			if(y > 1000)
+			{
+			return;
+			}
 		}
 		save_dir_string = save_dir_string.left(save_dir_string.size() - y);
 	  }
@@ -186,10 +192,13 @@ if(!save_filename.isEmpty())
   savestream << maptyp;
   savestream << "</maptype>\n";
   
+  qWarning() << "Mapprops written";
   //hier die Mapprops reinschreiben (Groesse, File, etc.)
   QGraphicsItem *saveitem;
   
 //   foreach(saveitem, itemList)
+if(itemMapList.size() > 0)
+{
 foreach(QString foritstring, itemMapList.keys())
  {
 	  saveitem = itemMapList.value(foritstring);
@@ -245,8 +254,10 @@ foreach(QString foritstring, itemMapList.keys())
  	savestream << "</objekthoehe>\n";
  	savestream << "</objekt>\n";
  }
+ }
  savestream << "</map>";
  }
+ 
  }
  
  void MapFrame::loadMap(QString load_filename)
