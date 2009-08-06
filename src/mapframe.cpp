@@ -115,9 +115,9 @@ if(!save_filename.isEmpty())
 			if(y > save_bgi_filename.size())
 			{
 			n=1;
-			qWarning() << "Aborted";
+			qWarning() << "While 1 Aborted";
 			}
-			qWarning() << "Schleife 1";
+// 			qWarning() << "Schleife 1";
 		}
 		save_bgi_filename = save_bgi_filename.right(y).prepend("img");
 		n = 0;
@@ -127,9 +127,10 @@ if(!save_filename.isEmpty())
 		{
 			y++;
 			n = save_dir_string.right(y).count("/");
-			qWarning() << "while 2";
-			if(y > 1000)
+// 			qWarning() << /**/"while 2";
+			if(y > save_dir_string.size())
 			{
+			qWarning() << "While 2 Aborted";
 			return;
 			}
 		}
@@ -1158,6 +1159,8 @@ object_filename = fd_filename;
 		mAlayout.addWidget(ok);
 		connect(ok, SIGNAL(clicked()), missingArgs, SLOT(deleteLater()));
 		missingArgs->show();
+		missingArgs->setFocus();
+		missingArgs->raise();
 	}
 }
 
