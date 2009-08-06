@@ -51,7 +51,7 @@
  void open();
  void openMap();
  void saveHandler();
- 
+ void savef();
  void autoSave();
 
  void loadAutoSaveMap();
@@ -75,7 +75,7 @@
  void createMenus();
  
  void save();
- void savef();
+
  
  QMenu *fileMenu;
  QMenu *editMenu;

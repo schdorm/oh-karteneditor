@@ -187,6 +187,7 @@ void MainWindow::loadAutoSaveMap()
 	{
 	MapView->fd_filename = QDir().home().absolutePath().append("/.OpenHanse/automapsave.ohm");
 	openMap();
+	existingMapFile = false;
 	}
 }
 
