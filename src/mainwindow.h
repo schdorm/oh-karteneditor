@@ -86,6 +86,7 @@
  QAction *saveAct;
  QAction *saveAsAct;
  QAction *loadAutoSaveAct;
+ QAction *autoSaveAct;
  QAction *quitAct;
  
  QAction *newObjectAct;
@@ -94,6 +95,7 @@
  QString mapfilename;
  bool existingMapFile;
  bool autoSaved;
+//  bool activeMapView;
  };
  #endif
  

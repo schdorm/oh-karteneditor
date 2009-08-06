@@ -103,7 +103,9 @@ object_type_land
  QGraphicsPixmapItem *activePixmapItem;
  QGraphicsItem *activeItem;
  bool itemSelected;
+ bool itemGrabbed;
  int object_typ;
+ int object_ZValue;
  QString object_filename;
  QString object_tooltip;
  int x, y;

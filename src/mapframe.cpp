@@ -302,7 +302,7 @@ foreach(QString foritstring, itemMapList.keys())
 		
 		int oposx = -1;				//x-Koordinate
 		int oposy = -1;				//y-Koordinate
-		double ohoehe;
+		double ohoehe = 0;
 		bool reading = true;
 
 		file.open(QIODevice::ReadOnly);
@@ -580,7 +580,7 @@ foreach(QString foritstring, itemMapList.keys())
 				case o_hoehe:
 				{
 					ohoehe = reader.text().toString().toDouble();
-					qWarning() << "\tPosY" << ohoehe;
+					qWarning() << "\tPosZ" << ohoehe;
 					break;
 				}
 				
@@ -648,6 +648,7 @@ foreach(QString foritstring, itemMapList.keys())
 // 						odatei = QString();
 // 						geb->setZValue(0.1);
 						object_typ = ofkt;
+						object_ZValue = ohoehe;
 						object_filename = odatei;
 						object_tooltip = otooltip;
 						ziel = QPoint(oposx, oposy);
@@ -793,15 +794,16 @@ foreach(QString foritstring, itemMapList.keys())
  void MapFrame::mousePressEvent(QMouseEvent *event)
  {
  qWarning() << "MapFrame::mousePressEvent(QMouseEvent *event)";
- if(!itemSelected)
+ if(!itemGrabbed)
  {
- object_tooltip = QString();
- object_filename = QString();
- fd_filename = QString();
+
  ziel = event->pos();
 	QList<QGraphicsItem *> QGIlistAtClick = items(event->pos());
 	if(QGIlistAtClick.isEmpty())
 	{
+	 object_tooltip = QString();
+	 object_filename = QString();
+	 fd_filename = QString();
 		newObjectDialog(ziel);
 // 		createObjectDialog = new QDialog();
 // 		createObjectDialog->setModal(true);
@@ -901,13 +903,14 @@ foreach(QString foritstring, itemMapList.keys())
 		{
 			if(activeItem == QGIlistAtClick.first())
 			{
-			itemSelected = true;
+			itemGrabbed = true;
 			
 			}
 			else
 			{
 			activeItem = QGIlistAtClick.first();
 			emit objectSelected(activeItem);
+			itemSelected = true;
 			}
 			
 		}
@@ -915,13 +918,20 @@ foreach(QString foritstring, itemMapList.keys())
 
 		if(QGIlistAtClick.size() >1)
 		{
+			if(QGIlistAtClick.contains(activeItem) && itemSelected)
+			{
+				itemGrabbed = true;
+			}
+			else
+			{
 			QDialog *selectObjectDialog = new QDialog(this);
 			selectObjectDialog->setModal(true);
 			QComboBox *objectList = new QComboBox(selectObjectDialog);
 			QStringList objectNameList;
-			foreach(activeItem, QGIlistAtClick)
+			QGraphicsItem *qgiit;	//QGraphicsItemIterator
+			foreach(qgiit, QGIlistAtClick)
 			{
-				objectNameList << QString(activeItem->data(17).toString()).append(QString("; ").append(activeItem->data(1).toString()).append(QString(" ...").append(activeItem->data(2).toString().right(15))));
+				objectNameList << QString(qgiit->data(17).toString()).append(QString("; ").append(qgiit->data(1).toString()).append(QString(" ...").append(qgiit->data(2).toString().right(15))));
 			}
 			objectList->addItems(objectNameList) ;
 			QPushButton *ok = new QPushButton ("Ok", selectObjectDialog);
@@ -935,45 +945,52 @@ foreach(QString foritstring, itemMapList.keys())
 			connect(objectList, SIGNAL(activated(QString)), this, SLOT(getObjectID(QString)));
 			getObjectID(objectList->currentText());
 			qgilist = QGIlistAtClick;
+			}
 		}
 
 	}
 }
 else
 {
-	itemSelected = false;
-	emit objectMoved();
+	itemGrabbed = true;
+// 	itemSelected = false;
+// 	emit objectMoved();
 }
+
 }
 
 
-void MapFrame::mouseMoveEvent(QMouseEvent *MME)
+void MapFrame::mouseMoveEvent(QMouseEvent *event)
 {
-curser = MME->pos();
+curser = event->pos();
 // setStatusTip(QString("%1 %2").arg(curser.x(), curser.y()));
 
 //qWarning() << "MapFrame::mouseMoveEvent(QMouseEvent *MME)";
 static int oldxpos, oldypos;
 
-if(!(oldxpos == 0 && oldypos == 0) && itemSelected /*&& (oldtime == time(NULL) || oldtime == time(NULL) - 1)*/)
+if(!(oldxpos == 0 && oldypos == 0) && itemGrabbed /*&& (oldtime == time(NULL) || oldtime == time(NULL) - 1)*/)
 {
- 	activeItem->moveBy( MME->x() - oldxpos,  MME->y() - oldypos);
+ 	activeItem->moveBy( event->x() - oldxpos,  event->y() - oldypos);
 	emit objectMoved();
 
 }
-oldxpos = MME->x();
-oldypos = MME->y();
+oldxpos = event->x();
+oldypos = event->y();
 }
 
 
 void MapFrame::mouseReleaseEvent(QMouseEvent *event)
 {
-if(itemSelected)
+if(itemGrabbed)
   {
-  itemSelected=false;
+  itemGrabbed = false;
+//   itemSelected=false;
   emit objectMoved();
   }
- 
+ if(event->button() == Qt::RightButton)
+ {
+ itemSelected = false;
+ }
 }
 
 void MapFrame::getObjectID(QString objname)
@@ -1115,6 +1132,7 @@ qWarning() << "MapFrame::newObject()";
 object_filename = fd_filename;
 	if(!object_filename.isEmpty())
 	{
+		object_ZValue = 0;
 		createObject();
 	}
 	else
@@ -1140,6 +1158,7 @@ object_filename = fd_filename;
  delete createObjectDialog;
   QGraphicsPixmapItem *itemtoAdd = szene->addPixmap(QPixmap(object_filename));
   itemtoAdd->setPos(ziel);
+  itemtoAdd->setZValue(object_ZValue);
   qWarning() << "ziel" << ziel;
   itemtoAdd->setToolTip(object_tooltip);
   itemtoAdd->setData(0, QVariant(object_typ));

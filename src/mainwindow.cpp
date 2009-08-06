@@ -88,10 +88,10 @@ MainWindow::MainWindow()
 	connect(SideBar->itemTyp, SIGNAL(activated(QString)), this, SLOT(typeComboBoxHandler(QString)));
 	connect(SideBar->selectFileButton, SIGNAL(clicked()), this, SLOT(sideBar_SelectFile()));
 	connect(SideBar->editToolTip, SIGNAL(textEdited(QString)), this, SLOT(lineEditHandler(QString)));
-// 	connect(SideBar->XBox, SIGNAL(valueChanged(int)), this, SLOT(spinboxHandler()));
-// 	connect(SideBar->YBox, SIGNAL(valueChanged(int)), this, SLOT(spinboxHandler()));
-	connect(SideBar->XBox, SIGNAL(editingFinished()), this, SLOT(spinboxHandler()));
-	connect(SideBar->YBox, SIGNAL(editingFinished()), this, SLOT(spinboxHandler()));
+ 	connect(SideBar->XBox, SIGNAL(valueChanged(int)), this, SLOT(spinboxHandler()));
+	connect(SideBar->YBox, SIGNAL(valueChanged(int)), this, SLOT(spinboxHandler()));
+// 	connect(SideBar->XBox, SIGNAL(editingFinished()), this, SLOT(spinboxHandler()));
+// 	connect(SideBar->YBox, SIGNAL(editingFinished()), this, SLOT(spinboxHandler()));
 	connect(SideBar->ZBox, SIGNAL(valueChanged(double)), this, SLOT(spinboxHandler()));
 	
 	connect(MapView, SIGNAL(objectSelected(QGraphicsItem*)), this, SLOT(markListItem(QGraphicsItem*)));
@@ -128,6 +128,10 @@ void MainWindow::createActions()
   saveAsAct->setShortcuts(QKeySequence::SaveAs);
   saveAsAct->setStatusTip(tr("Save the map to disk"));
   connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveHandler()));
+  
+  autoSaveAct = new QAction(tr("Save Autosave"), this);
+  autoSaveAct->setStatusTip(tr("Saves the Map as Autosaved Map"));
+  connect(autoSaveAct, SIGNAL(triggered()), this, SLOT(autoSave()));
   
   loadAutoSaveAct = new QAction(tr("Load Autosave"), this);
   loadAutoSaveAct->setStatusTip(tr("Loads the Autosaved Map"));
@@ -278,6 +282,7 @@ void MainWindow::createMenus()
   fileMenu->addAction(saveAsAct);
   fileMenu->addSeparator();
   fileMenu->addAction(loadAutoSaveAct);
+  fileMenu->addAction(autoSaveAct);
   fileMenu->addSeparator();
   fileMenu->addAction(quitAct);
 
@@ -306,6 +311,7 @@ SideBar->itemListWidget->setCurrentRow(SideBar->itemListWidget->count() - 1);
 void MainWindow::updateItemList(int selectedItemRow)
 {
 qWarning() << "MainWindow::updateItemList(int selectedItemRow)" << selectedItemRow;
+
 	if(selectedItemRow == 0)	//mapbackgroundimagefilepath !-! allgemeine Mapprops
 	{
 		if(MapView->bgi_filename.size() > 43)
@@ -554,8 +560,11 @@ qWarning() << "MainWindow::sideBar_FileSelected()";
 void MainWindow::spinboxHandler()
 {
 autoSaved = false;
-qWarning() << "MainWindow::spinboxHandler()";
-	if(SideBar->itemListWidget->currentRow() > 4 && ! MapView->itemSelected && !itemAdded)
+// qWarning() << "MainWindow::spinboxHandler()";
+
+if(SideBar->XBox->hasFocus() || SideBar->YBox->hasFocus() || SideBar->ZBox->hasFocus())
+{
+	if(SideBar->itemListWidget->currentRow() > 4 /*&& !MapView->itemGrabbed && !itemAdded*/)
 	{
 // 		MapView->itemMapList.value(SideBar->itemListWidget->currentItem()->text())->setPos(SideBar->XBox->value(), SideBar->YBox->value());
 // 		MapView->itemMapList.value(SideBar->itemListWidget->currentRow() - 6)->setZValue(SideBar->ZBox->value());
@@ -570,10 +579,11 @@ qWarning() << "MainWindow::spinboxHandler()";
 	if(itemAdded)
 		itemAdded = false;
 }
+}
 
 void MainWindow::updateSpinbox()
 {
-
+autoSaved = false;
 SideBar->XBox->setValue(MapView->activeItem->x());
 SideBar->YBox->setValue(MapView->activeItem->y());
 }
@@ -628,7 +638,7 @@ void MainWindow::markListItem(QGraphicsItem *selectedItem)
 // }
 // QList <QListWidgetItem*> matchingListEntry =  SideBar->itemListWidget->findItems(selectedItem->data(0).toString(), Qt::MatchContains);
 qWarning() << "MainWindow::markListItem(QGraphicsItem *selectedItem)";
-SideBar->itemListWidget->setCurrentItem(SideBar->itemListWidget->findItems(selectedItem->data(17).toString().append("; "), Qt::MatchStartsWith).first());
+SideBar->itemListWidget->setCurrentItem(SideBar->itemListWidget->findItems(selectedItem->data(18).toString(), Qt::MatchStartsWith).first());
 
 }
 
