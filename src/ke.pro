@@ -17,5 +17,5 @@ CONFIG += warn_on \
 
 RESOURCES += icons.qrc
 
-DESTDIR = bin/
+DESTDIR = ../bin/
 
