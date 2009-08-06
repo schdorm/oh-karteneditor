@@ -904,51 +904,58 @@ void MapFrame::setObjectType(QString text)
 qWarning() << "MapFrame::setObjectType(QString text)" << text;
 if(text == ot_townhall)
 {
-object_typ = 0;
-}
-if(text == ot_market)
-{
-object_typ = 1;
-}
-if(text == ot_church)
-{
-object_typ = 2;
-}
-if(text == ot_port)
-{
-object_typ = 3;
-}
-if(text == ot_office)
-{
-object_typ = 4;
-}
-if(text == ot_bank)
-{
-object_typ = 5;
-}
-if(text == ot_tavern)
-{
-object_typ = 6;
-}
-if(text == ot_land)
-{
-static int idi;
-object_typ = idi + 100;
-idi++;
-}
-if(text == ot_land2)
-{
-static int idi;
-object_typ = idi + 500;
-idi++;
-}
-if(text == ot_mapdecoration)
-{
-static int idi;
-object_typ = idi + 1000;
-idi++;
+	object_typ = 0;
 }
 
+else if(text == ot_market)
+{
+	object_typ = 1;
+}
+
+else if(text == ot_church)
+{
+	object_typ = 2;
+}
+
+else if(text == ot_port)
+{
+	object_typ = 3;
+}
+
+else if(text == ot_office)
+{
+	object_typ = 4;
+}
+
+else if(text == ot_bank)
+{
+	object_typ = 5;
+}
+
+else if(text == ot_tavern)
+{
+	object_typ = 6;
+}
+
+else if(text == ot_land)
+{
+	static int idi;
+	object_typ = idi + 100;
+	idi++;
+}
+
+else if(text == ot_land2)
+{
+	static int idi;
+	object_typ = idi + 500;
+	idi++;
+}
+else if(text == ot_mapdecoration)
+{
+	static int idi;
+	object_typ = idi + 1000;
+	idi++;
+}
 }
 
 void MapFrame::setMapType(QString text)
