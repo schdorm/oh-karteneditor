@@ -533,29 +533,7 @@ foreach(QString foritstring, itemMapList.keys())
 				}
 				case m_typ:
 				{
-// 				qWarning() << "m_typ";
 					maptyp = static_cast<MapType::mtyp>(reader.text().toString().toInt());
-// 					if(reader.text().toString().toInt() == 0)
-// 					{
-// 						maptyp = MapType::sea;
-// 					}
-// 					if(reader.text().toString().toInt() == 1)
-// 					{
-// 						maptyp = MapType::coast;
-// 					}
-// 					if(reader.text().toString().toInt() == 2)
-// 					{
-// 						maptyp = MapType::land;
-// 					}
-// 					if(reader.text().toString().toInt() == 3)
-// 					{
-// 						maptyp = MapType::coast_city;
-// 					}
-// 					if(reader.text().toString().toInt() == 4)
-// 					{
-// 						maptyp = MapType::land_city;
-// 					}
-// 					qWarning() << maptyp << reader.text().toString();
 					break;
 				}
 
@@ -609,20 +587,14 @@ foreach(QString foritstring, itemMapList.keys())
 				if(reader.qualifiedName().toString() == "objekt" && ofkt != -1 && !odatei.isEmpty())
 	//jetzt zeichnen: habe alle Eigenschaften des Objektes erhalten?
 				{
-// 						if(!odatei.contains("img"))
-// 						{ odatei.prepend(mapdir);
-// 						}
-// 						else
-// 							odatei.prepend(":");
+
 					odatei = odatei.prepend(mapdir);
 					qWarning() << odatei << ofkt;
 					QFile bild(odatei);
 					if(bild.exists())
 					{
-// 						int static i;
 						qWarning() << "Malen ....";
 // #ifdef _RELEASE_
-// 						bool gemalt = false;
 // 						if(ofkt == "Uhr")
 // 						{
 // 
@@ -642,25 +614,8 @@ foreach(QString foritstring, itemMapList.keys())
 // 						kz->setToolTip(tr("kleiner Zeiger"));
 // 						kz->setZValue(1);
 // 						kz->setData(0,QVariant(QString("kleiner Zeiger")));
-// 						gemalt = true;
 // 						}
 
-
-// 						if(!gemalt)
-// 						{
-// 						QGraphicsItem *geb = szene->addPixmap((QPixmap(odatei)));
-// 						geb->setPos(oposx,oposy);
-// 						geb->setData(0,QVariant(ofkt));
-// 
-// 						if(!otooltip.isEmpty())
-// 						{
-// 							geb->setToolTip(otooltip);
-// 						}
-// 
-// 						ofkt = QString();
-// 						otooltip = QString();
-// 						odatei = QString();
-// 						geb->setZValue(0.1);
 						object_typ = ofkt;
 						object_ZValue = ohoehe;
 						object_filename = odatei;
@@ -810,106 +765,14 @@ foreach(QString foritstring, itemMapList.keys())
  qWarning() << "MapFrame::mousePressEvent(QMouseEvent *event)";
  if(!itemGrabbed)
  {
-
  ziel = event->pos();
 	QList<QGraphicsItem *> QGIlistAtClick = items(event->pos());
 	if(QGIlistAtClick.isEmpty())
 	{
-	 object_tooltip = QString();
-	 object_filename = QString();
-	 fd_filename = QString();
+		object_tooltip = QString();
+		object_filename = QString();
+		fd_filename = QString();
 		newObjectDialog(ziel);
-// 		createObjectDialog = new QDialog();
-// 		createObjectDialog->setModal(true);
-// 		createObjectDialog->setWindowTitle(tr("Create new Object ..."));
-// 
-// 		QGridLayout *cODlayout = new QGridLayout(createObjectDialog);
-// 
-// 		QLabel *labelimg = new QLabel(createObjectDialog);
-// 		labelimg->setText(tr("Image File"));
-// 		cODlayout->addWidget(labelimg, 0, 0, 1, 1);
-// 
-// 		QLabel *filelabel = new QLabel(createObjectDialog);
-// 		filelabel->setFrameShape(QFrame::Box);
-// 		cODlayout->addWidget(filelabel, 0, 1, 1, 3);
-// 
-// 		QPushButton *selectFileButton = new QPushButton ("...",createObjectDialog);
-// 		cODlayout->addWidget(selectFileButton, 0, 4, 1, 1);
-// 
-// 
-// 		QLabel *labelfkt = new QLabel(createObjectDialog);
-// 		labelfkt->setText(tr("Object function"));
-// 		cODlayout->addWidget(labelfkt, 1, 0, 1, 1);
-// 
-// 		QComboBox *fkt = new QComboBox(createObjectDialog);
-// 
-// //		itemfktList << townhall << market << church << port << office << bank << tavern << land << land2 << mapdecoration;
-// 		fkt->addItems(itemfktList);
-// 		cODlayout->addWidget(fkt, 1, 1,1,4);
-// 
-// 		QLabel *labeltt = new QLabel(createObjectDialog);
-// 		labeltt->setText(tr("Object tooltip (optional)"));
-// 		cODlayout->addWidget(labeltt, 2, 0, 1, 1);
-// 
-// 		QLineEdit *objToolTip = new QLineEdit(createObjectDialog);
-// 		objToolTip->setMaxLength(25);
-// 		cODlayout->addWidget(objToolTip, 2, 1, 1, 4);
-// 		
-// 		QSpinBox *XBox_MV = new QSpinBox(createObjectDialog);
-// 		XBox_MV->setRange(0, mapSize.width());
-// 		XBox_MV->setValue(ziel.x());
-// 		
-// 		QSpinBox *YBox_MV = new QSpinBox(createObjectDialog);
-// 		YBox_MV->setRange(0, mapSize.height());
-// 		YBox_MV->setValue(ziel.y());
-// 		
-// 		QHBoxLayout spinboxlayout;
-// //		spinboxlayout.addSpacing(20);
-// 		QLabel *XLabel = new QLabel(tr("X-Pos:"),createObjectDialog);
-// 		spinboxlayout.addWidget(XLabel);
-// 		spinboxlayout.addWidget(XBox_MV);
-// //		spinboxlayout.addSpacing(40);
-// 		QLabel *YLabel = new QLabel(tr("Y-Pos:"),createObjectDialog);
-// 		spinboxlayout.addWidget(YLabel);
-// 		spinboxlayout.addWidget(YBox_MV);
-// //		spinboxlayout.addSpacing(20);
-// 		cODlayout->setRowStretch(3,2);
-// 		cODlayout->addLayout(&spinboxlayout, 4, 0, 2, 5);
-// 
-// 		QPushButton *ok = new QPushButton(tr("Ok"), createObjectDialog);
-// 		QPushButton *abort = new QPushButton(tr("Abort"), createObjectDialog);
-// 				
-// 		QHBoxLayout buttonlayout;
-// 		buttonlayout.addSpacing(20);
-// 		buttonlayout.addWidget(ok);
-// 		buttonlayout.addSpacing(40);
-// 		buttonlayout.addWidget(abort);
-// 		buttonlayout.addSpacing(20);
-// 		cODlayout->setRowStretch(5,2);
-// 		cODlayout->addLayout(&buttonlayout, 6, 0, 2, 5);
-// 
-// 
-// 
-// 		createObjectDialog->setLayout(cODlayout);
-// 		createObjectDialog->show();
-// 
-// 		connect(ok, SIGNAL(clicked()), this, SLOT(newObject()));
-// 		connect(abort, SIGNAL(clicked()), createObjectDialog, SLOT(close()));
-// 		connect(abort, SIGNAL(clicked()), createObjectDialog, SLOT(deleteLater()));
-// 
-// 		QSignalMapper *selectFileMapper = new QSignalMapper(createObjectDialog);
-// 		selectFileMapper->setMapping(selectFileButton, NameFilters::Img);
-// 		
-// 		connect(selectFileButton, SIGNAL(clicked()), selectFileMapper, SLOT(map()));
-// 		connect(selectFileMapper,SIGNAL(mapped(int)),this, SLOT(fileDialog(int)));
-// 		
-// 		connect(this, SIGNAL(fileStringChanged(QString)), filelabel, SLOT(setText(QString)));
-// 
-// 		connect(fkt, SIGNAL(currentIndexChanged(QString)), this, SLOT(setObjectType(QString)));
-// 		connect(objToolTip, SIGNAL(textEdited(QString)), this, SLOT(setToolTipString(QString)));
-// 		connect(XBox_MV, SIGNAL(valueChanged(int)), this, SLOT(setXPos(int)));
-// 		connect(YBox_MV, SIGNAL(valueChanged(int)), this, SLOT(setYPos(int)));
-// 		setObjectType(market);
 	}
 	else
 	{
@@ -1187,7 +1050,6 @@ object_filename = fd_filename;
 
   
  
-//    = itemtoAdd;
     activeItem = itemtoAdd;
   itemMapList[activeItem->data(18).toString()] = activeItem;
   
