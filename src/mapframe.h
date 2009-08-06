@@ -21,6 +21,9 @@
  #ifndef _MAPFRAME_H
  #define _MAPFRAME_H
  
+ #define GI2GPMI(x) dynamic_cast<QGraphicsPixmapItem *>(x)
+
+ 
  #include <QtCore/QMap>
  
  #include <QtGui/QGraphicsView>

@@ -219,7 +219,7 @@ connect(MapView->fd, SIGNAL(accepted()), this, SLOT(openMap()));
  return;
  }
  
- if(!existingMapFile)
+ else
  {
  save();
  return;
@@ -311,9 +311,18 @@ SideBar->itemListWidget->setCurrentRow(SideBar->itemListWidget->count() - 1);
 
 void MainWindow::updateItemList(int selectedItemRow)
 {
-qWarning() << "MainWindow::updateItemList(int selectedItemRow)" << selectedItemRow;
+enum items{
+en_mapproperties,
+en_mapnorth,
+en_mapwest,
+en_mapsouth,
+en_mapeast
+};
 
-	if(selectedItemRow == 0)	//mapbackgroundimagefilepath !-! allgemeine Mapprops
+qWarning() << "MainWindow::updateItemList(int selectedItemRow)" << selectedItemRow;
+	switch(selectedItemRow)
+	{
+	case en_mapproperties:	//mapbackgroundimagefilepath !-! allgemeine Mapprops
 	{
 		if(MapView->bgi_filename.size() > 43)
 		{
@@ -356,28 +365,10 @@ qWarning() << "MainWindow::updateItemList(int selectedItemRow)" << selectedItemR
 		SideBar->XBox->setEnabled(true);
 		SideBar->XBox->setValue(MapView->mapSize.width());
 		SideBar->YBox->setValue(MapView->mapSize.height());
+		break;
 	}
 
-// 	if(selectedItemRow == 0)	//city-name
-// 	{
-// 		SideBar->itemTyp->setEnabled(false);
-// 		SideBar->editToolTip->setEnabled(true);
-// 		SideBar->selectFileButton->setEnabled(false);
-// 		if(MapView->cityname.size() > 43)
-// 		{
-// 			SideBar->fileView->setText(QString(MapView->cityname).right(39).prepend("..."));
-// 		}
-// 		else
-// 			SideBar->editToolTip->setText(MapView->cityname);
-// 		SideBar->fileView->setText(QString());
-// 		SideBar->ZBox->setEnabled(false);
-// 		SideBar->YBox->setEnabled(true);
-// 		SideBar->XBox->setEnabled(true);
-// 		SideBar->XBox->setValue(MapView->mapSize.width());
-// 		SideBar->YBox->setValue(MapView->mapSize.height());
-// 	}
-
-	if(selectedItemRow == 1)	//Map: North
+	case en_mapnorth:		//Map: North
 	{
 		SideBar->itemTyp->setEnabled(false);
 		SideBar->editToolTip->setEnabled(false);
@@ -392,11 +383,9 @@ qWarning() << "MainWindow::updateItemList(int selectedItemRow)" << selectedItemR
 		SideBar->ZBox->setEnabled(false);
 		SideBar->YBox->setEnabled(false);
 		SideBar->XBox->setEnabled(false);
-
-// 		SideBar->XBox->setValue(MapView->mapSize.width());
-// 		SideBar->YBox->setValue(MapView->mapSize.height());
+		break;
 	}
-	if(selectedItemRow == 2)	//Map: West
+	case en_mapwest:	//Map: West
 	{
 		SideBar->itemTyp->setEnabled(false);
 		SideBar->editToolTip->setEnabled(false);
@@ -411,10 +400,9 @@ qWarning() << "MainWindow::updateItemList(int selectedItemRow)" << selectedItemR
 		SideBar->ZBox->setEnabled(false);
 		SideBar->YBox->setEnabled(false);
 		SideBar->XBox->setEnabled(false);
-// 		SideBar->XBox->setValue(MapView->mapSize.width());
-// 		SideBar->YBox->setValue(MapView->mapSize.height());
+		break;
 	}
-	if(selectedItemRow == 3)	//Map: South
+	case en_mapsouth:	//Map: South
 	{
 		SideBar->itemTyp->setEnabled(false);
 		SideBar->editToolTip->setEnabled(false);
@@ -429,10 +417,9 @@ qWarning() << "MainWindow::updateItemList(int selectedItemRow)" << selectedItemR
 		SideBar->ZBox->setEnabled(false);
 		SideBar->YBox->setEnabled(false);
 		SideBar->XBox->setEnabled(false);
-// 		SideBar->XBox->setValue(MapView->mapSize.width());
-// 		SideBar->YBox->setValue(MapView->mapSize.height());
+		break;
 	}
-	if(selectedItemRow == 4)	//Map: East
+	case en_mapeast:	//Map: East
 	{
 		SideBar->itemTyp->setEnabled(false);
 		SideBar->editToolTip->setEnabled(false);
@@ -447,10 +434,9 @@ qWarning() << "MainWindow::updateItemList(int selectedItemRow)" << selectedItemR
 		SideBar->ZBox->setEnabled(false);
 		SideBar->YBox->setEnabled(false);
 		SideBar->XBox->setEnabled(false);
-// 		SideBar->XBox->setValue(MapView->mapSize.width());
-// 		SideBar->YBox->setValue(MapView->mapSize.height());
+		break;
 	}
-	if(selectedItemRow > 4)		//MapObject
+	default:		//MapObject
 	{
 		SideBar->editToolTip->setEnabled(true);
 		SideBar->selectFileButton->setEnabled(true);
@@ -480,13 +466,21 @@ qWarning() << "MainWindow::updateItemList(int selectedItemRow)" << selectedItemR
 		int obj_id = MapView->activeItem->data(0).toInt();
 		qWarning() << obj_id;
 		if(obj_id < 100)
+		{
 			SideBar->itemTyp->setCurrentIndex(obj_id);
-		if(obj_id >= 100 && obj_id < 500)
+		}
+		else if(obj_id >= 100 && obj_id < 500)
+		{
 			SideBar->itemTyp->setCurrentIndex(SideBar->itemTyp->count() - 3);
-		if(obj_id >= 500 && obj_id < 1000)
+		}
+		else if(obj_id >= 500 && obj_id < 1000)
+		{
 			SideBar->itemTyp->setCurrentIndex(SideBar->itemTyp->count() - 2);
-		if(obj_id >= 1000)
+		}
+		else if(obj_id >= 1000)
+		{
 			SideBar->itemTyp->setCurrentIndex(SideBar->itemTyp->count() - 1);
+		}
 		SideBar->editToolTip->setText(MapView->activeItem->data(1).toString());
 		
 		
@@ -496,7 +490,12 @@ qWarning() << "MainWindow::updateItemList(int selectedItemRow)" << selectedItemR
 			
 		}
 		else
-		SideBar->fileView->setText(MapView->activeItem->data(2).toString());
+		{
+			SideBar->fileView->setText(MapView->activeItem->data(2).toString());
+		}
+		
+		break;
+	}
 	}
 
 }
@@ -528,11 +527,12 @@ qWarning() << "MainWindow::sideBar_FileSelected()";
 
 // 		MapView->itemMapList.value(SideBar->itemListWidget->currentItem()->text())->setData(1, QVariant(MapView->fd_filename));
 
-// // 		QGraphicsPixmapItem *blah = MapView->itemList.value(SideBar->itemListWidget->currentRow() - 6);
+
+
 		MapView->activeItem->setData(2, QVariant(MapView->fd_filename));
-		
-		MapView->pixmapItemList[MapView->activeItem]->setPixmap(QPixmap(MapView->fd_filename));
-//   		MapView->itemList.value(SideBar->itemListWidget->currentRow() - 6)->setPixmap(QPixmap(MapView->fd_filename));
+
+		GI2GPMI( MapView->activeItem )->setPixmap(QPixmap(MapView->fd_filename));
+//		MapView->pixmapItemList[MapView->activeItem]->setPixmap(QPixmap(MapView->fd_filename));
 	}
 	if(SideBar->itemListWidget->currentRow() == 0)
 	{
