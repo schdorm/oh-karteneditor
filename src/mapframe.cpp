@@ -75,6 +75,7 @@
 
  void MapFrame::newMap()
  {
+ qWarning() << "void MapFrame::newMap()";
  maptyp = MapType::sea;
  bgi_filename = QString();
  mapnorth = QString(); mapwest = QString();  mapsouth = QString(); mapeast = QString();

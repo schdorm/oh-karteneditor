@@ -311,8 +311,8 @@ SideBar->itemListWidget->setCurrentRow(SideBar->itemListWidget->count() - 1);
 
 void MainWindow::updateItemList(int selectedItemRow)
 {
-
-
+if(selectedItemRow >= 0)
+{
 qWarning() << "MainWindow::updateItemList(int selectedItemRow)" << selectedItemRow;
 	switch(selectedItemRow)
 	{
@@ -491,6 +491,7 @@ qWarning() << "MainWindow::updateItemList(int selectedItemRow)" << selectedItemR
 		break;
 	}
 	}
+}
 
 }
 
