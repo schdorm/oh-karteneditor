@@ -637,7 +637,9 @@ void MainWindow::markListItem(QGraphicsItem *selectedItem)
 // {
 // }
 // QList <QListWidgetItem*> matchingListEntry =  SideBar->itemListWidget->findItems(selectedItem->data(0).toString(), Qt::MatchContains);
-qWarning() << "MainWindow::markListItem(QGraphicsItem *selectedItem)";
+
+qWarning() << "MainWindow::markListItem(QGraphicsItem *selectedItem)" //<< SideBar->itemListWidget->findItems(selectedItem->data(17).toString(), Qt::MatchStartsWith).first().text()
+;
 SideBar->itemListWidget->setCurrentItem(SideBar->itemListWidget->findItems(selectedItem->data(17).toString(), Qt::MatchStartsWith).first());
 
 }

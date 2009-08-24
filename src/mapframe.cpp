@@ -175,21 +175,21 @@ if(!save_filename.isEmpty())
 	QTextStream savestream(&savefile);
 	savestream << "<map>\n";
 
-  savestream << "<maphintergrund>";
+  savestream << "<mapbackground>";
   savestream << save_bgi_filename;
-  savestream << "</maphintergrund>\n";
+  savestream << "</mapbackground>\n";
   if(!cityname.isEmpty() && (maptyp == MapType::coast_city || maptyp == MapType::land_city))
   {
   savestream << "<cityname>";
   savestream << cityname;
   savestream << "</cityname>\n";
   }
-  savestream << "<mapbreite>";
+  savestream << "<mapwidth>";
   savestream << mapSize.width();
-  savestream << "</mapbreite>\n";
-  savestream << "<maphoehe>";
+  savestream << "</mapwidth>\n";
+  savestream << "<mapheight>";
   savestream << mapSize.height();
-  savestream << "</maphoehe>\n";
+  savestream << "</mapheight>\n";
   savestream << "<maptype>";
   savestream << maptyp;
   savestream << "</maptype>\n";
@@ -369,13 +369,13 @@ foreach(QString foritstring, itemMapList.keys())
 				status=m_west;
 				break;
 				}
-				if(reader.qualifiedName().toString() =="mapbreite")
+				if(reader.qualifiedName().toString() =="mapwidth")
 				{
 // 				qWarning() << "Start: mapprops";
 				status=m_grx;
 				break;
 				}
-				if(reader.qualifiedName().toString() =="maphoehe")
+				if(reader.qualifiedName().toString() =="mapheight")
 				{
 // 				qWarning() << "Start: mapprops";
 				status=m_gry;
