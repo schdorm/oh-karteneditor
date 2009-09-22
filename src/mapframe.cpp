@@ -1309,12 +1309,13 @@ qWarning() << "MapFrame::fileDialog(int filterarg)" << filterarg;
 	if(filterarg == NameFilters::Img)
 	{
 
-		filters	<< "Image files (*.png *.jpg)";
+		filters	<< tr("Image files (*.png *.jpg)")
+			<< tr("Scalable Vector Graphics (*.svg)");
 //		<< "All files (*)";
 	}
 	else if(filterarg == NameFilters::Map)
 	{
-		filters	<< "OpenHanse Map files (*.ohm)";
+		filters	<< tr("OpenHanse Map files (*.ohm)");
 //		<< "All files (*)";
 	}
 	else if(filterarg == (NameFilters::Map|NameFilters::Save))
@@ -1327,8 +1328,8 @@ qWarning() << "MapFrame::fileDialog(int filterarg)" << filterarg;
 	fd->show();
 	fd->setFocus();
 	fd->raise();
-	connect(fd,SIGNAL(fileSelected(QString)),this,SLOT(setFileString(QString)));
-	connect(fd,SIGNAL(finished(int)),fd,SLOT(deleteLater()));
+	connect(fd, SIGNAL(fileSelected(QString)), this, SLOT(setFileString(QString)));
+	connect(fd, SIGNAL(finished(int)), fd, SLOT(deleteLater()));
 }
 
 void MapFrame::setFileString(QString fileString)

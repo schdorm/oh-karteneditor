@@ -46,6 +46,8 @@
  #include <QtGui/QPushButton>
  #include <QtGui/QSpinBox>
  #include <QtGui/QComboBox>
+ 
+ #include <QtGui/QMessageBox>
 
 // #define _DEBUG_
 
@@ -628,10 +630,27 @@ qWarning() << "MainWindow::sideBar_FileSelected()";
 	default:
 	{
 
+		if(MapView->fd_filename.endsWith(".svg") && MapView->activeItem->data(MapFrame::Filename).toString().endsWith(".svg"))
+		{
+		QMessageBox *warning = new QMessageBox();
+		warning->setText("Change SVG-Files is not supported yet!");
+		warning->exec();
+// 		QGraphicsSvgItem *svgitem = qgraphicsitem_cast<QGraphicsSvgItem*>(MapView->activeItem);
+		}
+		else
+		{
 		MapView->activeItem->setData(MapFrame::Filename, MapView->fd_filename);
 
-		GI2GPMI( MapView->activeItem )->setPixmap(QPixmap(MapView->fd_filename));
+		QGraphicsPixmapItem *gpi = qgraphicsitem_cast<QGraphicsPixmapItem*>(MapView->activeItem);
+		
+		if(gpi != 0)
+		{
+		gpi->setPixmap(QPixmap(MapView->fd_filename));
+		}
+// 		GI2GPMI( MapView->activeItem )->setPixmap(QPixmap(MapView->fd_filename));
+		
 //		MapView->pixmapItemList[MapView->activeItem]->setPixmap(QPixmap(MapView->fd_filename));
+		}
 		break;
 	}
 	}
