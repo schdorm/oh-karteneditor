@@ -22,13 +22,17 @@
  #define _SIDEBAR_H
  
  #include <QtGui/QWidget>
- #include <QtGui/QListWidget>
- #include <QtGui/QLineEdit>
- #include <QtGui/QLabel>
- #include <QtGui/QPushButton>
- #include <QtGui/QSpinBox>
- #include <QtGui/QComboBox>
+ #include <QtCore/QHash>
 
+
+ class QListWidget;
+ class QLineEdit;
+ class QLabel;
+ class QPushButton;
+ class QSpinBox;
+ class QComboBox;
+ class MainWindow;
+ class QDoubleSpinBox;
  
  class SideBarClass : public QWidget
  {
@@ -40,18 +44,28 @@
  
  bool CB_mapprops;
  
- SideBarClass();
- 
+ SideBarClass(const MainWindow *);
+ const QString &maptypelabel(int) const;
+
   QComboBox *itemTyp;
   QListWidget *itemListWidget;
   QPushButton *selectFileButton;
-  QLabel *fileView;
+  QLineEdit *fileView;
+  QLineEdit *nameLineEdit;
   QLineEdit *editToolTip;
   QSpinBox *XBox, *YBox;
   QDoubleSpinBox *ZBox;
  //void initMapEntriesList();
+ const QHash<int, QString> &functionlabels()	const	{	return functionLabels;	}
+  const QHash<int, QString> &maptypelabels()	const	{	return maptypeLabels;	}
+
 
 protected:
+
+QHash<int, QString> functionLabels;
+QHash<int, QString> maptypeLabels;
+
+const MainWindow *m_parent;
 void keyPressEvent(QKeyEvent*);
 
 signals:

@@ -19,6 +19,8 @@
  ***************************************************************************/
 
  #include "mapframe.h"
+ #include "mainwindow.h"
+ #include "sidebar.h"
 
  #include <QtCore/QDebug>
  #include <QtCore/QList>
@@ -42,51 +44,54 @@
 
 #include <QtCore/QXmlStreamReader>
 
+
+#include <QtSvg/QGraphicsSvgItem>
+
 //  #include <QtGui/QPixmap>
  
  
- void MapFrame::initMap()
+ MapFrame::MapFrame( const MainWindow *mainwin)
  {
+ m_MainWindow = mainwin;
+ activeItem = 0;
  qWarning() << "MapFrame::initMap()";
- szene = new QGraphicsScene();
+ QGraphicsScene *szene = new QGraphicsScene();
  setScene(szene);
  newMap();
- ot_townhall = tr("Rathaus");
- ot_market = tr("Markt");
- ot_church = tr("Kirche");
- ot_port = tr("Hafen");
- ot_office = tr("Kontor");
- ot_bank = tr("Darlehensgeber");
- ot_tavern = tr("Kneipe");
- ot_land = tr("Landflaechen");
- ot_land2 = tr("\"boese\" Untiefen"); // Objekte, bei denen eine Kollision mit dem Schiff Schaden am Schiff verursacht.
- ot_mapdecoration = tr("Mapdeko");
- ObjectTypeEntries << ot_townhall << ot_market << ot_church << ot_port << ot_office << ot_bank << ot_tavern << ot_land << ot_land2 << ot_mapdecoration;
+//  ot_townhall = tr("Rathaus");
+//  ot_market = tr("Markt");
+//  ot_church = tr("Kirche");
+//  ot_port = tr("Hafen");
+//  ot_office = tr("Kontor");
+//  ot_bank = tr("Darlehensgeber");
+//  ot_tavern = tr("Kneipe");
+//  ot_land = tr("Landflaechen");
+//  ot_land2 = tr("\"boese\" Untiefen"); // Objekte, bei denen eine Kollision mit dem Schiff Schaden am Schiff verursacht.
+//  ot_mapdecoration = tr("Mapdeko");
+//  ObjectTypeEntries << ot_townhall << ot_market << ot_church << ot_port << ot_office << ot_bank << ot_tavern << ot_land << ot_land2 << ot_mapdecoration;
+//  
+//  mt_sea = tr("See/Meer");
+//  mt_coast = tr("Kueste");
+//  mt_land = tr("Land");
+//  mt_coast_city = tr("Kueste (Stadt)");
+//  mt_land_city = tr("Land (Stadt)");
+//  MapTypeEntries << mt_sea  << mt_coast << mt_land << mt_coast_city << mt_land_city;
  
- mt_sea = tr("See/Meer");
- mt_coast = tr("Kueste");
- mt_land = tr("Land");
- mt_coast_city = tr("Kueste (Stadt)");
- mt_land_city = tr("Land (Stadt)");
- MapTypeEntries << mt_sea  << mt_coast << mt_land << mt_coast_city << mt_land_city;
- 
- 
+ itemGrabbed = false;
  }
 
  void MapFrame::newMap()
  {
  qWarning() << "void MapFrame::newMap()";
- maptyp = MapType::sea;
+ maptyp = Seamap;
  bgi_filename = QString();
  mapnorth = QString(); mapwest = QString();  mapsouth = QString(); mapeast = QString();
-pixmapItemList.clear();
-itemMapList.clear();
 
- szene->clear();
+ scene()->clear();
  mapSize = QSize(1000,1000);
  setSceneRect(0,0,1000,1000);
  itemSelected = false;
- szene->setBackgroundBrush(QBrush());
+ scene()->setBackgroundBrush(QBrush());
  }
 
 void MapFrame::saveMap(QString save_filename)
@@ -158,7 +163,7 @@ if(!save_filename.isEmpty())
 	
 	//if(! QFile(save_bgi_filename).exists())
 	//	{
-	if(!bgi_filename.isEmpty() && szene->backgroundBrush() != Qt::NoBrush)
+	if(!bgi_filename.isEmpty() && scene()->backgroundBrush() != Qt::NoBrush)
 	{
 	qWarning() << "Copying Map Background File:" << QString(bgi_filename) << QString(save_bgi_filename).prepend("/").prepend(save_dir_string);
 		if(QFile(bgi_filename).copy(QString(save_bgi_filename).prepend("/").prepend(save_dir_string)))
@@ -178,7 +183,12 @@ if(!save_filename.isEmpty())
   savestream << "<mapbackground>";
   savestream << save_bgi_filename;
   savestream << "</mapbackground>\n";
-  if(!cityname.isEmpty() && (maptyp == MapType::coast_city || maptyp == MapType::land_city))
+  
+    savestream << "<mapname>";
+  savestream << mapname;
+  savestream << "</mapname>\n";
+  
+  if(!cityname.isEmpty() && (maptyp == Coastcitymap || maptyp == Landcitymap))
   {
   savestream << "<cityname>";
   savestream << cityname;
@@ -196,43 +206,58 @@ if(!save_filename.isEmpty())
   
   qWarning() << "Mapprops written";
   //hier die Mapprops reinschreiben (Groesse, File, etc.)
-  QGraphicsItem *saveitem;
+//   QGraphicsItem *saveitem;
   
 //   foreach(saveitem, itemList)
-if(itemMapList.size() > 0)
+QList<QGraphicsItem *> ItemList = scene()->items();
+if(!ItemList.isEmpty())
 {
-foreach(QString foritstring, itemMapList.keys())
+qWarning() << "List-Size: "<< ItemList.size();
+// foreach(QString foritstring, itemMapList.keys())
+for(QList<QGraphicsItem*>::iterator saveitem = ItemList.begin(); saveitem != ItemList.end(); ++saveitem)
  {
-	  saveitem = itemMapList.value(foritstring);
-	 savestream << "<objekt>\n";
-	 savestream << "<objektfunktion>";
-	 savestream << saveitem->data(0).toString();
-	 savestream << "</objektfunktion>\n";
-	 if(!saveitem->data(1).toString().isEmpty())
-	 {
-		 savestream << "<objekttooltip>";
-		 savestream << saveitem->data(1).toString();
-		 savestream << "</objekttooltip>\n";
- 	 }
+// 	  saveitem = itemMapList.value(foritstring);
+if((*saveitem)->data(Filename).toString().endsWith(".jpg") || (*saveitem)->data(Filename).toString().endsWith(".svg") || (*saveitem)->data(Filename).toString().endsWith(".png"))
 	  {
-		QString img_filename = saveitem->data(2).toString();
+	qWarning() << "Name: " << (*saveitem)->data(Name).toString() << "ID: " << (*saveitem)->data(ID).toInt();
+
+	 savestream << "<object>\n";
+	 
+	 savestream << "<objectname>";
+	 savestream << (*saveitem)->data(Name).toString();
+	 savestream << "</objectname>\n";
+	 
+	 savestream << "<objectfunktion>";
+	 savestream << (*saveitem)->data(Function).toInt();
+	 savestream << "</objectfunktion>\n";
+	 if(!(*saveitem)->data(Tooltip).toString().isEmpty())
+	 {
+		 savestream << "<objecttooltip>";
+		 savestream << (*saveitem)->data(Tooltip).toString();
+		 savestream << "</objecttooltip>\n";
+ 	 }
+
+// 		QString img_filename = (*saveitem)->data(2).toString();
+		QString img_filename = (*saveitem)->data(Filename).toString();
 		int n = 0;
 		int y = 0;
-		while(n < 1)
+		while(n < 1 && y < img_filename.size())
 		{
 			y++;
 			n = img_filename.right(y).count("/");
+			qWarning() << n << y;
 		}
 		img_filename = img_filename.right(y).prepend("img");
-
-		savestream << "<objektdatei>";
+		qWarning() << img_filename;
+		savestream << "<objectdatei>";
 		savestream << img_filename;
-		savestream << "</objektdatei>\n";
+		savestream << "</objectdatei>\n";
 		
 		//if(! QFile(img_filename).exists())
 		//{
-		qWarning() << "Copying Object File:" << saveitem->data(2).toString() << QString(img_filename).prepend("/").prepend(save_dir_string);
-		if(QFile(saveitem->data(2).toString()).copy(QString(img_filename).prepend("/").prepend(save_dir_string)))
+		qWarning() << "Copying Object File:" << (*saveitem)->data(Filename).toString() << QString(img_filename).prepend("/").prepend(save_dir_string);
+// 		if(QFile((*saveitem)->data(2).toString()).copy(QString(img_filename).prepend("/").prepend(save_dir_string)))
+		if(QFile((*saveitem)->data(Filename).toString()).copy(QString(img_filename).prepend("/").prepend( save_dir_string)))
 		{
 		qWarning() << "Success!";
 		}
@@ -243,18 +268,18 @@ foreach(QString foritstring, itemMapList.keys())
 	 
 
 
-  	savestream << "<objektpositionx>";
- 	savestream << saveitem->x();
- 	savestream << "</objektpositionx>\n";
+  	savestream << "<objectpositionx>";
+ 	savestream << (*saveitem)->x();
+ 	savestream << "</objectpositionx>\n";
 
- 	savestream << "<objektpositiony>";
- 	savestream << saveitem->y();
- 	savestream << "</objektpositiony>\n";
+ 	savestream << "<objectpositiony>";
+ 	savestream << (*saveitem)->y();
+ 	savestream << "</objectpositiony>\n";
  	
- 	savestream << "<objekthoehe>";
- 	savestream << saveitem->zValue();
- 	savestream << "</objekthoehe>\n";
- 	savestream << "</objekt>\n";
+ 	savestream << "<objecthoehe>";
+ 	savestream << (*saveitem)->zValue();
+ 	savestream << "</objecthoehe>\n";
+ 	savestream << "</object>\n";
  }
  }
  savestream << "</map>";
@@ -272,15 +297,16 @@ foreach(QString foritstring, itemMapList.keys())
 	QString mapdir = QFileInfo(load_filename).path().append("/");
 
 
-	QGraphicsScene *tempsc = new QGraphicsScene;
-	setScene(tempsc);
+// 	QGraphicsScene *tempsc = new QGraphicsScene;
+// 	setScene(tempsc);
 
-	szene->clear();
-	delete szene;
+	
+// 	QGraphicsScene *szene = scene();
+// 	szene->clear();
+// 	delete szene;
+// 	szene = new QGraphicsScene();
 	qWarning() << "Szene geloescht";
 
-
-	szene = new QGraphicsScene();
 
 
 	QFile file(load_filename);		//Map-XML-Lesen
@@ -292,6 +318,7 @@ foreach(QString foritstring, itemMapList.keys())
 				objekt,
 				o_fkt,
 				o_tooltip,
+				object_name,
 				o_datei,
 				o_posx,
 				o_posy,
@@ -312,6 +339,7 @@ foreach(QString foritstring, itemMapList.keys())
 		int ofkt = -1;				//Funktion des Objektes
 		QString otooltip = QString();				//name/tooltip des objekts
 		QString odatei = QString();				//name des Bildes des Objekts
+		objectName = QString();
 		
 		int oposx = -1;				//x-Koordinate
 		int oposy = -1;				//y-Koordinate
@@ -339,25 +367,25 @@ foreach(QString foritstring, itemMapList.keys())
 				status=m_stadtname;
 				break;
 				}
-				if(reader.qualifiedName().toString() =="maphintergrund")
+				if(reader.qualifiedName().toString() =="mapbackground")
 				{
 // 				qWarning() << "Start: mapprops";
 				status=m_img;
 				break;
 				}
-				if(reader.qualifiedName().toString() =="mapnord")
+				if(reader.qualifiedName().toString() =="mapnorth")
 				{
 // 				qWarning() << "Start: mapprops";
 				status=m_nord;
 				break;
 				}
-				if(reader.qualifiedName().toString() =="mapost")
+				if(reader.qualifiedName().toString() =="mapeast")
 				{
 // 				qWarning() << "Start: mapprops";
 				status=m_ost;
 				break;
 				}
-				if(reader.qualifiedName().toString() =="mapsued")
+				if(reader.qualifiedName().toString() =="mapsouth")
 				{
 // 				qWarning() << "Start: mapprops";
 				status=m_sued;
@@ -388,50 +416,55 @@ foreach(QString foritstring, itemMapList.keys())
 				status=m_typ;
 				break;
 				}
-
-				if(reader.qualifiedName().toString() =="objekt")
+				
+				if(reader.qualifiedName().toString() =="object")
 				{
 // 				qWarning() << "objekt";
 				status=objekt;
 				break;
 				}
-
-				if(reader.qualifiedName().toString() == "objektfunktion")
+				
+				if(reader.qualifiedName().toString() =="objectname")
+				{
+				status = object_name;
+				
+				}
+				if(reader.qualifiedName().toString() == "objectfunktion")
 				{
 // 				qWarning() << "o_fkt";
 				status = o_fkt;
 				break;
 				}
 
-				if(reader.qualifiedName().toString() == "objekttooltip")
+				if(reader.qualifiedName().toString() == "objecttooltip")
 				{
 // 				qWarning() << "o_tooltip";
 				status = o_tooltip;
 				break;
 				}
 
-				if(reader.qualifiedName().toString() == "objektdatei")
+				if(reader.qualifiedName().toString() == "objectdatei")
 				{
 // 				qWarning() << "o_datei";
 				status = o_datei;
 				break;
 				}
 
-				if(reader.qualifiedName().toString() == "objektpositionx")
+				if(reader.qualifiedName().toString() == "objectpositionx")
 				{
 // 				qWarning() << "o_posx";
 				status = o_posx;
 				break;
 				}
 
-				if(reader.qualifiedName().toString() == "objektpositiony")
+				if(reader.qualifiedName().toString() == "objectpositiony")
 				{
 // 				qWarning() << "o_posy";
 				status = o_posy;
 				break;
 				}
 				
-				if(reader.qualifiedName().toString() == "objekthoehe")
+				if(reader.qualifiedName().toString() == "objecthoehe")
 				{
 // 				qWarning() << "o_posy";
 				status = o_hoehe;
@@ -466,7 +499,7 @@ foreach(QString foritstring, itemMapList.keys())
  				QFile mapimgfile(bgi_filename);
  					if(mapimgfile.exists())
  					{
-					szene->setBackgroundBrush(QBrush(QImage(bgi_filename)));
+					scene()->setBackgroundBrush(QBrush(QImage(bgi_filename)));
 					}
 					else
 						qWarning() << "Maphintergrund:" << bgi_filename << "nicht gefunden!" << mapdir;
@@ -534,7 +567,7 @@ foreach(QString foritstring, itemMapList.keys())
 				}
 				case m_typ:
 				{
-					maptyp = static_cast<MapType::mtyp>(reader.text().toString().toInt());
+					maptyp = reader.text().toString().toInt();
 					break;
 				}
 
@@ -546,6 +579,12 @@ foreach(QString foritstring, itemMapList.keys())
 					qWarning() << "\tObjektfkt" << ofkt;
 					break;
 				}
+				case object_name:
+				{
+					objectName = reader.text().toString();
+					break;
+				}
+				
 				case o_tooltip:
 				{
 					otooltip = reader.text().toString();
@@ -585,7 +624,7 @@ foreach(QString foritstring, itemMapList.keys())
 			case QXmlStreamReader::EndElement:
 			{
 				qWarning() << "Ende :"<< reader.qualifiedName().toString();
-				if(reader.qualifiedName().toString() == "objekt" && ofkt != -1 && !odatei.isEmpty())
+				if(reader.qualifiedName().toString() == "object" && ofkt != -1 && !odatei.isEmpty())
 	//jetzt zeichnen: habe alle Eigenschaften des Objektes erhalten?
 				{
 
@@ -599,18 +638,18 @@ foreach(QString foritstring, itemMapList.keys())
 // 						if(ofkt == "Uhr")
 // 						{
 // 
-// 						QGraphicsItem *zb = szene->addPixmap((QPixmap(odatei)));
+// 						QGraphicsItem *zb = scene()->addPixmap((QPixmap(odatei)));
 // 						zb->setPos(oposx,oposy);
 // 						zb->setToolTip(otooltip);
 // 						zb->setZValue(0.5);
 // 						zb->setData(0,QVariant(QString("Ziffernblatt")));
-// 						QGraphicsItem *gz = szene-> addPixmap((QPixmap(":/img/objekte/zeiger1.png")));
+// 						QGraphicsItem *gz = scene()-> addPixmap((QPixmap(":/img/objekte/zeiger1.png")));
 // 						gz->setPos(oposx+21,oposy+4);
 // 						gz->setToolTip(tr("grosser Zeiger"));
 // 						gz->setZValue(2);
 // 						gz->setData(0,QVariant(QString("grosser Zeiger")));
 // 
-// 						QGraphicsItem *kz = szene-> addPixmap( (QPixmap(":/img/objekte/zeiger2.png")));
+// 						QGraphicsItem *kz = scene()-> addPixmap( (QPixmap(":/img/objekte/zeiger2.png")));
 // 						kz->setPos(oposx+23,oposy+9);
 // 						kz->setToolTip(tr("kleiner Zeiger"));
 // 						kz->setZValue(1);
@@ -622,7 +661,7 @@ foreach(QString foritstring, itemMapList.keys())
 						object_filename = odatei;
 						object_tooltip = otooltip;
 						ziel = QPoint(oposx, oposy);
-						createObjectDialog = new QDialog();
+						createObjectDialog = 0;
 						createObject();
 // 						}
 					}
@@ -649,8 +688,8 @@ foreach(QString foritstring, itemMapList.keys())
 		if (reader.hasError()) {
 		qWarning() << reader.errorString();
 	}
-	setScene(szene);
-	delete tempsc;
+// 	setScene(szene);
+// 	delete tempsc;
 	setSceneRect(0,0,mapSize.width(),mapSize.height());
 	
 }
@@ -692,9 +731,16 @@ foreach(QString foritstring, itemMapList.keys())
 		labelfkt->setText(tr("Object function"));
 		cODlayout->addWidget(labelfkt, 1, 0, 1, 1);
 
-		QComboBox *fkt = new QComboBox(createObjectDialog);
-		fkt->addItems(ObjectTypeEntries);
-		cODlayout->addWidget(fkt, 1, 1,1,4);
+		fktComboBox = new QComboBox(createObjectDialog);
+		
+		QHashIterator <int, QString> it(m_MainWindow->SideBar->functionlabels());
+		while(it.hasNext())
+		{
+			it.next();
+			fktComboBox->addItem(it.value(), it.key());
+		}
+// 		fkt->addItems(ObjectTypeEntries);
+		cODlayout->addWidget(fktComboBox, 1, 1,1,4);
 
 		QLabel *labeltt = new QLabel(createObjectDialog);
 		labeltt->setText(tr("Object tooltip (optional)"));
@@ -754,20 +800,34 @@ foreach(QString foritstring, itemMapList.keys())
 		
 		connect(this, SIGNAL(fileStringChanged(QString)), filelabel, SLOT(setText(QString)));
 
-		connect(fkt, SIGNAL(currentIndexChanged(QString)), this, SLOT(setObjectType(QString)));
+		connect(fktComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setObjectType(int)));
 		connect(objToolTip, SIGNAL(textEdited(QString)), this, SLOT(setToolTipString(QString)));
 		connect(XBox_MV, SIGNAL(valueChanged(int)), this, SLOT(setXPos(int)));
 		connect(YBox_MV, SIGNAL(valueChanged(int)), this, SLOT(setYPos(int)));
-		setObjectType(ot_market);
+// 		setObjectType(ot_market);
  }
  
  void MapFrame::mousePressEvent(QMouseEvent *event)
  {
  qWarning() << "MapFrame::mousePressEvent(QMouseEvent *event)";
+ if(event->buttons() == Qt::LeftButton)
+ {
  if(!itemGrabbed)
  {
  ziel = event->pos();
 	QList<QGraphicsItem *> QGIlistAtClick = items(event->pos());
+	QList<QGraphicsItem *> &gilist = QGIlistAtClick;
+	
+// 		 QGraphicsItem *Cit = 0;
+// 	 QGIlistAtClick.clear();
+// 	 QGIlistAtClick = scene()->items();
+// 		foreach(Cit, QGIlistAtClick)
+// 		{
+// 		qWarning() << "CIT-Data(0)"<< Cit->data(0).toInt();
+// 		}
+	
+	
+	qWarning() << "items(event->pos()); - Anzahl:" <<  QGIlistAtClick.size();
 	if(QGIlistAtClick.isEmpty())
 	{
 		object_tooltip = QString();
@@ -777,40 +837,112 @@ foreach(QString foritstring, itemMapList.keys())
 	}
 	else
 	{
-		if(QGIlistAtClick.size() == 1)
+// 		ObjectGraphicsItem *tempogi = 0;
+/*		QList<ObjectGraphicsItem *> matchingOGI;
+		for(QList<QGraphicsItem *>::iterator Cit = QGIlistAtClick.begin(); Cit != QGIlistAtClick.end(); ++Cit)
+// QGraphicsItem *Cit = 0;
+// 		foreach(Cit, QGIlistAtClick)
 		{
-			if(activeItem == QGIlistAtClick.first())
+// 		qWarning() << "test";
+ 			for(QList<ObjectGraphicsItem*>::iterator it = ogilist.begin(); it != ogilist.end(); ++it)
 			{
+			qWarning() << "test2" << (*it)->data(0).toInt() << (*Cit)->data(0).toInt() << (*it)->pos() << (*Cit)->pos();
+//  				if((*it)->pos() == (*Cit)->pos())
+ 				{
+// 				qWarning() << "test 3";
+ 					if((*it)->data(0).toInt() == (*Cit)->data(0).toInt() *//*&& (*it)->toolTip() == (*Cit)->toolTip()*//*)
+ 					{
+						qWarning() << "test 4";
+ 						matchingOGI << *it;
+ 						break;
+ 					}
+ 				}
+			}
+// 			tempogi = qgraphicsitem_cast<ObjectGraphicsItem*>(Cit);
+// 			tempogi = dynamic_cast<ObjectGraphicsItem*>(Cit);
+// 			qWarning() << "gecastet";
+// 			if(tempogi != 0)
+// 			{
+// 			matchingOGI << tempogi;
+// 			qWarning() << "added To List";
+// 			}
+		}
+				qWarning() << "OGI-Size:" << matchingOGI.size();
+		*/
+		
+		// ---> dynamic cast // qgraphicsitem_cast(qgi)
+// 		ObjectGraphicsItem *OGI;
+
+		if(gilist.size() == 1)
+		{
+			if(activeItem == gilist.first())
+			{
+			emit objectSelected(activeItem);
 			itemGrabbed = true;
-			
 			}
 			else
 			{
+// 			ObjectGraphicsItem *matchingOGI;
+// 			for(QList<ObjectGraphicsItem>::iterator it = ogilist.begin; it != ogilist.end(); ++it)
+// 			{
+// 			if(it->pos() == QGIlistAtClick.first()->pos())
+// 			{
+// 			if(it->boundingRect() == QGIlistAtClick.first()->boundingRect() && it->toolTip() == QGIlistAtClick.first()->toolTip())
+// 			{
+// 			matchingOGI = &*it;
+// 			break;
+// 			}
+// 			}
+			
+//  			}
 			activeItem = QGIlistAtClick.first();
+			
+// 			activeItem = matchingOGI.first();
 			emit objectSelected(activeItem);
 			itemSelected = true;
+			qWarning() << "Move-Item-ID "<< activeItem->data(ID).toInt();
 			}
+// 			QGIlistAtClick = scene()->items(curser);
+// 		for(QList<QGraphicsItem *>::iterator Cit = QGIlistAtClick.begin(); Cit != QGIlistAtClick.end(); ++Cit)
+// 		{
+// 			qWarning() << "test2" <<  (*Cit)->data(0).toInt()  << (*Cit)->pos();
+// 		}
+// 		for(QList<ObjectGraphicsItem*>::iterator it = ogilist.begin(); it != ogilist.end(); ++it)
+// 			{
+// 				qWarning() << "test 3" << (*it)->data(0).toInt() << (*it)->pos();
+// 			}
+
 			
 		}
 
 
 		else if(QGIlistAtClick.size() >1)
 		{
-			if(QGIlistAtClick.contains(activeItem) && itemSelected)
+			if(gilist.contains(activeItem) && itemSelected)
 			{
 				itemGrabbed = true;
+				
 			}
 			else
 			{
 			QDialog *selectObjectDialog = new QDialog(this);
 			selectObjectDialog->setModal(true);
+			
 			QComboBox *objectList = new QComboBox(selectObjectDialog);
-			QStringList objectNameList;
-			QGraphicsItem *qgiit;	//QGraphicsItemIterator
-			foreach(qgiit, QGIlistAtClick)
+			
+			QStringList objectNameList;	QGraphicsItem *GIit;
+// 			ObjectGraphicsItem *ogiit;	//ObjectGraphicsItemIterator
+// 			foreach(ogiit, matchingOGI)
+// 			{
+// 				objectNameList << QString(qgiit->data(17).toString()).append(QString("; ").append(qgiit->data(1).toString()).append(QString(" ...").append(qgiit->data(2).toString().right(15))));
+// 				objectNameList << ogiit->data(Name).toString();
+//  			}
+			foreach(GIit, gilist)
 			{
-				objectNameList << QString(qgiit->data(17).toString()).append(QString("; ").append(qgiit->data(1).toString()).append(QString(" ...").append(qgiit->data(2).toString().right(15))));
+				objectNameList << GIit->data(Name).toString();
 			}
+
+
 			objectList->addItems(objectNameList) ;
 			QPushButton *ok = new QPushButton ("Ok", selectObjectDialog);
 			QHBoxLayout *sodlayout = new QHBoxLayout(selectObjectDialog);
@@ -822,28 +954,34 @@ foreach(QString foritstring, itemMapList.keys())
 			connect(ok, SIGNAL(clicked()), this, SLOT(selectObject()));
 			connect(objectList, SIGNAL(activated(QString)), this, SLOT(getObjectID(QString)));
 			getObjectID(objectList->currentText());
-			qgilist = QGIlistAtClick;
+// 			qgilist = QGIlistAtClick;
 			}
 		}
 
 	}
 }
-else
-{
+	else
+	{
 	itemGrabbed = true;
 // 	itemSelected = false;
 // 	emit objectMoved();
+	}
 }
-
+else if(event->button() == Qt::RightButton)
+{
+activeItem = 0;
+itemSelected = false;
+}
 }
 
 
 void MapFrame::mouseMoveEvent(QMouseEvent *event)
 {
+// qWarning() << "void MapFrame::mouseMoveEvent(QMouseEvent *event)";
+
 curser = event->pos();
 // setStatusTip(QString("%1 %2").arg(curser.x(), curser.y()));
 
-//qWarning() << "MapFrame::mouseMoveEvent(QMouseEvent *MME)";
 static int oldxpos, oldypos;
 
 if(!(oldxpos == 0 && oldypos == 0) && itemGrabbed /*&& (oldtime == time(NULL) || oldtime == time(NULL) - 1)*/)
@@ -871,36 +1009,67 @@ if(itemGrabbed)
  }
 }
 
-void MapFrame::getObjectID(QString objname)
+void MapFrame::getObjectID(const QString &objname)
 {
 // QString copy = objname;
-int n = 0;
-while(!objname.left(n).contains(";"))
+// int n = 0;
+// while(!objname.left(n).contains(";"))
+// {
+// n++;
+// }
+
+qWarning() << objname/*.left(n-1)<< n*/;
+objectName = objname/*.left(n-1)*/;
+ QGraphicsItem *it;
+
+ foreach(it, scene()->items())
 {
-n++;
+	if(it->data(Name).toString() == objectName)
+	{
+	qWarning() << "ActiveItem->ID before" << activeItem->data(ID).toInt();
+		activeItem = it;
+	qWarning() << "ActiveItem->ID new" << activeItem->data(ID).toInt();
+		return;
+	}
 }
 
-qWarning() << objname.left(n-1) << n;
-objectName = objname.left(n-1);
+
 }
 
 void MapFrame::selectObject()
 {
 itemSelected = true;
-QGraphicsItem *it;
-foreach(it, qgilist)
+ QGraphicsItem *it;
+ foreach(it, scene()->items())
 {
-if(it->data(17).toString() == objectName)
+	if(it->data(Name).toString() == objectName)
+	{
+		activeItem = it;
+		emit objectSelected(activeItem);
+		return;
+	}
+}
+
+
+// for(QList<ObjectGraphicsItem*>::iterator it = ogilist.begin(); it != ogilist.end(); ++it)
+// {
+// 	if((*it)->data(Name).toString() == objectName)
+// 	{
+// 		activeItem = *it;
+// 	}
+// }
+
+
+}
+
+void MapFrame::setObjectType(int typ)
 {
-activeItem = it;
-return;
-}
-}
-
-
+qWarning() << "void MapFrame::setObjectType(int typ)";
+object_typ = fktComboBox->itemData(typ).toInt();
 }
 
-void MapFrame::setObjectType(QString text)
+
+/*void MapFrame::setObjectType(QString text)
 {
 qWarning() << "MapFrame::setObjectType(QString text)" << text;
 if(text == ot_townhall)
@@ -957,38 +1126,38 @@ else if(text == ot_mapdecoration)
 	object_typ = idi + 1000;
 	idi++;
 }
-}
+}*/
 
-void MapFrame::setMapType(QString text)
+/*void MapFrame::setMapType(QString text)
 {
 // maptypename = text;
 qWarning() << text;
 	if(text == mt_sea)
 	{
-		maptyp = MapType::sea;
+		maptyp = Seamap;
 // 		isCity = false;
 	}
 	else if(text == mt_coast)
 	{
-		maptyp = MapType::coast;
+		maptyp = Coastmap;
 // 		isCity = false;
 	}
 	else if(text == mt_land)
 	{
-		maptyp = MapType::land;
+		maptyp = Landmap;
 // 		isCity = false;
 	}
 	else if(text == mt_coast_city)
 	{
-		maptyp = MapType::coast_city;
+		maptyp = Coastcitymap;
 // 		isCity = true;
 	}
 	else if(text == mt_land_city)
 	{
-		maptyp = MapType::land_city;
+		maptyp = Landcitymap;
 // 		isCity = true;
 	}
-}
+}*/
 
 void MapFrame::setXPos(int xpos)
 {
@@ -1029,6 +1198,7 @@ object_filename = fd_filename;
 		QPushButton *ok = new QPushButton ("OK", missingArgs);
 		mAlayout.addWidget(ok);
 		connect(ok, SIGNAL(clicked()), missingArgs, SLOT(deleteLater()));
+		connect(missingArgs, SIGNAL(finished(int)), missingArgs, SLOT(deleteLater()));
 		missingArgs->show();
 		missingArgs->setFocus();
 		missingArgs->raise();
@@ -1038,39 +1208,91 @@ object_filename = fd_filename;
 
  void MapFrame::createObject()
  {
- qWarning() << "MapFrame::createObject()";
- createObjectDialog->close();
- delete createObjectDialog;
-  QGraphicsPixmapItem *itemtoAdd = szene->addPixmap(QPixmap(object_filename));
-  itemtoAdd->setPos(ziel);
-  itemtoAdd->setZValue(object_ZValue);
-  qWarning() << "ziel" << ziel;
-  itemtoAdd->setToolTip(object_tooltip);
-  itemtoAdd->setData(0, QVariant(object_typ));
-  itemtoAdd->setData(1, QVariant(object_tooltip));
-  itemtoAdd->setData(2, QVariant(object_filename));
-  itemtoAdd->setData(3, QVariant(ziel.x()));
-  itemtoAdd->setData(4, QVariant(ziel.y()));
-  static int objID;
-  itemtoAdd->setData(17, QVariant(objID));
-  objID++;
-  itemtoAdd->setData(18, QVariant(itemtoAdd->data(17).toString().append("; ").append(itemtoAdd->data(1).toString()).append(itemtoAdd->data(2).toString().right(14).left(10))));
+ qWarning() << "MapFrame::createObject()" << object_filename;
+   qWarning() << "ziel" << ziel;
+	delete createObjectDialog;
+	
+	const QString &paramstring = object_filename;
+	if(QFile(paramstring).exists())
+	{
+		if(paramstring.endsWith(".png") || paramstring.endsWith(".jpg") || paramstring.endsWith(".jpeg") || paramstring.endsWith(".gif"))
+		{
+			QGraphicsPixmapItem *m_pixmapitem = scene()->addPixmap(QPixmap(paramstring));
+			setGraphicsItemProperties(m_pixmapitem);
+// 			QGraphicsItem *tempobj = m_pixmapitem;
+// 			emit newObjectCreated(tempobj);
 
-  
- 
-    activeItem = itemtoAdd;
-  itemMapList[activeItem->data(18).toString()] = activeItem;
-  
-  pixmapItemList[activeItem] = itemtoAdd;
+		}
+		else if(paramstring.endsWith(".svg"))
+		{
+			QGraphicsSvgItem *m_svgitem = new QGraphicsSvgItem(paramstring);
+			scene()->addItem(m_svgitem);
+			setGraphicsItemProperties(m_svgitem);
+// 			QGraphicsItem *tempobj = m_svgitem;
+// 			emit newObjectCreated(tempobj);
 
-  emit newObjectCreated(itemtoAdd);
+		}
+	}
+	
+	
+	
+/*	if(object_filename.endsWith(".jpg") || object_filename.endsWith(".svg") || object_filename.endsWith(".png"))
+	{
+	ObjectGraphicsItem *itemToAdd = new ObjectGraphicsItem(object_filename);
+//   QGraphicsPixmapItem *itemtoAdd = scene()->addPixmap(QPixmap(object_filename));
+		itemToAdd->setPos(ziel);
+		itemToAdd->setZValue(object_ZValue);
+
+	itemToAdd->setToolTip(object_tooltip);
+	itemToAdd->setFunction(object_typ);
+	static int objID;
+	itemToAdd->setId(objID);
+	itemToAdd->setData(0, objID);
+	objID++;
+	qWarning() << "SetName";
+	itemToAdd->setName(QString("%1").arg(itemToAdd->data(ID).toInt()).append("; ").append(itemToAdd->data(Tooltip).toString()).append(itemToAdd->data(Filename).toString().right(14).left(10)));
+
+	qWarning() << "Add to Scene";
+	scene()->addItem(itemToAdd);
+	qWarning() << "Set ActiveItem";
+	activeItem = itemToAdd;
+	ogilist << itemToAdd;
+	qWarning() << "add To List";
+	emit newObjectCreated(itemToAdd);
 
 
 // QGraphicsSvgItem *svgblah = new QGraphicsSvgItem("/home/christian/Dokumente/Physik/LaTeX/absorption_angepasst.svg", blah);
-// szene->addItem(svgblah);
+// scene()->addItem(svgblah);
 // svgblah->setPos(20,20);
 // QGraphicsSVGItem *blah = 
+	}*/
+ }
+ 
+ void MapFrame::setGraphicsItemProperties(QGraphicsItem *paramitem)
+ {
+ #define setData(x, y) setData(x, QVariant(y))
+ static int idcounter;
+  idcounter ++;
+ paramitem->setData(ID, idcounter);
+ paramitem->setData(Function, object_typ);
+ paramitem->setData(Tooltip, object_tooltip);
 
+ paramitem->setData(Filename, object_filename);
+ paramitem->setPos(ziel);
+//  paramitem->setData(
+
+if(objectName.isEmpty())
+{
+objectName = QString("%1 ").arg(idcounter).append(object_tooltip).append(" ").append(QString(object_filename).right(9));
+}
+ paramitem->setData(Name, objectName);
+	emit newObjectCreated(paramitem);
+
+objectName = QString();
+object_tooltip = QString();
+object_filename = QString();
+
+ #undef setData
  }
 
 

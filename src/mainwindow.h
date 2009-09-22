@@ -24,11 +24,17 @@
 
  #include <QtGui/QMainWindow>
  
- #include <QtGui/QAction>
- #include <QtGui/QMenu>
-
- #include "mapframe.h"
- #include "sidebar.h"
+//  #include <QtGui/QAction>
+//  #include <QtGui/QMenu>
+ 
+ class QMenu;
+ class QAction;
+ class MapFrame;
+ class SideBarClass;
+ class QGraphicsItem;
+ class QTimer;
+//  #include "mapframe.h"
+//  #include "sidebar.h"
 
 
  class MainWindow : public QMainWindow
@@ -53,6 +59,8 @@
  void saveHandler();
  void savef();
  void autoSave();
+ 
+ void disableAutoSave();
 
  void loadAutoSaveMap();
  
@@ -61,12 +69,13 @@
  void updateItemList(int);
  void updateSpinbox();
  
- void lineEditHandler(QString);
+ void nameLineEditHandler(const QString &);
+ void lineEditHandler(const QString &);
  void sideBar_SelectFile();
  void sideBar_FileSelected();
  void spinboxHandler();
- void typeComboBoxHandler(QString);
- void markListItem(QGraphicsItem*);
+ void typeComboBoxHandler(int);
+ void markListItem(QGraphicsItem *);
  
  void deleteCurrentObject();
 
@@ -94,10 +103,14 @@ en_mapeast
  QAction *saveAsAct;
  QAction *loadAutoSaveAct;
  QAction *autoSaveAct;
+ QAction *disableAutoSaveAct;
  QAction *quitAct;
  
  QAction *newObjectAct;
  QAction *rmcurrentObjectAct;
+ 
+ 
+ QTimer *autoSaveTimer;
  
  QString mapfilename;
  bool existingMapFile;

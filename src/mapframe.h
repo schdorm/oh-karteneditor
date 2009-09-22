@@ -27,29 +27,48 @@
  #include <QtCore/QMap>
  
  #include <QtGui/QGraphicsView>
- #include <QtGui/QGraphicsScene>
+//  #include <QtGui/QGraphicsScene>
  #include <QtGui/QGraphicsItem>
  
-#include <QtSvg/QGraphicsSvgItem>
+// #include <QtSvg/QGraphicsSvgItem>
  
  #include <QtGui/QMouseEvent>
  #include <QtGui/QDialog>
  #include <QtGui/QFileDialog>
  
 
-namespace MapType
-	{
+// namespace MapType
+// 	{
 	enum mtyp
 		{
-		 sea,			// 000
-		 coast,			// 001 || -> | -> 110
-		 land,			// 010 || -> | -> 111
-		 coast_city,
-		 land_city			// 100
+		 Seamap,			// 000
+		 Coastmap,			// 001 || -> | -> 110
+		 Landmap,			// 010 || -> | -> 111
+		 Coastcitymap,
+		 Landcitymap			// 100
 		};
-	}
+// 	}
 
+ enum
+ object_functions{
+ Townhall,
+ Market,
+ Church,
+ Port,
+ Office,
+ Bank,
+ Tavern,
+ Land_breake,
+ Land_damage,
+ Mapdecoration
+ };
+ 
  namespace NameFilters{ enum NFs{Img, Map, Save};}
+ 
+ 
+ class MainWindow;
+ class QComboBox;
+ 
  
  class MapFrame : public QGraphicsView
  {
@@ -57,35 +76,47 @@ namespace MapType
 
  public:
  
- void initMap();
+ enum{
+ ID,
+ Name,
+ Filename,
+ Function,
+ Tooltip,
+  };
+ 
+
+ MapFrame(const MainWindow *);
+//  void initMap();
  void newObjectDialog(QPoint);
 
-  MapType::mtyp maptyp;
+ void setGraphicsItemProperties(QGraphicsItem *);
+
+
+  int maptyp;
 //   int maptyp;
 //   QString maptypename;
   
  QString bgi_filename; // Backgroundimage-FN
 //  bool isCity;
  QString cityname;
- QString mapnorth, mapwest, mapsouth, mapeast;
- QMap <QGraphicsItem *, QGraphicsPixmapItem *> pixmapItemList;
- QList <QGraphicsItem *> qgilist;
-//  QMap <QVariant , QGraphicsItem*> itemMapList; 
-QMap <QString , QGraphicsItem*> itemMapList; 
-
-//  QStringList itemfktList;
  
- QStringList MapTypeEntries;
- QString mt_sea, mt_coast, mt_land, mt_coast_city, mt_land_city;
-
- QStringList ObjectTypeEntries;
- QString ot_market, ot_townhall, ot_church, ot_port, ot_office, ot_bank, ot_tavern, ot_land, ot_land2, ot_mapdecoration;
+ QString mapname;
+ 
+ QString mapnorth, mapwest, mapsouth, mapeast;
+//  QList <ObjectGraphicsItem *> ogilist;
+ 
+ 
+//  QStringList MapTypeEntries;
+//  QString mt_sea, mt_coast, mt_land, mt_coast_city, mt_land_city;
+// 
+//  QStringList ObjectTypeEntries;
+//  QString ot_market, ot_townhall, ot_church, ot_port, ot_office, ot_bank, ot_tavern, ot_land, ot_land2, ot_mapdecoration;
 
  QSize mapSize;
  QPoint curser;
  
- 
- QGraphicsScene *szene;
+//  QGraphicsItem *moveitem;
+//  QGraphicsScene *szene;
 
 enum object_types_def
 {
@@ -102,9 +133,9 @@ object_type_land
 
 };
 
-
- QGraphicsPixmapItem *activePixmapItem;
- QGraphicsItem *activeItem;
+QGraphicsItem *activeItem;
+//  QGraphicsPixmapItem *activePixmapItem;
+//  QGraphicsItem *activeItem;
  bool itemSelected;
  bool itemGrabbed;
  int object_typ;
@@ -132,12 +163,12 @@ QString objectName;
  void fileDialog(int);
 // void fileDialog(NameFilters::NFs);
 
- void setMapType(QString);
- void setObjectType(QString);
+//  void setMapType(QString);
+ void setObjectType(int);
  void setToolTipString(QString);
  void setFileString(QString);
  
- void getObjectID(QString);
+ void getObjectID(const QString&);
  void selectObject();
  
  void setXPos(int);
@@ -150,6 +181,8 @@ QString objectName;
  
  void keyPressEvent(QKeyEvent *);
  
+ const MainWindow *m_MainWindow;
+ QComboBox *fktComboBox;
  
  signals:
  void newObjectCreated(QGraphicsItem *);

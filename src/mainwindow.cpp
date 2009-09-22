@@ -19,9 +19,12 @@
  ***************************************************************************/
  
 #include "mainwindow.h"
-
-#include <QtGui/QMenuBar>
+ #include "mapframe.h"
+ #include "sidebar.h"
+ 
 #include <QtGui/QAction>
+#include <QtGui/QMenu>
+#include <QtGui/QMenuBar>
 #include <QtGui/QStatusBar>
 
 #include <QtGui/QToolBar>
@@ -37,27 +40,43 @@
 #include <QtCore/QTimer>
 #include <QtCore/QDir>
 #include <QtCore/QFile>
+ #include <QtGui/QListWidget>
+ #include <QtGui/QLineEdit>
+ #include <QtGui/QLabel>
+ #include <QtGui/QPushButton>
+ #include <QtGui/QSpinBox>
+ #include <QtGui/QComboBox>
+
+// #define _DEBUG_
 
 MainWindow::MainWindow()
  {
-	QTimer *autoSaveTimer = new QTimer(this);
+	autoSaveTimer = new QTimer(this);
+	#ifndef _DEBUG_
 	autoSaveTimer->start(10000);
+	#endif
  	existingMapFile = false;
 
-	QWidget *zentralwidget = new QWidget();
+	QWidget *zentralwidget = new QWidget(this);
 	setCentralWidget(zentralwidget);
 
 
-	SideBar = new SideBarClass();
+	SideBar = new SideBarClass(this);
 	SideBar->setParent(zentralwidget);
 // 	SideBar->setFixedWidth(100);
 
-	MapView = new MapFrame();
+	MapView = new MapFrame(this);
 	MapView->setParent(zentralwidget); 
-	MapView->initMap();
+// 	MapView->initMap();
 //	MapView->setStatusTip("");
 	
-	SideBar->itemTyp->addItems(MapView->MapTypeEntries);
+	QHashIterator <int, QString> it(SideBar->maptypelabels());
+	while(it.hasNext())
+	{
+		it.next();
+		SideBar->itemTyp->addItem(it.value(), it.key());
+// 		SideBar->itemTyp->addItems(MapView->MapTypeEntries);
+	}
 // 	SideBar->comboBoxObjectEntries = MapView->itemfktList;
 
 	QHBoxLayout *layout = new QHBoxLayout(zentralwidget);
@@ -84,8 +103,10 @@ MainWindow::MainWindow()
 	resize(800, 600);
  
 	connect(MapView, SIGNAL(newObjectCreated(QGraphicsItem *)), this, SLOT(addNewObjectToList(QGraphicsItem*)));
+	
+	connect(SideBar->nameLineEdit, SIGNAL(textEdited(QString)), this, SLOT(nameLineEditHandler(QString)));
 	connect(SideBar->itemListWidget, SIGNAL(currentRowChanged(int)), this, SLOT(updateItemList(int)));
-	connect(SideBar->itemTyp, SIGNAL(activated(QString)), this, SLOT(typeComboBoxHandler(QString)));
+	connect(SideBar->itemTyp, SIGNAL(activated(int)), this, SLOT(typeComboBoxHandler(int)));
 	connect(SideBar->selectFileButton, SIGNAL(clicked()), this, SLOT(sideBar_SelectFile()));
 	connect(SideBar->editToolTip, SIGNAL(textEdited(QString)), this, SLOT(lineEditHandler(QString)));
  	connect(SideBar->XBox, SIGNAL(valueChanged(int)), this, SLOT(spinboxHandler()));
@@ -95,6 +116,7 @@ MainWindow::MainWindow()
 	connect(SideBar->ZBox, SIGNAL(valueChanged(double)), this, SLOT(spinboxHandler()));
 	
 	connect(MapView, SIGNAL(objectSelected(QGraphicsItem*)), this, SLOT(markListItem(QGraphicsItem*)));
+	
 	connect(MapView, SIGNAL(objectMoved()), this, SLOT(updateSpinbox()));
 	
 	connect(MapView, SIGNAL(SIG_deleteObject()), this, SLOT(deleteCurrentObject()));
@@ -132,6 +154,10 @@ void MainWindow::createActions()
   autoSaveAct = new QAction(tr("Save Autosave"), this);
   autoSaveAct->setStatusTip(tr("Saves the Map as Autosaved Map"));
   connect(autoSaveAct, SIGNAL(triggered()), this, SLOT(autoSave()));
+  
+  disableAutoSaveAct = new QAction(tr("Disable Autosaves"), this);
+//   disableAutoSaveAct->setStatusTip(tr("Saves the Map as Autosaved Map"));
+  connect(disableAutoSaveAct, SIGNAL(triggered()), this, SLOT(disableAutoSave()));
   
   loadAutoSaveAct = new QAction(tr("Load Autosave"), this);
   loadAutoSaveAct->setStatusTip(tr("Loads the Autosaved Map"));
@@ -248,6 +274,10 @@ connect(MapView->fd, SIGNAL(accepted()), this, SLOT(openMap()));
  }
 
  }
+ void MainWindow::disableAutoSave()
+ {
+ autoSaveTimer->stop();
+ }
 
  void MainWindow::save()
  {
@@ -284,6 +314,7 @@ void MainWindow::createMenus()
   fileMenu->addSeparator();
   fileMenu->addAction(loadAutoSaveAct);
   fileMenu->addAction(autoSaveAct);
+  fileMenu->addAction(disableAutoSaveAct);
   fileMenu->addSeparator();
   fileMenu->addAction(quitAct);
 
@@ -299,13 +330,16 @@ void MainWindow::addNewObjectToList(QGraphicsItem *newObject)
 autoSaved = false;
 
 // SideBar->MapEntries << entry->data(0).toString().append(entry->data(1).toString()).append(entry->data(2).toString());
-qWarning() << "MainWindow::addNewObjectToList(QGraphicsItem *newObject)";
+qWarning() << "MainWindow::addNewObjectToList(QGraphicsItem *newObject) :: ID:" << newObject->data(MapFrame::ID).toInt();
 
 // SideBar->itemListWidget->addItem(newObject->data(17).toString().append("; ").append(newObject->data(1).toString()).append(newObject->data(2).toString().right(14).left(10)));
+ QListWidgetItem *lwi = new QListWidgetItem(newObject->data(MapFrame::Name).toString(), SideBar->itemListWidget);
+ lwi->setData(64, newObject->data(MapFrame::ID).toInt());
+// 	SideBar->itemListWidget->addItem(newObject->data(MapFrame::Name));
+	qWarning() << newObject->data(MapFrame::Name);
  
- SideBar->itemListWidget->addItem(newObject->data(18).toString());
- 
-SideBar->itemListWidget->setCurrentRow(SideBar->itemListWidget->count() - 1);
+// SideBar->itemListWidget->setCurrentRow(SideBar->itemListWidget->count() - 1);
+SideBar->itemListWidget->setCurrentItem(lwi);
  itemAdded = true;
 }
 
@@ -324,11 +358,11 @@ qWarning() << "MainWindow::updateItemList(int selectedItemRow)" << selectedItemR
 		}
 		else
 		SideBar->fileView->setText(MapView->bgi_filename);
-		
+		SideBar->nameLineEdit->setEnabled(true);
 		//SideBar->editToolTip->setToolTip(tr("Comment"));
 // 		SideBar->editToolTip->setEnabled(false);
 // 		SideBar->editToolTip->setText(QString());
-		if(MapView->maptyp == MapType::land_city || MapView->maptyp == MapType::coast_city)
+		if(MapView->maptyp == Landcitymap || MapView->maptyp == Coastcitymap)
 		{
 			SideBar->editToolTip->setEnabled(true);
 			SideBar->editToolTip->setText(MapView->cityname);
@@ -346,14 +380,22 @@ qWarning() << "MainWindow::updateItemList(int selectedItemRow)" << selectedItemR
 		if(!SideBar->CB_mapprops)
 		{
 			SideBar->itemTyp->clear();
-			SideBar->itemTyp->addItems(MapView->MapTypeEntries);
+// 			SideBar->itemTyp->addItems(MapView->MapTypeEntries);
+			
+				QHashIterator <int, QString> it(SideBar->maptypelabels());
+				while(it.hasNext())
+				{
+					it.next();
+					SideBar->itemTyp->addItem(it.value(), it.key());
+				}
+			
 			SideBar->CB_mapprops = true;
 			int MapTypeRow = MapView->maptyp;
 			qWarning() << MapTypeRow;
 // 			SideBar->itemTyp->setCurrentIndex(SideBar->itemTyp->findText(MapView->maptypename));
 			SideBar->itemTyp->setCurrentIndex(MapTypeRow);
 		}
-
+		SideBar->nameLineEdit->setText(MapView->mapname);
 		SideBar->ZBox->setEnabled(false);
 		SideBar->YBox->setEnabled(true);
 		SideBar->XBox->setEnabled(true);
@@ -366,8 +408,10 @@ qWarning() << "MainWindow::updateItemList(int selectedItemRow)" << selectedItemR
 	{
 		SideBar->itemTyp->setEnabled(false);
 		SideBar->editToolTip->setEnabled(false);
+		SideBar->nameLineEdit->setEnabled(false);
 		SideBar->selectFileButton->setEnabled(true);
 		SideBar->editToolTip->setText(QString());
+		SideBar->nameLineEdit->setText(QString());
 		if(MapView->mapnorth.size() > 43)
 		{
 			SideBar->fileView->setText(QString(MapView->mapnorth).right(39).prepend("..."));
@@ -383,8 +427,10 @@ qWarning() << "MainWindow::updateItemList(int selectedItemRow)" << selectedItemR
 	{
 		SideBar->itemTyp->setEnabled(false);
 		SideBar->editToolTip->setEnabled(false);
+		SideBar->nameLineEdit->setEnabled(false);
 		SideBar->selectFileButton->setEnabled(true);
 		SideBar->editToolTip->setText(QString());
+		SideBar->nameLineEdit->setText(QString());
 		if(MapView->mapwest.size() > 43)
 		{
 			SideBar->fileView->setText(QString(MapView->mapwest).right(39).prepend("..."));
@@ -400,8 +446,11 @@ qWarning() << "MainWindow::updateItemList(int selectedItemRow)" << selectedItemR
 	{
 		SideBar->itemTyp->setEnabled(false);
 		SideBar->editToolTip->setEnabled(false);
+		SideBar->nameLineEdit->setEnabled(false);
 		SideBar->selectFileButton->setEnabled(true);
 		SideBar->editToolTip->setText(QString());
+		SideBar->nameLineEdit->setText(QString());
+
 		if(MapView->mapsouth.size() > 43)
 		{
 			SideBar->fileView->setText(QString(MapView->mapsouth).right(39).prepend("..."));
@@ -417,8 +466,11 @@ qWarning() << "MainWindow::updateItemList(int selectedItemRow)" << selectedItemR
 	{
 		SideBar->itemTyp->setEnabled(false);
 		SideBar->editToolTip->setEnabled(false);
+		SideBar->nameLineEdit->setEnabled(false);
 		SideBar->selectFileButton->setEnabled(true);
 		SideBar->editToolTip->setText(QString());
+		SideBar->nameLineEdit->setText(QString());
+
 		if(MapView->mapeast.size() > 43)
 		{
 			SideBar->fileView->setText(QString(MapView->mapeast).right(39).prepend("..."));
@@ -434,19 +486,37 @@ qWarning() << "MainWindow::updateItemList(int selectedItemRow)" << selectedItemR
 	{
 		SideBar->editToolTip->setEnabled(true);
 		SideBar->selectFileButton->setEnabled(true);
+		SideBar->nameLineEdit->setEnabled(true);
 		SideBar->YBox->setEnabled(true);
 		SideBar->XBox->setEnabled(true);
 		SideBar->ZBox->setEnabled(true);
 		SideBar->itemTyp->setEnabled(true);
+		
 		if(SideBar->CB_mapprops)
 		{
 			SideBar->itemTyp->clear();
-			SideBar->itemTyp->addItems(MapView->ObjectTypeEntries);
+				QHashIterator <int, QString> it(SideBar->functionlabels());
+				while(it.hasNext())
+				{
+					it.next();
+					SideBar->itemTyp->addItem(it.value(), it.key());
+				}
+// 			SideBar->itemTyp->addItems(MapView->ObjectTypeEntries);
 			SideBar->CB_mapprops = false;
 		}
 // 		QGraphicsItem *blah = new QGraphicsItem();
 // 		MapView->activeItem = blah:
- 		MapView->activeItem = MapView->itemMapList.value(SideBar->itemListWidget->currentItem()->text());
+// 		for(QList<QGraphicsItem>::iterator it = MapView->ogilist.begin(); it != MapView->ogilist.end(); ++it)
+		foreach(MapView->activeItem, MapView->scene()->items())
+		{
+			qWarning() << "Item-ID:" << MapView->activeItem->data(MapFrame::ID).toInt();
+			if(MapView->activeItem->data(MapFrame::ID).toInt() == SideBar->itemListWidget->currentItem()->data(64).toInt())
+			{
+				qWarning() << MapView->activeItem->data(MapFrame::ID);
+				break;
+			}
+		}
+//  		MapView->activeItem = MapView->itemMapList.value(SideBar->itemListWidget->currentItem()->text());
 		
 // 		MapView->activeItem->setPos(10000,1000);
 // 				qWarning() << "DebugMeldung";
@@ -457,35 +527,45 @@ qWarning() << "MainWindow::updateItemList(int selectedItemRow)" << selectedItemR
 		SideBar->ZBox->setValue(MapView->activeItem->zValue());
 		
 		
-		int obj_id = MapView->activeItem->data(0).toInt();
+		int obj_id = MapView->activeItem->data(MapFrame::Function).toInt();
 		qWarning() << obj_id;
-		if(obj_id < 100)
+		
+		for(int i = 0; i< SideBar->itemTyp->count(); i++)
 		{
-			SideBar->itemTyp->setCurrentIndex(obj_id);
+			if(SideBar->itemTyp->itemData(i).toInt() == obj_id)
+			{
+			SideBar->itemTyp->setCurrentIndex(i);
+			break;
+			}
 		}
-		else if(obj_id >= 100 && obj_id < 500)
-		{
-			SideBar->itemTyp->setCurrentIndex(SideBar->itemTyp->count() - 3);
-		}
-		else if(obj_id >= 500 && obj_id < 1000)
-		{
-			SideBar->itemTyp->setCurrentIndex(SideBar->itemTyp->count() - 2);
-		}
-		else if(obj_id >= 1000)
-		{
-			SideBar->itemTyp->setCurrentIndex(SideBar->itemTyp->count() - 1);
-		}
-		SideBar->editToolTip->setText(MapView->activeItem->data(1).toString());
+// 		if(obj_id < 100)
+// 		{
+// 			SideBar->itemTyp->setCurrentIndex(obj_id);
+// 		}
+// 		else if(obj_id >= 100 && obj_id < 500)
+// 		{
+// 			SideBar->itemTyp->setCurrentIndex(SideBar->itemTyp->count() - 3);
+// 		}
+// 		else if(obj_id >= 500 && obj_id < 1000)
+// 		{
+// 			SideBar->itemTyp->setCurrentIndex(SideBar->itemTyp->count() - 2);
+// 		}
+// 		else if(obj_id >= 1000)
+// 		{
+// 			SideBar->itemTyp->setCurrentIndex(SideBar->itemTyp->count() - 1);
+// 		}
+		SideBar->editToolTip->setText(MapView->activeItem->data(MapFrame::Tooltip).toString());
+		SideBar->nameLineEdit->setText(MapView->activeItem->data(MapFrame::Name).toString());
 		
 		
-		if(MapView->activeItem->data(2).toString().size() > 43)
+		if(MapView->activeItem->data(MapFrame::Filename).toString().size() > 43)
 		{
-			SideBar->fileView->setText(QString(MapView->activeItem->data(2).toString()).right(39).prepend("..."));
+			SideBar->fileView->setText(QString(MapView->activeItem->data(MapFrame::Filename).toString().right(39).prepend("...")));
 			
 		}
 		else
 		{
-			SideBar->fileView->setText(MapView->activeItem->data(2).toString());
+			SideBar->fileView->setText(MapView->activeItem->data(MapFrame::Filename).toString());
 		}
 		
 		break;
@@ -522,7 +602,7 @@ qWarning() << "MainWindow::sideBar_FileSelected()";
 	case 0:
 	{
 		MapView->bgi_filename = MapView->fd_filename;
-		MapView->szene->setBackgroundBrush(QBrush(QImage(MapView->bgi_filename)));
+		MapView->scene()->setBackgroundBrush(QBrush(QImage(MapView->bgi_filename)));
 		break;
 	}
 	case 1:
@@ -548,7 +628,7 @@ qWarning() << "MainWindow::sideBar_FileSelected()";
 	default:
 	{
 
-		MapView->activeItem->setData(2, QVariant(MapView->fd_filename));
+		MapView->activeItem->setData(MapFrame::Filename, MapView->fd_filename);
 
 		GI2GPMI( MapView->activeItem )->setPixmap(QPixmap(MapView->fd_filename));
 //		MapView->pixmapItemList[MapView->activeItem]->setPixmap(QPixmap(MapView->fd_filename));
@@ -589,21 +669,21 @@ SideBar->YBox->setValue(MapView->activeItem->y());
 }
 
 
-void MainWindow::typeComboBoxHandler(QString typ)
+void MainWindow::typeComboBoxHandler(/*const QString &*/ int typ)
 {
-qWarning() << "MainWindow::setObjTyp(QString typ)" << typ;
+qWarning() << "MainWindow::typeComboBoxHandler(int typ)" << typ << "ID:" << SideBar->itemTyp->itemData(typ).toInt();
 autoSaved = false;
-	if(!SideBar->CB_mapprops)
+	if(!SideBar->CB_mapprops)		// holds the property, if the type-combo-box contains the maptype-Properties or the object-type-properties
 	{
-		MapView->setObjectType(typ);
-		MapView->activeItem->setData(0, QVariant(MapView->object_typ));
-		qWarning() << MapView->object_typ << MapView->activeItem->data(0).toInt();
+// 		MapView->setObjectType(typ);
+		MapView->activeItem->setData(MapFrame::Function, SideBar->itemTyp->itemData(typ));
+		qWarning() << MapView->object_typ << MapView->activeItem->data(MapFrame::Function).toInt();
 	}
 	else
 	{
-		MapView->setMapType(typ);
-		
-		if(MapView->maptyp == MapType::land_city || MapView->maptyp == MapType::coast_city)
+// 		MapView->setMapType(typ);
+		MapView->maptyp = SideBar->itemTyp->itemData(typ).toInt();
+		if(MapView->maptyp == Landcitymap || MapView->maptyp == Coastcitymap)
 		{
 			SideBar->editToolTip->setEnabled(true);
 			SideBar->editToolTip->setText(MapView->cityname);
@@ -616,7 +696,7 @@ autoSaved = false;
 	}
 }
 
-void MainWindow::lineEditHandler(QString text)
+void MainWindow::lineEditHandler(const QString &text)
 {
 autoSaved = false;
 	if(SideBar->itemListWidget->currentRow() == 0 )
@@ -625,8 +705,23 @@ autoSaved = false;
 	}
 	else if(SideBar->itemListWidget->currentRow() > 4)
 	{
-	MapView->activeItem->setData(1, QVariant(text));
-	MapView->activeItem->setToolTip(text);
+	MapView->activeItem->setData(MapFrame::Tooltip, text);
+ 	MapView->activeItem->setToolTip(text);
+	}
+}
+
+
+void MainWindow::nameLineEditHandler(const QString &text)
+{
+autoSaved = false;
+	if(SideBar->itemListWidget->currentRow() == 0 )
+	{
+	MapView->mapname = text;
+	}
+	else if(SideBar->itemListWidget->currentRow() > 4 && !QString(text).trimmed().simplified().isEmpty())
+	{
+	MapView->activeItem->setData(MapFrame::Name, text);
+	SideBar->itemListWidget->currentItem()->setText(text);
 	}
 }
 
@@ -639,36 +734,55 @@ void MainWindow::markListItem(QGraphicsItem *selectedItem)
 // QList <QListWidgetItem*> matchingListEntry =  SideBar->itemListWidget->findItems(selectedItem->data(0).toString(), Qt::MatchContains);
 
 qWarning() << "MainWindow::markListItem(QGraphicsItem *selectedItem)" //<< SideBar->itemListWidget->findItems(selectedItem->data(17).toString(), Qt::MatchStartsWith).first().text()
-;
-SideBar->itemListWidget->setCurrentItem(SideBar->itemListWidget->findItems(selectedItem->data(17).toString(), Qt::MatchStartsWith).first());
-
+<< selectedItem->data(MapFrame::ID) << selectedItem->data(0).toInt();
+// SideBar->itemListWidget->setCurrentItem(SideBar->itemListWidget->findItems(selectedItem->data(17).toString(), Qt::MatchStartsWith).first());
+if(selectedItem != 0)
+{
+for(int i = 0; i < SideBar->itemListWidget->count(); i++)
+{
+qWarning() << SideBar->itemListWidget->item(i)->data(0);
+	if(SideBar->itemListWidget->item(i)->data(64).toInt() == selectedItem->data(MapFrame::ID))
+	{
+		SideBar->itemListWidget->setCurrentRow(i);
+		break;
+	}
+}
+}
 }
 
 
 void MainWindow::deleteCurrentObject()
 {
+qWarning() << MapView->activeItem->data(MapFrame::Filename).toString();
 autoSaved = false;
 int currentListRow = SideBar->itemListWidget->currentRow();
 
-if(!MapView->itemMapList.isEmpty() && currentListRow > 4)
+if(!MapView->scene()->items().isEmpty() && currentListRow > 4)
 {
 qWarning() << "MainWindow::deleteCurrentObject()";
 //int itemID = MapView->activeItem->data(17).toInt();
 
-MapView->itemMapList.remove(SideBar->itemListWidget->currentItem()->text());
+// MapView->itemMapList.remove(SideBar->itemListWidget->currentItem()->text());
 
 
 // SideBar->itemListWidget->removeItemWidget(SideBar->itemListWidget->item(currentListRow));
-SideBar->itemListWidget->takeItem(currentListRow);
 SideBar->itemListWidget->setCurrentRow(0);
+SideBar->itemListWidget->takeItem(currentListRow);
+
 
 
 // qWarning() << MapView->itemList.size();
+// MapView->ogilist.removeOne(MapView->activeItem);
 
-MapView->szene->removeItem(MapView->activeItem);
+qWarning() << "Deleting Item";
+MapView->scene()->removeItem(MapView->activeItem);
 
  delete MapView->activeItem;
  
+//  if(!ogilist.isEmpty())
+//  {
+//  activeItem = ogilist.first();
+//  }
 // MapView->szene->items
 
 }

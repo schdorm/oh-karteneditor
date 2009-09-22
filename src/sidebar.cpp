@@ -19,15 +19,25 @@
  ***************************************************************************/
  
  #include "sidebar.h"
+ #include "mainwindow.h"
+ #include "mapframe.h"
  
  #include <QtGui/QVBoxLayout>
  #include <QtGui/QHBoxLayout>
  #include <QtGui/QFrame>
  #include <QtGui/QKeyEvent>
+ 
+ #include <QtGui/QListWidget>
+ #include <QtGui/QLineEdit>
+ #include <QtGui/QLabel>
+ #include <QtGui/QPushButton>
+ #include <QtGui/QSpinBox>
+ #include <QtGui/QComboBox>
 
  
- SideBarClass::SideBarClass()
+ SideBarClass::SideBarClass(const MainWindow *parentWindow)
  {
+	m_parent = parentWindow;
 	staticListEntries << /*tr("Stadtname") << tr("Maphintergrund")*/ tr("Mapeigenschaften") << tr("Nordmap") << tr("Westmap") << tr("Suedmap") << tr("Ostmap");
 	
 
@@ -48,22 +58,27 @@
 	itemTyp = new QComboBox(this);
 	SideBarLayout->addWidget(itemTyp);
 	
+	nameLineEdit = new QLineEdit(this);
+	nameLineEdit->setMaxLength(30);
+	SideBarLayout->addWidget(nameLineEdit);
+	
+	editToolTip = new QLineEdit(this);
+	editToolTip->setMaxLength(30);
+	SideBarLayout->addWidget(editToolTip );
+	
 	QWidget *wid = new QWidget(this);
 	SideBarLayout->addWidget(wid);
-
+	
 	QHBoxLayout *objectFileLayout = new QHBoxLayout(wid);
 
-	fileView = new QLabel(this);
-	fileView->setFrameShape(QFrame::Box);
+	fileView = new QLineEdit(this);
+// 	fileView->setFrameShape(QFrame::Box);
+	fileView->setEnabled(false);
 	objectFileLayout->addWidget(fileView);
 
 	selectFileButton = new QPushButton ("...", this);
 	objectFileLayout->addWidget(selectFileButton);
 	
-	editToolTip = new QLineEdit(this);
-	editToolTip->setMaxLength(30);
-	SideBarLayout->addWidget(editToolTip );
-
 	objectFileLayout->setStretch(0,5);
 
 	QWidget *wid2 = new QWidget(this);
@@ -90,9 +105,49 @@
 	ZBox->setDecimals(3);
 	ZBox->setToolTip(tr("Hoehe des Objekts"));
 
+	
+	QString townhalllabel = tr("Rathaus"),
+	marketlabel = tr("Markt"),
+	churchlabel = tr("Kirche"),
+	portlabel = tr("Hafen"),
+	officelabel = tr("Kontor"),
+	banklabel = tr("Darlehensgeber"),
+	tavernlabel = tr("Kneipe"),
+	land_breakelabel = tr("Landflaechen"),
+	land_damagelabel = tr("\"boese\" Untiefen"), // Objekte, bei denen eine Kollision mit dem Schiff Schaden am Schiff verursacht.
+	mapdecorationlabel = tr("Mapdeko");
+
+	functionLabels.insert(Townhall, townhalllabel);
+	functionLabels.insert(Market, marketlabel);
+	functionLabels.insert(Church, churchlabel);
+	functionLabels.insert(Port, portlabel);
+	functionLabels.insert(Office, officelabel);
+	functionLabels.insert(Bank, banklabel);
+	functionLabels.insert(Tavern, tavernlabel);
+	functionLabels.insert(Land_breake, land_breakelabel);
+	functionLabels.insert(Land_damage, land_damagelabel);
+	functionLabels.insert(Mapdecoration, mapdecorationlabel);
+	
+	QString mt_sea = tr("See/Meer"),
+	mt_coast = tr("Kueste"),
+	mt_land = tr("Land"),
+	mt_coast_city = tr("Kueste (Stadt)"),
+	mt_land_city = tr("Land (Stadt)");
+	
+	maptypeLabels.insert(Seamap, mt_sea);
+	maptypeLabels.insert(Coastmap, mt_coast);
+	maptypeLabels.insert(Landmap, mt_land);
+	maptypeLabels.insert(Coastcitymap, mt_coast_city);
+	maptypeLabels.insert(Landcitymap, mt_land_city);
+	
 
 //	SideBarLayout->addLayout(objectFileLayout);
 
+ }
+ 
+ const QString &SideBarClass::maptypelabel(int key) const
+ {
+ return maptypeLabels.value(key);
  }
  
 // void SideBarClass::initMapEntriesList()
