@@ -354,11 +354,11 @@ qWarning() << "MainWindow::updateItemList(int selectedItemRow)" << selectedItemR
 	{
 	case en_mapproperties:	//mapbackgroundimagefilepath !-! allgemeine Mapprops
 	{
-		if(MapView->bgi_filename.size() > 43)
-		{
-			SideBar->fileView->setText(QString(MapView->bgi_filename).right(39).prepend("..."));
-		}
-		else
+// 		if(MapView->bgi_filename.size() > 43)
+// 		{
+// 			SideBar->fileView->setText(QString(MapView->bgi_filename).right(39).prepend("..."));
+// 		}
+// 		else
 		SideBar->fileView->setText(MapView->bgi_filename);
 		SideBar->nameLineEdit->setEnabled(true);
 		//SideBar->editToolTip->setToolTip(tr("Comment"));
@@ -414,11 +414,11 @@ qWarning() << "MainWindow::updateItemList(int selectedItemRow)" << selectedItemR
 		SideBar->selectFileButton->setEnabled(true);
 		SideBar->editToolTip->setText(QString());
 		SideBar->nameLineEdit->setText(QString());
-		if(MapView->mapnorth.size() > 43)
-		{
-			SideBar->fileView->setText(QString(MapView->mapnorth).right(39).prepend("..."));
-		}
-		else
+// 		if(MapView->mapnorth.size() > 43)
+// 		{
+// 			SideBar->fileView->setText(QString(MapView->mapnorth).right(39).prepend("..."));
+// 		}
+// 		else
 		SideBar->fileView->setText(MapView->mapnorth);
 		SideBar->ZBox->setEnabled(false);
 		SideBar->YBox->setEnabled(false);
@@ -433,11 +433,11 @@ qWarning() << "MainWindow::updateItemList(int selectedItemRow)" << selectedItemR
 		SideBar->selectFileButton->setEnabled(true);
 		SideBar->editToolTip->setText(QString());
 		SideBar->nameLineEdit->setText(QString());
-		if(MapView->mapwest.size() > 43)
-		{
-			SideBar->fileView->setText(QString(MapView->mapwest).right(39).prepend("..."));
-		}
-		else
+// 		if(MapView->mapwest.size() > 43)
+// 		{
+// 			SideBar->fileView->setText(QString(MapView->mapwest).right(39).prepend("..."));
+// 		}
+// 		else
 		SideBar->fileView->setText(MapView->mapwest);
 		SideBar->ZBox->setEnabled(false);
 		SideBar->YBox->setEnabled(false);
@@ -453,11 +453,11 @@ qWarning() << "MainWindow::updateItemList(int selectedItemRow)" << selectedItemR
 		SideBar->editToolTip->setText(QString());
 		SideBar->nameLineEdit->setText(QString());
 
-		if(MapView->mapsouth.size() > 43)
-		{
-			SideBar->fileView->setText(QString(MapView->mapsouth).right(39).prepend("..."));
-		}
-		else
+// 		if(MapView->mapsouth.size() > 43)
+// 		{
+// 			SideBar->fileView->setText(QString(MapView->mapsouth).right(39).prepend("..."));
+// 		}
+// 		else
 		SideBar->fileView->setText(MapView->mapsouth);
 		SideBar->ZBox->setEnabled(false);
 		SideBar->YBox->setEnabled(false);
@@ -473,11 +473,11 @@ qWarning() << "MainWindow::updateItemList(int selectedItemRow)" << selectedItemR
 		SideBar->editToolTip->setText(QString());
 		SideBar->nameLineEdit->setText(QString());
 
-		if(MapView->mapeast.size() > 43)
-		{
-			SideBar->fileView->setText(QString(MapView->mapeast).right(39).prepend("..."));
-		}
-		else
+// 		if(MapView->mapeast.size() > 43)
+// 		{
+// 			SideBar->fileView->setText(QString(MapView->mapeast).right(39).prepend("..."));
+// 		}
+// 		else
 		SideBar->fileView->setText(MapView->mapeast);
 		SideBar->ZBox->setEnabled(false);
 		SideBar->YBox->setEnabled(false);
@@ -560,12 +560,12 @@ qWarning() << "MainWindow::updateItemList(int selectedItemRow)" << selectedItemR
 		SideBar->nameLineEdit->setText(MapView->activeItem->data(MapFrame::Name).toString());
 		
 		
-		if(MapView->activeItem->data(MapFrame::Filename).toString().size() > 43)
-		{
-			SideBar->fileView->setText(QString(MapView->activeItem->data(MapFrame::Filename).toString().right(39).prepend("...")));
-			
-		}
-		else
+// 		if(MapView->activeItem->data(MapFrame::Filename).toString().size() > 43)
+// 		{
+// 			SideBar->fileView->setText(QString(MapView->activeItem->data(MapFrame::Filename).toString().right(39).prepend("...")));
+// 			
+// 		}
+// 		else
 		{
 			SideBar->fileView->setText(MapView->activeItem->data(MapFrame::Filename).toString());
 		}

@@ -73,7 +73,8 @@
 
 	fileView = new QLineEdit(this);
 // 	fileView->setFrameShape(QFrame::Box);
-	fileView->setEnabled(false);
+// 	fileView->setEnabled(false);
+	fileView->setReadOnly(true);
 	objectFileLayout->addWidget(fileView);
 
 	selectFileButton = new QPushButton ("...", this);
