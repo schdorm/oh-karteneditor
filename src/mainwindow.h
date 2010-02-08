@@ -18,11 +18,11 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
- #ifndef _MAINWINDOW_H
- #define _MAINWINDOW_H
+#ifndef _MAINWINDOW_H
+#define _MAINWINDOW_H
 
 
- #include <QtGui/QMainWindow>
+#include <QtGui/QMainWindow>
  
 //  #include <QtGui/QAction>
 //  #include <QtGui/QMenu>
@@ -37,51 +37,63 @@
 //  #include "sidebar.h"
 
 
- class MainWindow : public QMainWindow
- {
- Q_OBJECT
+class MapSettingsDialog;
+
+
+class MainWindow : public QMainWindow
+{
+  Q_OBJECT
  /*
   protected:
      void contextMenuEvent(QContextMenuEvent *event);
  */
  public:
- MapFrame *MapView;
+   MainWindow();
+   SideBarClass *SideBar;
+   bool itemAdded;
+   
+  public slots:
+    void closeMapSettingsDialog(int);
+    void applyMapSettings();
 
- SideBarClass *SideBar;
- MainWindow();
 
- bool itemAdded;
 
- private slots:
- void newMap();
- void open();
- void openMap();
- void saveHandler();
- void savef();
- void autoSave();
+  private slots:
+    void newMap();
+    void open();
+    void openMap();
+    void saveHandler();
+    void savef();
+    void autoSave();
+    
+    void disableAutoSave();
+    
+    void loadAutoSaveMap();
+    
+    void addNewObjectToList(QGraphicsItem *);
+
+    void updateItemList(int);
+    void updateSpinbox();
+    
+    void nameLineEditHandler(const QString &);
+    void lineEditHandler(const QString &);
+    void sideBar_SelectFile();
+    void sideBar_FileSelected();
+    void spinboxHandler();
+    void typeComboBoxHandler(int);
+    void markListItem(QGraphicsItem *);
+    
+    void deleteCurrentObject();
  
- void disableAutoSave();
-
- void loadAutoSaveMap();
+    void mapPropertiesDialog();
  
- void addNewObjectToList(QGraphicsItem *);
-
- void updateItemList(int);
- void updateSpinbox();
- 
- void nameLineEditHandler(const QString &);
- void lineEditHandler(const QString &);
- void sideBar_SelectFile();
- void sideBar_FileSelected();
- void spinboxHandler();
- void typeComboBoxHandler(int);
- void markListItem(QGraphicsItem *);
- 
- void deleteCurrentObject();
+    void preferences(); 
+    void applySettings();
 
  private:
  void createActions();
  void createMenus();
+ void createOldLayout();
  
  void save();
 
@@ -92,6 +104,11 @@ en_mapwest,
 en_mapsouth,
 en_mapeast
 };
+
+
+  MapFrame *MapView;
+
+  MapSettingsDialog *MapSettings;
  
  QMenu *fileMenu;
  QMenu *editMenu;
@@ -109,6 +126,10 @@ en_mapeast
  QAction *newObjectAct;
  QAction *rmcurrentObjectAct;
  
+ QAction *m_MapPropertiesAction;
+ 
+ QAction *m_PreferencesAction;
+ QAction *m_AboutAction;
  
  QTimer *autoSaveTimer;
  

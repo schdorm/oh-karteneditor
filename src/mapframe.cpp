@@ -21,6 +21,7 @@
  #include "mapframe.h"
  #include "mainwindow.h"
  #include "sidebar.h"
+ #include "settings.h"
 
  #include <QtCore/QDebug>
  #include <QtCore/QList>
@@ -38,6 +39,7 @@
  #include <QtGui/QScrollBar>
  
  #include <QtGui/QKeyEvent>
+ #include <QtGui/QWheelEvent>
 
  #include <QtCore/QStringList> 
  #include <QtCore/QSignalMapper>
@@ -50,14 +52,16 @@
 //  #include <QtGui/QPixmap>
  
  
- MapFrame::MapFrame( const MainWindow *mainwin)
- {
- m_MainWindow = mainwin;
- activeItem = 0;
- qWarning() << "MapFrame::initMap()";
- QGraphicsScene *szene = new QGraphicsScene();
- setScene(szene);
- newMap();
+MapFrame::MapFrame( const MainWindow *mainwin)
+{
+  qWarning() << "MapFrame::MapFrame( const MainWindow *mainwin)";
+   
+  m_MainWindow = mainwin;
+  activeItem = 0;
+  m_map = new Map();
+  QGraphicsScene *szene = new QGraphicsScene();
+  setScene(szene);
+  newMap();
 //  ot_townhall = tr("Rathaus");
 //  ot_market = tr("Markt");
 //  ot_church = tr("Kirche");
@@ -77,15 +81,21 @@
 //  mt_land_city = tr("Land (Stadt)");
 //  MapTypeEntries << mt_sea  << mt_coast << mt_land << mt_coast_city << mt_land_city;
  
- itemGrabbed = false;
- }
+  itemGrabbed = false;
+}
 
- void MapFrame::newMap()
- {
- qWarning() << "void MapFrame::newMap()";
- maptyp = Seamap;
- bgi_filename = QString();
- mapnorth = QString(); mapwest = QString();  mapsouth = QString(); mapeast = QString();
+MapFrame::~MapFrame()
+{
+  delete m_map;
+}
+
+
+void MapFrame::newMap()
+{
+  qWarning() << "void MapFrame::newMap()";
+  maptyp = Map::Sea;
+  bgi_filename = QString();
+  mapnorth = QString(); mapwest = QString();  mapsouth = QString(); mapeast = QString();
 
  scene()->clear();
  mapSize = QSize(1000,1000);
@@ -96,9 +106,9 @@
 
 void MapFrame::saveMap(QString save_filename)
 {
-qWarning() << "Saving Map ..." << save_filename;
-if(!save_filename.isEmpty())
-{
+  qWarning() << "Saving Map ..." << save_filename;
+  if(!save_filename.isEmpty())
+  {
 	if(!save_filename.endsWith(".ohm"))
 	{
 		save_filename.append(".ohm");
@@ -188,7 +198,7 @@ if(!save_filename.isEmpty())
   savestream << mapname;
   savestream << "</mapname>\n";
   
-  if(!cityname.isEmpty() && (maptyp == Coastcitymap || maptyp == Landcitymap))
+  if(!cityname.isEmpty() && (maptyp == (Map::Coast ^ Map::Citymap) || maptyp == (Map::Land ^ Map::Citymap)))
   {
   savestream << "<cityname>";
   savestream << cityname;
@@ -692,10 +702,35 @@ if((*saveitem)->data(Filename).toString().endsWith(".jpg") || (*saveitem)->data(
 // 	delete tempsc;
 	setSceneRect(0,0,mapSize.width(),mapSize.height());
 	
-}
+	}
  
  
  }
+ 
+void MapFrame::setMap(const Map &a_map)
+{
+
+  qWarning() << "void MapFrame::setMap(const Map &a_map)" << a_map.type();
+  
+    delete m_map;
+    m_map = new Map(a_map);
+  
+  qWarning() << "Map setted" << m_map->type();
+}
+ 
+void MapFrame::setMap(Map *a_map)
+{
+
+  qWarning() << "void MapFrame::setMap(Map *a_map)" << a_map->type();
+  
+  if(a_map != 0)
+  {
+    delete m_map;
+    m_map = a_map;
+  }
+  
+  qWarning() << "Map setted" << m_map->type();
+}
  
  
  void MapFrame::newObjectDialog_ext()
@@ -733,13 +768,13 @@ if((*saveitem)->data(Filename).toString().endsWith(".jpg") || (*saveitem)->data(
 
 		fktComboBox = new QComboBox(createObjectDialog);
 		
-		QHashIterator <int, QString> it(m_MainWindow->SideBar->functionlabels());
-		while(it.hasNext())
+ 		QHashIterator <int, QString> it(SETTINGS->ObjectFunctions());
+ 		while(it.hasNext())
 		{
 			it.next();
 			fktComboBox->addItem(it.value(), it.key());
 		}
-// 		fkt->addItems(ObjectTypeEntries);
+//  		fkt->addItems(ObjectTypeEntries);
 		cODlayout->addWidget(fktComboBox, 1, 1,1,4);
 
 		QLabel *labeltt = new QLabel(createObjectDialog);
@@ -814,7 +849,10 @@ if((*saveitem)->data(Filename).toString().endsWith(".jpg") || (*saveitem)->data(
  {
  if(!itemGrabbed)
  {
- ziel = event->pos();
+      int tx = event->x() + horizontalScrollBar()->value();
+      int ty = event->y() + verticalScrollBar()->value();
+      ziel = QPoint(tx, ty);
+//  ziel = event->pos();
 	QList<QGraphicsItem *> QGIlistAtClick = items(event->pos());
 	QList<QGraphicsItem *> &gilist = QGIlistAtClick;
 	
@@ -1134,12 +1172,12 @@ else if(text == ot_mapdecoration)
 qWarning() << text;
 	if(text == mt_sea)
 	{
-		maptyp = Seamap;
+		maptyp = Sea;
 // 		isCity = false;
 	}
 	else if(text == mt_coast)
 	{
-		maptyp = Coastmap;
+		maptyp = Coast;
 // 		isCity = false;
 	}
 	else if(text == mt_land)
@@ -1149,12 +1187,12 @@ qWarning() << text;
 	}
 	else if(text == mt_coast_city)
 	{
-		maptyp = Coastcitymap;
+		maptyp = Map::Coast ^ Map::Citymap;
 // 		isCity = true;
 	}
 	else if(text == mt_land_city)
 	{
-		maptyp = Landcitymap;
+		maptyp = Map::Land ^ Map::Citymap;
 // 		isCity = true;
 	}
 }*/
@@ -1346,4 +1384,84 @@ void MapFrame::keyPressEvent(QKeyEvent *event)
   {
   emit SIG_deleteObject();
   }
+  if(event->key() == Qt::Key_O)
+  {
+    activeItem->resetTransform();
+    activeItem->setData(98, QVariant(0));
+    activeItem->setData(99, QVariant(0));
+    activeItem->setData(100, QVariant(1));
+
+    
+  }
 }
+
+
+ void MapFrame::wheelEvent ( QWheelEvent * event )
+ {
+   int tx = event->x() + horizontalScrollBar()->value();
+   int ty = event->y() + verticalScrollBar()->value();
+//    QGraphicsPixmapItem *edititem = qgraphicsitem_cast<QGraphicsPixmapItem *>(scene()->itemAt(x,y));
+QGraphicsItem *edititem = (scene()->itemAt(tx,ty));
+
+   if(edititem != 0)
+   {
+//      edititem->data(99).toDouble;
+//      int angle = edititem->data(99).toDouble() + event->delta()/50;
+//     qWarning() << edititem->boundingRect() 	;
+
+     edititem->resetTransform();
+     int sx = tx - edititem->x();
+     const int sx2 = edititem->boundingRect().width()/2;
+     int sy = ty - edititem->y();
+     const int sy2 = edititem->boundingRect().height()/2;
+     
+     if(sx < 5 && sy < 5)
+     {
+       sx = 0;
+       sy = 0;
+     }
+     QTransform t;
+     t.translate( sx, sy);
+     
+     double xangle = edititem->data(98).toDouble();
+     double yangle = edititem->data(99).toDouble();
+     double scale = edititem->data(100).toDouble();
+     if(scale == 0)
+     {
+       scale = 1;
+     }
+
+
+     if(event->modifiers() == Qt::ShiftModifier)
+     {
+       yangle += event->delta()/50;
+       edititem->setData(99, QVariant(yangle));
+     }
+     else if(event->modifiers() == Qt::ControlModifier)
+     {
+       scale += scale * event->delta()/500;
+       edititem->setData(100, QVariant(scale));
+       qWarning() << scale;
+     }
+     else
+     {
+       xangle += event->delta()/50;
+       edititem->setData(98, QVariant(xangle));
+       
+     }
+     if(scale > 0)
+     {
+       t.scale(scale, scale);
+     }
+
+     t.rotate(xangle, Qt::XAxis);
+     t.rotate(yangle, Qt::YAxis);
+
+      t.translate( - sx, - sy);
+
+     edititem->setTransform(t);
+//      edititem->setData(99, QVariant(angle));
+   }
+   
+ }
+

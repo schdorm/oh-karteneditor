@@ -21,6 +21,7 @@
  #include "sidebar.h"
  #include "mainwindow.h"
  #include "mapframe.h"
+ #include "settings.h"
  
  #include <QtGui/QVBoxLayout>
  #include <QtGui/QHBoxLayout>
@@ -34,6 +35,7 @@
  #include <QtGui/QSpinBox>
  #include <QtGui/QComboBox>
 
+#include <QtGui/QGraphicsItem>
  
  SideBarClass::SideBarClass(const MainWindow *parentWindow)
  {
@@ -118,13 +120,13 @@
 	land_damagelabel = tr("\"boese\" Untiefen"), // Objekte, bei denen eine Kollision mit dem Schiff Schaden am Schiff verursacht.
 	mapdecorationlabel = tr("Mapdeko");
 
-	functionLabels.insert(Townhall, townhalllabel);
-	functionLabels.insert(Market, marketlabel);
-	functionLabels.insert(Church, churchlabel);
-	functionLabels.insert(Port, portlabel);
-	functionLabels.insert(Office, officelabel);
-	functionLabels.insert(Bank, banklabel);
-	functionLabels.insert(Tavern, tavernlabel);
+	functionLabels.insert(Building::Townhall, townhalllabel);
+	functionLabels.insert(Building::Market, marketlabel);
+	functionLabels.insert(Building::Church, churchlabel);
+	functionLabels.insert(Building::Port, portlabel);
+	functionLabels.insert(Building::Kontor, officelabel);
+	functionLabels.insert(Building::Bank, banklabel);
+	functionLabels.insert(Building::Tavern, tavernlabel);
 	functionLabels.insert(Land_breake, land_breakelabel);
 	functionLabels.insert(Land_damage, land_damagelabel);
 	functionLabels.insert(Mapdecoration, mapdecorationlabel);
@@ -135,18 +137,24 @@
 	mt_coast_city = tr("Kueste (Stadt)"),
 	mt_land_city = tr("Land (Stadt)");
 	
-	maptypeLabels.insert(Seamap, mt_sea);
-	maptypeLabels.insert(Coastmap, mt_coast);
-	maptypeLabels.insert(Landmap, mt_land);
-	maptypeLabels.insert(Coastcitymap, mt_coast_city);
-	maptypeLabels.insert(Landcitymap, mt_land_city);
+	maptypeLabels.insert(Map::Sea, mt_sea);
+	maptypeLabels.insert(Map::Coast, mt_coast);
+	maptypeLabels.insert(Map::Land, mt_land);
+	maptypeLabels.insert(Map::Coast ^ Map::Citymap, mt_coast_city);
+	maptypeLabels.insert(Map::Land ^ Map::Citymap, mt_land_city);
 	
-
+ 	QHashIterator <int, QString> it(maptypelabels());
+ 	while(it.hasNext())
+ 	{
+ 		it.next();
+ 		itemTyp->addItem(it.value(), it.key());
+// 		SideBar->itemTyp->addItems(MapView->MapTypeEntries);
+ 	}
 //	SideBarLayout->addLayout(objectFileLayout);
 
  }
  
- const QString &SideBarClass::maptypelabel(int key) const
+QString SideBarClass::maptypelabel(int key) const
  {
  return maptypeLabels.value(key);
  }
@@ -161,6 +169,41 @@ void SideBarClass::keyPressEvent(QKeyEvent *event)
   if(event->key() == Qt::Key_Delete)
   {
   emit SIG_deleteObject();
+  }
+}
+
+void SideBarClass::fillList(QList<QGraphicsItem*> itemlist)
+	  //add missing entrys of QGraphicsItems to the itemlist
+{
+  bool found;
+  QGraphicsItem *item; 
+  QListWidgetItem *lwi;
+  QList<QListWidgetItem*> lwilist;
+  
+  foreach(item, itemlist)
+  {
+    found = false;
+    lwilist = itemListWidget->findItems(item->data(MapFrame::Name).toString(), Qt::MatchExactly);
+    foreach(lwi, lwilist)
+    {
+      if(lwi->data(64).toInt() == item->data(MapFrame::ID).toInt())
+      {
+	found = true;
+	lwi = lwilist.last();
+      }
+    }
+    if(!found)
+    {
+      lwi = new QListWidgetItem(item->data(MapFrame::Name).toString(), itemListWidget);
+      lwi->setData(64, item->data(MapFrame::ID).toInt());
+    }
+  // = new QListWidgetItem(newObject->data(MapFrame::Name).toString(), SideBar->itemListWidget);
+//   lwi->setData(64, newObject->data(MapFrame::ID).toInt());
+  // 	SideBar->itemListWidget->addItem(newObject->data(MapFrame::Name));
+  
+//   qWarning() << newObject->data(MapFrame::Name);
+ 
+// SideBar->itemListWidget->setCurrentRow(SideBar->itemListWidget->count() - 1);
   }
 }
 

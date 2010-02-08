@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2009 by Christian Doerffel and Joerg Thalheim  	   *
- *   oh.devs@googlemail.com 						   *
+ *   Copyright (C) 2009 by Christian Doerffel                              *
+ *   oh.devs@googlemail.com                                                *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -17,62 +17,34 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
- 
- #ifndef _SIDEBAR_H
- #define _SIDEBAR_H
- 
- #include <QtGui/QWidget>
- #include <QtCore/QHash>
+#ifndef _MAPOBJECT_H
+#define _MAPOBJECT_H
+#include <QtCore/QPoint>
+#include <QtCore/QString>
+
+class MapObject
+{
+public:
+
+// MapObject(int param_role, QString param_filename, QString param_tooltip, QPoint param_position, double param_zvalue)
+ MapObject(const int &, const QString &, const QString &, const QPoint &, const double &);
 
 
- class QListWidget;
- class QLineEdit;
- class QLabel;
- class QPushButton;
- class QSpinBox;
- class QComboBox;
- class MainWindow;
- class QDoubleSpinBox;
- class QGraphicsItem;
- 
- class SideBarClass : public QWidget
- {
- Q_OBJECT
- public:
-   void fillList(QList<QGraphicsItem*>);
- 
- QStringList staticListEntries;
+int	role ()	{	return m_role;		}
+QString	fileName ()	{	return m_filename;	}
+QString	toolTip  ()	{	return m_tooltip;		}
+QPoint	position ()	{	return m_position;	}
+double	zValue ()	{	return m_zValue;		}
 
- 
- bool CB_mapprops;
- 
- SideBarClass(const MainWindow *);
- QString maptypelabel(int) const;
-
-  QComboBox *itemTyp;
-  QListWidget *itemListWidget;
-  QPushButton *selectFileButton;
-  QLineEdit *fileView;
-  QLineEdit *nameLineEdit;
-  QLineEdit *editToolTip;
-  QSpinBox *XBox, *YBox;
-  QDoubleSpinBox *ZBox;
- //void initMapEntriesList();
- const QHash<int, QString> &functionlabels()	const	{	return functionLabels;	}
-  const QHash<int, QString> &maptypelabels()	const	{	return maptypeLabels;	}
+private:
+int m_role;
+QString m_filename;
+QString m_tooltip;
+QPoint m_position;
+double m_zValue;
 
 
-protected:
 
-QHash<int, QString> functionLabels;
-QHash<int, QString> maptypeLabels;
+};
 
-const MainWindow *m_parent;
-void keyPressEvent(QKeyEvent*);
-
-signals:
-void SIG_deleteObject();
-
-
- };
- #endif
+#endif

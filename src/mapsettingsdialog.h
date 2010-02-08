@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2009 by Christian Doerffel and Joerg Thalheim  	   *
- *   oh.devs@googlemail.com 						   *
+ *   Copyright (C) 2009 by Christian Doerffel                              *
+ *   schdorm@googlemail.com                                                *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -17,62 +17,45 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
- 
- #ifndef _SIDEBAR_H
- #define _SIDEBAR_H
- 
- #include <QtGui/QWidget>
- #include <QtCore/QHash>
 
+#ifndef _MappropertyWidget_h
+#define _MappropertyWidget_h
 
- class QListWidget;
- class QLineEdit;
- class QLabel;
- class QPushButton;
- class QSpinBox;
- class QComboBox;
- class MainWindow;
- class QDoubleSpinBox;
- class QGraphicsItem;
- 
- class SideBarClass : public QWidget
- {
- Q_OBJECT
- public:
-   void fillList(QList<QGraphicsItem*>);
- 
- QStringList staticListEntries;
+#include <QtGui/QDialog>
+#include "ui_mapsettingsdialog.h"
+#include "map.h"
 
- 
- bool CB_mapprops;
- 
- SideBarClass(const MainWindow *);
- QString maptypelabel(int) const;
+class MapSettingsDialog : public QDialog
+{
+  Q_OBJECT
+  public:
+    MapSettingsDialog(const Map *);
+  
+    Map *map()
+    {
+      return m_map;
+    }
+    
+  public slots:
+    void backgroundFileDialog();
+    void northmapFileDialog();
+    void southmapFileDialog();
+    void westmapFileDialog();
+    void eastmapFileDialog();
+    
+    void setMapProperties();
+    
+    
+    //   void startDeleteTimer();
+  signals:
+    void apply();
 
-  QComboBox *itemTyp;
-  QListWidget *itemListWidget;
-  QPushButton *selectFileButton;
-  QLineEdit *fileView;
-  QLineEdit *nameLineEdit;
-  QLineEdit *editToolTip;
-  QSpinBox *XBox, *YBox;
-  QDoubleSpinBox *ZBox;
- //void initMapEntriesList();
- const QHash<int, QString> &functionlabels()	const	{	return functionLabels;	}
-  const QHash<int, QString> &maptypelabels()	const	{	return maptypeLabels;	}
+  private:
+    Ui::MapSettingsDialog ui;
+    Map *m_map;
 
+  protected:
 
-protected:
+};
 
-QHash<int, QString> functionLabels;
-QHash<int, QString> maptypeLabels;
-
-const MainWindow *m_parent;
-void keyPressEvent(QKeyEvent*);
-
-signals:
-void SIG_deleteObject();
-
-
- };
- #endif
+#endif

@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2009 by Christian Doerffel and Joerg Thalheim  	   *
- *   oh.devs@googlemail.com 						   *
+ *   Copyright (C) 2009 by Christian Doerffel                              *
+ *   oh.devs@googlemail.com                                                *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -17,62 +17,28 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
- 
- #ifndef _SIDEBAR_H
- #define _SIDEBAR_H
- 
- #include <QtGui/QWidget>
- #include <QtCore/QHash>
+#ifndef _gameparameter_h
+#define _gameparameter_h
 
+#include <QtCore/QHash>
+#define GAMEPARAMETER GameParameter::instance()
 
- class QListWidget;
- class QLineEdit;
- class QLabel;
- class QPushButton;
- class QSpinBox;
- class QComboBox;
- class MainWindow;
- class QDoubleSpinBox;
- class QGraphicsItem;
- 
- class SideBarClass : public QWidget
- {
- Q_OBJECT
- public:
-   void fillList(QList<QGraphicsItem*>);
- 
- QStringList staticListEntries;
+class GameParameter : QObject
+{
+public:
+const QHash <int, QString> &GoodLabels  () const {	return m_GoodLabelHash;		}
 
- 
- bool CB_mapprops;
- 
- SideBarClass(const MainWindow *);
- QString maptypelabel(int) const;
+QString GoodName 	(int key) const {	return m_GoodLabelHash[key];		}
 
-  QComboBox *itemTyp;
-  QListWidget *itemListWidget;
-  QPushButton *selectFileButton;
-  QLineEdit *fileView;
-  QLineEdit *nameLineEdit;
-  QLineEdit *editToolTip;
-  QSpinBox *XBox, *YBox;
-  QDoubleSpinBox *ZBox;
- //void initMapEntriesList();
- const QHash<int, QString> &functionlabels()	const	{	return functionLabels;	}
-  const QHash<int, QString> &maptypelabels()	const	{	return maptypeLabels;	}
+static GameParameter * instance();
 
+private:
+  GameParameter();
+  static GameParameter *m_instance;
+QHash<int, QString> m_GoodLabelHash;
 
-protected:
+QHash<int, QString> m_BuildingLabelHash;
 
-QHash<int, QString> functionLabels;
-QHash<int, QString> maptypeLabels;
+};
 
-const MainWindow *m_parent;
-void keyPressEvent(QKeyEvent*);
-
-signals:
-void SIG_deleteObject();
-
-
- };
- #endif
+#endif

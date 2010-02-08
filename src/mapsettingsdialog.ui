@@ -1,0 +1,708 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MapSettingsDialog</class>
+ <widget class="QDialog" name="MapSettingsDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>508</width>
+    <height>487</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <property name="modal">
+   <bool>true</bool>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="2" column="0">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+     <property name="centerButtons">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="MapSettings">
+      <attribute name="title">
+       <string>Mapsettings</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_2" columnstretch="0,3,0">
+       <item row="0" column="0" colspan="3">
+        <widget class="QComboBox" name="MapTypeBox"/>
+       </item>
+       <item row="1" column="0" colspan="3">
+        <widget class="QGroupBox" name="MapsizeBox">
+         <property name="title">
+          <string>Mapsize</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_4">
+          <item row="0" column="0">
+           <widget class="QLabel" name="WidthLabel">
+            <property name="text">
+             <string>Width</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QSlider" name="WidthSlider">
+            <property name="minimum">
+             <number>1000</number>
+            </property>
+            <property name="maximum">
+             <number>9999</number>
+            </property>
+            <property name="singleStep">
+             <number>1</number>
+            </property>
+            <property name="pageStep">
+             <number>500</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="tickPosition">
+             <enum>QSlider::TicksAbove</enum>
+            </property>
+            <property name="tickInterval">
+             <number>500</number>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QSpinBox" name="WidthSpinBox">
+            <property name="minimum">
+             <number>1000</number>
+            </property>
+            <property name="maximum">
+             <number>9999</number>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="HeightLabel">
+            <property name="text">
+             <string>Height</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QSlider" name="HeightSlider">
+            <property name="minimum">
+             <number>1000</number>
+            </property>
+            <property name="maximum">
+             <number>9999</number>
+            </property>
+            <property name="pageStep">
+             <number>500</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="tickPosition">
+             <enum>QSlider::TicksAbove</enum>
+            </property>
+            <property name="tickInterval">
+             <number>500</number>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QSpinBox" name="HeightSpinBox">
+            <property name="minimum">
+             <number>1000</number>
+            </property>
+            <property name="maximum">
+             <number>9999</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="BackgroundLabel">
+         <property name="frameShape">
+          <enum>QFrame::Box</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <property name="text">
+          <string>Mapbackgroundimage</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLabel" name="BackgroundfileLabel">
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Sunken</enum>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <widget class="QPushButton" name="Backgroundbrowse">
+         <property name="text">
+          <string>...</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="NorthmapLabel">
+         <property name="frameShape">
+          <enum>QFrame::Box</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <property name="text">
+          <string>North joining Map</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLabel" name="NorthmapfileLabel">
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Sunken</enum>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="2">
+        <widget class="QPushButton" name="Northmapbrowse">
+         <property name="text">
+          <string>...</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="SouthmapLabel">
+         <property name="frameShape">
+          <enum>QFrame::Box</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <property name="text">
+          <string>South joining Map</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QLabel" name="SouthmapfileLabel">
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Sunken</enum>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="2">
+        <widget class="QPushButton" name="Southmapbrowse">
+         <property name="text">
+          <string>...</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QLabel" name="WestmapLabel">
+         <property name="frameShape">
+          <enum>QFrame::Box</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <property name="text">
+          <string>West joining Map</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <widget class="QLabel" name="WestmapfileLabel">
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Sunken</enum>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="2">
+        <widget class="QPushButton" name="Westmapbrowse">
+         <property name="text">
+          <string>...</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <widget class="QLabel" name="EastmapLabel">
+         <property name="frameShape">
+          <enum>QFrame::Box</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <property name="text">
+          <string>East joining Map</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="1">
+        <widget class="QLabel" name="EastmapfileLabel">
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Sunken</enum>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="2">
+        <widget class="QPushButton" name="Eastmapbrowse">
+         <property name="text">
+          <string>...</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="CitySettings">
+      <attribute name="title">
+       <string>City</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_3">
+       <item row="0" column="0" colspan="2">
+        <widget class="QCheckBox" name="CityCheckBox">
+         <property name="text">
+          <string>Map is City</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="Citynamelabel">
+         <property name="text">
+          <string>Name</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="Citynameline">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0" colspan="2">
+        <widget class="QGroupBox" name="Productionbox">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="title">
+          <string>Production</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_5">
+          <item row="0" column="0">
+           <widget class="QLabel" name="HighProductionLabel">
+            <property name="text">
+             <string>High Production</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1" rowspan="6">
+           <widget class="QListWidget" name="GoodsListWidget">
+            <property name="acceptDrops">
+             <bool>true</bool>
+            </property>
+            <property name="dragDropMode">
+             <enum>QAbstractItemView::DragDrop</enum>
+            </property>
+            <property name="defaultDropAction">
+             <enum>Qt::MoveAction</enum>
+            </property>
+            <property name="sortingEnabled">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QListWidget" name="HighProductionListWidget">
+            <property name="dragDropMode">
+             <enum>QAbstractItemView::DragDrop</enum>
+            </property>
+            <property name="defaultDropAction">
+             <enum>Qt::MoveAction</enum>
+            </property>
+            <property name="sortingEnabled">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="NormalProductionLabel">
+            <property name="text">
+             <string>Normal Production</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QListWidget" name="NormalProductionListWidget_2">
+            <property name="dragDropMode">
+             <enum>QAbstractItemView::DragDrop</enum>
+            </property>
+            <property name="defaultDropAction">
+             <enum>Qt::MoveAction</enum>
+            </property>
+            <property name="sortingEnabled">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="LowProductionLabel">
+            <property name="text">
+             <string>Low Production</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QListWidget" name="LowProductionListWidget">
+            <property name="dragDropMode">
+             <enum>QAbstractItemView::DragDrop</enum>
+            </property>
+            <property name="defaultDropAction">
+             <enum>Qt::MoveAction</enum>
+            </property>
+            <property name="sortingEnabled">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>MapSettingsDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>MapSettingsDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>CityCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>Citynameline</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>253</x>
+     <y>48</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>277</x>
+     <y>77</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>CityCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>Productionbox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>253</x>
+     <y>48</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>253</x>
+     <y>269</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>WidthSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>WidthSpinBox</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>241</x>
+     <y>155</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>451</x>
+     <y>155</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>WidthSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>WidthSlider</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>451</x>
+     <y>155</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>241</x>
+     <y>155</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>HeightSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>HeightSpinBox</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>241</x>
+     <y>225</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>451</x>
+     <y>225</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>HeightSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>HeightSlider</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>451</x>
+     <y>225</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>241</x>
+     <y>225</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>WidthSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>MapSettingsDialog</receiver>
+   <slot>setMapProperties()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>451</x>
+     <y>155</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>253</x>
+     <y>243</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>HeightSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>MapSettingsDialog</receiver>
+   <slot>setMapProperties()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>451</x>
+     <y>225</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>253</x>
+     <y>243</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Backgroundbrowse</sender>
+   <signal>clicked()</signal>
+   <receiver>MapSettingsDialog</receiver>
+   <slot>backgroundFileDialog()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>472</x>
+     <y>306</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>253</x>
+     <y>243</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Northmapbrowse</sender>
+   <signal>clicked()</signal>
+   <receiver>MapSettingsDialog</receiver>
+   <slot>northmapFileDialog()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>472</x>
+     <y>337</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>253</x>
+     <y>243</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Southmapbrowse</sender>
+   <signal>clicked()</signal>
+   <receiver>MapSettingsDialog</receiver>
+   <slot>southmapFileDialog()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>472</x>
+     <y>368</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>253</x>
+     <y>243</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Westmapbrowse</sender>
+   <signal>clicked()</signal>
+   <receiver>MapSettingsDialog</receiver>
+   <slot>westmapFileDialog()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>472</x>
+     <y>399</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>253</x>
+     <y>243</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Eastmapbrowse</sender>
+   <signal>clicked()</signal>
+   <receiver>MapSettingsDialog</receiver>
+   <slot>eastmapFileDialog()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>472</x>
+     <y>430</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>253</x>
+     <y>243</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>CityCheckBox</sender>
+   <signal>stateChanged(int)</signal>
+   <receiver>MapSettingsDialog</receiver>
+   <slot>setMapProperties()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>253</x>
+     <y>48</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>253</x>
+     <y>243</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>MapTypeBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>MapSettingsDialog</receiver>
+   <slot>setMapProperties()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>253</x>
+     <y>50</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>253</x>
+     <y>243</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>setMapProperties()</slot>
+  <slot>backgroundFileDialog()</slot>
+  <slot>northmapFileDialog()</slot>
+  <slot>southmapFileDialog()</slot>
+  <slot>westmapFileDialog()</slot>
+  <slot>eastmapFileDialog()</slot>
+  <slot>dummyslot()</slot>
+  <slot>applyMapSettings()</slot>
+ </slots>
+</ui>
