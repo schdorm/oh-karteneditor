@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2009 by Christian Doerffel and Joerg Thalheim  	   *
- *   oh.devs@googlemail.com 						   *
+ *   Copyright (C) 2009 - 2010 by Christian Doerffel                       *
+ *   oh.devs@googlemail.com                                                *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
