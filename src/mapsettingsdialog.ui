@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Mapsettings</string>
   </property>
   <property name="modal">
    <bool>true</bool>
@@ -313,14 +313,14 @@
         </widget>
        </item>
        <item row="1" column="0">
-        <widget class="QLabel" name="Citynamelabel">
+        <widget class="QLabel" name="CitynameLabel">
          <property name="text">
           <string>Name</string>
          </property>
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="QLineEdit" name="Citynameline">
+        <widget class="QLineEdit" name="CitynameLine">
          <property name="enabled">
           <bool>false</bool>
          </property>
@@ -379,7 +379,7 @@
            </widget>
           </item>
           <item row="3" column="0">
-           <widget class="QListWidget" name="NormalProductionListWidget_2">
+           <widget class="QListWidget" name="NormalProductionListWidget">
             <property name="dragDropMode">
              <enum>QAbstractItemView::DragDrop</enum>
             </property>
@@ -457,7 +457,7 @@
   <connection>
    <sender>CityCheckBox</sender>
    <signal>toggled(bool)</signal>
-   <receiver>Citynameline</receiver>
+   <receiver>CitynameLine</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -551,54 +551,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>WidthSpinBox</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>MapSettingsDialog</receiver>
-   <slot>setMapProperties()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>451</x>
-     <y>155</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>253</x>
-     <y>243</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>HeightSpinBox</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>MapSettingsDialog</receiver>
-   <slot>setMapProperties()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>451</x>
-     <y>225</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>253</x>
-     <y>243</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>Backgroundbrowse</sender>
-   <signal>clicked()</signal>
-   <receiver>MapSettingsDialog</receiver>
-   <slot>backgroundFileDialog()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>472</x>
-     <y>306</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>253</x>
-     <y>243</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>Northmapbrowse</sender>
    <signal>clicked()</signal>
    <receiver>MapSettingsDialog</receiver>
@@ -639,38 +591,6 @@
     <hint type="sourcelabel">
      <x>472</x>
      <y>399</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>253</x>
-     <y>243</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>Eastmapbrowse</sender>
-   <signal>clicked()</signal>
-   <receiver>MapSettingsDialog</receiver>
-   <slot>eastmapFileDialog()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>472</x>
-     <y>430</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>253</x>
-     <y>243</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>CityCheckBox</sender>
-   <signal>stateChanged(int)</signal>
-   <receiver>MapSettingsDialog</receiver>
-   <slot>setMapProperties()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>253</x>
-     <y>48</y>
     </hint>
     <hint type="destinationlabel">
      <x>253</x>

@@ -53,14 +53,15 @@
  #include <QtGui/QComboBox>
  
  #include <QtGui/QMessageBox>
+ #include <QtGui/QFileDialog>
 
 // #define _DEBUG_
 
 MainWindow::MainWindow()
  {
-	autoSaveTimer = new QTimer(this);
+// 	autoSaveTimer = new QTimer(this);
 	#ifndef _DEBUG_
-	autoSaveTimer->start(10000);
+// 	autoSaveTimer->start(10000);
 	#endif
  	existingMapFile = false;
 
@@ -137,8 +138,18 @@ MainWindow::MainWindow()
 	connect(SETTINGS, SIGNAL(changed()), this, SLOT(applySettings()));
 
 
-	connect(autoSaveTimer, SIGNAL(timeout()), this, SLOT(autoSave()));
+	connect(SETTINGS, SIGNAL(autosave()), this, SLOT(autoSave()));
 	loadAutoSaveMap();
+}
+
+
+MainWindow::~MainWindow()
+{
+  delete MapView;
+  if(SETTINGS->oldlayout())
+  {
+    delete SideBar;
+  }
 }
 
 void MainWindow::createActions()
@@ -158,22 +169,24 @@ void MainWindow::createActions()
   saveAct = new QAction(tr("&Save"), this);
   saveAct->setShortcuts(QKeySequence::Save);
   saveAct->setStatusTip(tr("Save the map with the current name to disk"));
-  connect(saveAct, SIGNAL(triggered()), this, SLOT(saveHandler()));
+  connect(saveAct, SIGNAL(triggered()), this, SLOT(saveMap()));
 
-  saveAsAct = new QAction(tr("&Save As ..."), this);
+  saveAsAct = new QAction(tr("Save As ..."), this);
   saveAsAct->setShortcuts(QKeySequence::SaveAs);
   saveAsAct->setStatusTip(tr("Save the map to disk"));
-  connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveHandler()));
+  connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveMapAs()));
   
   autoSaveAct = new QAction(tr("Save Autosave"), this);
+  autoSaveAct->setShortcut(QKeySequence(tr("Ctrl + 1")));
   autoSaveAct->setStatusTip(tr("Saves the Map as Autosaved Map"));
   connect(autoSaveAct, SIGNAL(triggered()), this, SLOT(autoSave()));
   
   disableAutoSaveAct = new QAction(tr("Disable Autosaves"), this);
-//   disableAutoSaveAct->setStatusTip(tr("Saves the Map as Autosaved Map"));
-  connect(disableAutoSaveAct, SIGNAL(triggered()), this, SLOT(disableAutoSave()));
+  disableAutoSaveAct->setStatusTip(tr("Disables autosaves for this session (temporary)"));
+  connect(disableAutoSaveAct, SIGNAL(triggered()), SETTINGS, SLOT(disableAutosave()));
   
   loadAutoSaveAct = new QAction(tr("Load Autosave"), this);
+  loadAutoSaveAct->setShortcut(QKeySequence(tr("Ctrl + 2")));
   loadAutoSaveAct->setStatusTip(tr("Loads the Autosaved Map"));
   connect(loadAutoSaveAct, SIGNAL(triggered()), this, SLOT(loadAutoSaveMap()));
 
@@ -263,17 +276,19 @@ void MainWindow::loadAutoSaveMap()
 	}
 }
 
- void MainWindow::open()
- {
- MapView->fileDialog(NameFilters::Map);
-connect(MapView->fd, SIGNAL(accepted()), this, SLOT(openMap()));
- }
+//  void MainWindow::open()
+//  {
+//  MapView->fileDialog(NameFilters::Map);
+// connect(MapView->fd, SIGNAL(accepted()), this, SLOT(openMap()));
+//  }
  
  void MainWindow::openMap()
  {
  existingMapFile = true;
- mapfilename = MapView->fd_filename;
- qWarning() << MapView->fd_filename;
+ 
+ QString mapfilename = QFileDialog::getOpenFileName(this, "Open Map File", QDir().current().absolutePath(), tr("OpenHanse Map files (*.ohm)" ));
+ 
+ qWarning() << mapfilename;
  
  if(SETTINGS->oldlayout())
  {
@@ -281,80 +296,77 @@ connect(MapView->fd, SIGNAL(accepted()), this, SLOT(openMap()));
    SideBar->itemListWidget->addItems(SideBar->staticListEntries);
  }
  
- MapView->loadMap(MapView->fd_filename);
+ MapView->map()->load(mapfilename);
  
  if(SETTINGS->oldlayout())
    SideBar->itemListWidget->setCurrentRow(0);
  }
- 
- void MainWindow::saveHandler()
- {
- autoSave();
- qWarning() << "saveHandler()" << mapfilename;
- if(existingMapFile)
- {
- savef();
- return;
- }
- 
- else
- {
- save();
- return;
- }
- 
- }
- 
- void MainWindow::autoSave()
- {
- if(!autoSaved)
- {
- QDir dir = QDir().home();
- if(!dir.cd(".OpenHanse"))
- {
-	if(dir.mkdir(".OpenHanse"))
-	{
-		dir.cd(".OpenHanse");
-	}
-	else	return;
- }
- QString savepath = dir.absolutePath();
- qWarning() << savepath;
- savepath.append("/automapsave.ohm");
- MapView->saveMap(savepath);
- autoSaved = true;
- }
 
- }
- void MainWindow::disableAutoSave()
+// void MainWindow::saveHandler()
+// {
+//   autoSave();
+//   qWarning() << "void MainWindow::saveHandler()";
+//   if(existingMapFile)
+//   {
+//     savef();
+//     return;
+//   }
+//   
+//   else
+//   {
+//     save();
+//     return;
+//   }  
+// }
+
+void MainWindow::autoSave()
+{
+  if(!autoSaved)
+  {
+    MapView->map()->save(SETTINGS->autosavepath());
+    autoSaved = true;
+  }
+}
+
+
+
+ void MainWindow::saveMapAs()
  {
- autoSaveTimer->stop();
- }
+ ///MapView->fileDialog(NameFilters::Map|NameFilters::Save);
+ 
+  MapView->map()->save( QFileDialog::getSaveFileName(this, tr("Save File"), QString() , tr("OpenHanse maps (*.ohm)")));
 
- void MainWindow::save()
- {
- MapView->fileDialog(NameFilters::Map|NameFilters::Save);
-
-  //::getSaveFileName(this, tr("Save File"), home() ,;
-
+  setWindowTitle(MapView->map()->filename());
  //MapView->saveMap(MapView->filename);
- connect(MapView->fd, SIGNAL(accepted()), this, SLOT(savef()));
+ ///connect(MapView->fd, SIGNAL(accepted()), this, SLOT(savef()));
  
- }
- 
- void MainWindow::savef()
- {
-// 	disconnect(saveAct, SIGN/**/AL(triggered()), this, SLOT(save()));
+}
+
+void MainWindow::saveMap()
+{
+  if(QFile(MapView->map()->filename()).exists())
+  {
+    MapView->map()->save();
+  }
+  else
+    saveMapAs();
+}
+
+
+
+//  void MainWindow::savef()
+//  {
+// 	disconnect(saveAct, SIGNAL(triggered()), this, SLOT(save()));
 // 	connect(saveAct, SIGNAL(triggered()), this, SLOT(savef()));
 
-	disconnect(MapView->fd, SIGNAL(accepted()), this, SLOT(savef()));
-	if(!existingMapFile)
-	{
-	mapfilename = MapView->fd_filename;
-	}
-	setWindowTitle(tr("Karteneditor: ").append(mapfilename));
-	MapView->saveMap(mapfilename);
- }
+	///disconnect(MapView->fd, SIGNAL(accepted()), this, SLOT(savef()));
+// 	if(!existingMapFile)
+// 	{
+///	mapfilename = MapView->fd_filename;
+// 	}
+// 	setWindowTitle(tr("Karteneditor: ").append(mapfilename));
+// 	MapView->saveMap(mapfilename);
+//  }
 
 void MainWindow::createMenus()
  {
@@ -669,22 +681,22 @@ void MainWindow::sideBar_SelectFile()
     qWarning() << "MainWindow::sideBar_SelectFile()";
     if(SideBar->itemListWidget->currentRow() == 0 || SideBar->itemListWidget->currentRow() > 4)
     {
-      MapView->fileDialog(NameFilters::Img);
+      ///MapView->fileDialog(NameFilters::Img);
     }
     else
     {
-      MapView->fileDialog(NameFilters::Map);
+      ///MapView->fileDialog(NameFilters::Map);
     }
-    connect(MapView->fd, SIGNAL(accepted()), this, SLOT(sideBar_FileSelected()));
+    /// connect(MapView->fd, SIGNAL(accepted()), this, SLOT(sideBar_FileSelected()));
   }
 }
 
 void MainWindow::sideBar_FileSelected()
 {
-autoSaved = false;
-
-qWarning() << "MainWindow::sideBar_FileSelected()";
-	disconnect(MapView->fd, SIGNAL(accepted()), this, SLOT(sideBar_FileSelected()));
+  autoSaved = false;
+  
+  qWarning() << "MainWindow::sideBar_FileSelected()";
+  ///disconnect(MapView->fd, SIGNAL(accepted()), this, SLOT(sideBar_FileSelected()));
 	
 	if(SETTINGS->oldlayout())
 	  SideBar->fileView->setText(MapView->fd_filename);

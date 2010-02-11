@@ -17,5 +17,34 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#ifndef _MAPOBJECT_H
+#define _MAPOBJECT_H
+#include <QtCore/QPoint>
+#include <QtCore/QString>
 
-#include "shared/visual_data/mapobject.h"
+class MapObject
+{
+public:
+
+ MapObject(const int , const QString &, const QString &, const QPoint &, const qreal );
+ MapObject(const int , const QString &, const QString &, const QString &, const qreal );
+
+
+int	role 	 () const	{	return m_role;		}
+QString	filename () const	{	return m_filename;	}
+QString	tooltip  () const	{	return m_tooltip;	}
+QPoint	position () const	{	return m_position;	}
+double	zValue	 () const	{	return m_zValue;	}
+
+private:
+int m_role;
+QString m_filename;
+QString m_tooltip;
+QPoint m_position;
+qreal m_zValue;
+
+
+
+};
+
+#endif

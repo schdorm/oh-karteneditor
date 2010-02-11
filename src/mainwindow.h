@@ -50,29 +50,31 @@ class MainWindow : public QMainWindow
  */
  public:
    MainWindow();
+   ~MainWindow();
    SideBarClass *SideBar;
    bool itemAdded;
    
   public slots:
     void closeMapSettingsDialog(int);
     void applyMapSettings();
-
-
-
+    
+    
+    
   private slots:
     void newMap();
-    void open();
+    //     void open();
     void openMap();
-    void saveHandler();
-    void savef();
+    //     void savef();
     void autoSave();
+    void saveMap();
+    void saveMapAs();
+
     
-    void disableAutoSave();
     
     void loadAutoSaveMap();
     
     void addNewObjectToList(QGraphicsItem *);
-
+    
     void updateItemList(int);
     void updateSpinbox();
     
@@ -85,18 +87,16 @@ class MainWindow : public QMainWindow
     void markListItem(QGraphicsItem *);
     
     void deleteCurrentObject();
- 
+    
     void mapPropertiesDialog();
- 
+    
     void preferences(); 
     void applySettings();
-
- private:
- void createActions();
- void createMenus();
- void createOldLayout();
- 
- void save();
+    
+  private:
+    void createActions();
+    void createMenus();
+    void createOldLayout();
 
 enum itemListItemNames{
 en_mapproperties,
@@ -132,10 +132,10 @@ en_mapeast
  QAction *m_PreferencesAction;
  QAction *m_AboutAction;
  
- QTimer *autoSaveTimer;
+//  QTimer *autoSaveTimer;
  
- QString mapfilename;
- bool existingMapFile;
+//  QString mapfilename;
+ bool existingMapFile;		// if true, no request for mapfile name
  bool autoSaved;
 //  bool activeMapView;
  };

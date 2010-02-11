@@ -18,55 +18,51 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef _City_H
-#define _City_H
+#ifndef _AbstractCity_H
+#define _AbstractCity_H
 
 #include <QtCore/QString>
 
   #include "goods.h"
+  #include "definitions.h"
+//   #define DEBUG_CITY
+
 
 class QXmlStreamAttributes;
 
-class City /*: public QObject*/
+class AbstractCity /*: public QObject*/
 {
 // Q_OBJECT
-public:
+  public:
+    #ifdef DEBUG_CITY
+      AbstractCity(const AbstractCity &other);
+      // AbstractCity(const AbstractCity *);
+      ~AbstractCity();
+    #endif
+    
+AbstractCity( const QString & = 0);
 
-enum
-{
-null = 0,
-NoProduction = 0,
-LowProduction = 1,		// 3		-- 186,67% of low production needed for normal demand
-NormalProduction = 2,		// 7		-- goods demand requires 80% of normal Production	
-HighProduction = 3,		// 10		-- 56 % of high production needed for normal demand
-};
-
-
-//#CityClass(int = -1, const QString &, const QList<int> &,  const QList<int> &, const QList<int> &);
-// City( const QString &, const QList<int> &,  const QList<int> &, const QList<int> &, int = -1);
-
-City( const QString & = 0, int = -1);
-City(const City &);
-
-// CityClass(const QString&, int [const_warenanzahl], int [const_warenanzahl], int [const_warenanzahl]);
-
-// CityClass(const QString&, const int &param_hproduction[const_warenanzahl], const int &param_mproduction[const_warenanzahl], const int &param_lproduction[const_warenanzahl])
 
 void init();
 
-
-void setID		(const QList<int>&);
-void setID		(int id = -1);
+void setID();
+/*void setID		(const QList<int>&);
+void setID		(int id = -1);*/
 void setName		(const QString &);
 void setProduction	(int, const QString&);
 //QString ;
 
 int id 			() const	{	return m_id;		}
-const QString &name	() const	{	return m_name;		}
+QString name		() const	{	return m_name;		}
+// const QString &nameref	() const	{	return m_name;		}
 
 int inhabitants		() const	{	return m_inhabitants;	}
 
-const Goods &production	() const	{	return m_production;	}	// returns production-things 
+const Goods &production	() const	{	return m_production;		}	// returns production-things 
+
+QString lowproduction	() const 	{	return m_lowproduction;		}
+QString normalproduction() const 	{	return m_normalproduction;	}
+QString highproduction	() const 	{	return m_highproduction;	}
 
 
 QXmlStreamAttributes characteristics () const;
@@ -77,6 +73,12 @@ private:
   QString m_name;
   int m_inhabitants;
   Goods m_production;
+  QString m_lowproduction, m_normalproduction, m_highproduction;
+  
+  
+#ifdef DEBUG_CITY
+  static int citycounter;
+#endif
 
 };
 

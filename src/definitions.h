@@ -18,4 +18,5 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "shared/visual_data/mapobject.h"
+
+#define OH_MAPEDITOR 0x0302

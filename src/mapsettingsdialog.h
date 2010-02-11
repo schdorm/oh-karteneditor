@@ -31,10 +31,16 @@ class MapSettingsDialog : public QDialog
   public:
     MapSettingsDialog(const Map *);
   
-    Map *map()
+    Map map()
     {
       return m_map;
     }
+    
+/*    Map smap() const
+    {
+      return s_map;
+    }*/
+    void setCityProperties();
     
   public slots:
     void backgroundFileDialog();
@@ -42,18 +48,20 @@ class MapSettingsDialog : public QDialog
     void southmapFileDialog();
     void westmapFileDialog();
     void eastmapFileDialog();
-    
     void setMapProperties();
-    
+
+
+
     
     //   void startDeleteTimer();
   signals:
     void apply();
+    
 
   private:
     Ui::MapSettingsDialog ui;
-    Map *m_map;
-
+    Map m_map;
+//     Map s_map;
   protected:
 
 };

@@ -4,11 +4,13 @@ SOURCES = main.cpp \
 	sidebar.cpp \
 	settings.cpp \
 	settingswidget.cpp \
-	map.cpp \
+	shared/visual_data/map.cpp \
 	mapsettingsdialog.cpp \
-	city.cpp \
-	goods.cpp \
-	gameparameter.cpp
+	shared/data/abstractcity.cpp \
+	shared/data/goods.cpp \
+	gameparameter.cpp \
+	shared/libs/qstring.cpp \
+	mapobjectdialog.cpp
 	
 HEADERS += mainwindow.h\
 	mapframe.h \
@@ -16,14 +18,16 @@ HEADERS += mainwindow.h\
 	settings.h \
 	settingswidget.h \
 	mapsettingsdialog.h \
-	map.h \
-	mapobject.h \
-	city.h \
-	qstring.h \
-	goods.h \
-	gameparameter.h
+	shared/visual_data/map.h \
+	shared/visual_data/mapobject.h \
+	shared/data/abstractcity.h \
+	shared/libs/qstring.h \
+	shared/data/goods.h \
+	gameparameter.h \
+	mapobjectdialog.h
 	
-FORMS       = mapsettingsdialog.ui
+FORMS       = mapsettingsdialog.ui \
+	mapobjectdialog.ui
 
 	
 TEMPLATE = app

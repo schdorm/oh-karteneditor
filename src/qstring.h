@@ -18,17 +18,4 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef _my_string
-#define _my_string
-
-#include <QtCore/QString>
-
-QString removeWithespace(QString string)
-{
-  string.simplified();
-  string.remove(" ");
-  return string;
-}
-
-
-#endif
+#include "shared/libs/qstring.h"

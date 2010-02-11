@@ -41,8 +41,13 @@ private slots:
   
 private:
   QGridLayout *m_layout;
+  
   QLabel *m_oldviewlabel;
+  QLabel *m_autosaveLabel;
+  
   QCheckBox *m_oldviewcheckbox;
+  QCheckBox *m_autosaveCheckBox;
+  
   QPushButton *m_accept;
   QPushButton *m_abort;
 

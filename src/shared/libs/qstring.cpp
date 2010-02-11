@@ -18,4 +18,34 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "shared/visual_data/mapobject.h"
+#include "qstring.h"
+
+QString removeWithespace(QString string)
+{
+  string.simplified();
+  string.remove(" ");
+  return string;
+}
+
+QString fromBool(bool boolean)
+{
+  if(boolean)
+    return "true";
+  else
+    return "false";
+}
+
+bool toBool(const QString &string)
+{
+  return (string == "true" || string.toInt() == 1);
+}
+
+// bool toBool(const QString string)
+// {
+//   
+// }
+
+bool toBool(const QStringRef stringref)
+{
+    return (stringref == "true" || stringref.string()->toInt() == 1);
+}

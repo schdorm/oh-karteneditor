@@ -23,26 +23,26 @@
 Goods::Goods()
 {
   m_GoodHash[Taler] = 0;
-  m_taler = &m_GoodHash[Taler];
+//   m_taler = &m_GoodHash[Taler];
   
   m_GoodHash[Capacity] = 0;
   m_GoodHash[Fill] = 0;
   m_GoodHash[ExchangeVolume] = 0;
   
-  m_capacity = &m_GoodHash[Capacity];
-  m_filling = &m_GoodHash[Fill];
-  m_exchange_volume = &m_GoodHash[ExchangeVolume]; 
+//   m_capacity = &m_GoodHash[Capacity];
+//   m_filling = &m_GoodHash[Fill];
+//   m_exchange_volume = &m_GoodHash[ExchangeVolume]; 
 }
 
-Goods::Goods(const Goods &other) :
-  m_GoodHash (other.m_GoodHash)/*,
+Goods::Goods(const Goods *other) :
+  m_GoodHash (other->m_GoodHash)/*,
   m_WeaponHash (other.m_WeaponHash)*/
 {
-  m_taler = &m_GoodHash[Taler];
+//   m_taler = &m_GoodHash[Taler];
   
-  m_capacity = &m_GoodHash[Capacity];
-  m_filling = &m_GoodHash[Fill];
-  m_exchange_volume = &m_GoodHash[ExchangeVolume]; 
+//   m_capacity = &m_GoodHash[Capacity];
+//   m_filling = &m_GoodHash[Fill];
+//   m_exchange_volume = &m_GoodHash[ExchangeVolume]; 
 }
 
 void Goods::setGood(int key, int value)

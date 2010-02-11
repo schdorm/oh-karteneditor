@@ -34,36 +34,10 @@
 // #include <QtSvg/QGraphicsSvgItem>
  
  #include <QtGui/QMouseEvent>
- #include <QtGui/QDialog>
- #include <QtGui/QFileDialog>
+//  #include <QtGui/QDialog>
+//  #include <QtGui/QFileDialog>
  class QWheelEvent;
  
-
-// namespace MapType
-// 	{
-// 	enum mtyp
-// 		{
-// 		 Seamap,			// 000
-// 		 Coastmap,			// 001 || -> | -> 110
-// 		 Landmap,			// 010 || -> | -> 111
-// 		 Coastcitymap,
-// 		 Landcitymap			// 100
-// 		};
-// 	}
-
-//  enum
-//  object_functions{
-//  Townhall,
-//  Market,
-//  Church,
-//  Port,
-//  Office,
-//  Bank,
-//  Tavern,
-//  Land_breake,
-//  Land_damage,
-//  Mapdecoration
-//  };
  
  namespace NameFilters{ enum NFs{Img, Map, Save};}
  
@@ -95,11 +69,15 @@ class MapFrame : public QGraphicsView
 
     void setGraphicsItemProperties(QGraphicsItem *);
     
-//     Map &map() {return m_map; }
-    Map *map() const { return m_map; }
-    void setMap(Map *a_map = 0);
+     Map &mapref();
+     Map map() const;
+/*    Map *map() { return m_map; }*/
+    Map *map();
+//     void setMap(const Map *a_map = 0);
     void setMap(const Map &map);
 
+//     void setSMap(const Map &map);
+//     Map smap() const {return s_map; }
 
     int maptyp;
     //   int maptyp;
@@ -127,18 +105,20 @@ class MapFrame : public QGraphicsView
     //  QGraphicsItem *moveitem;
     //  QGraphicsScene *szene;
 
-    enum object_types_def
-    {
-      object_type_townhall,
-      object_type_market,
-      object_type_church,
-      object_type_port,
-      object_type_office,
-      object_type_bank,
-      object_type_tavern,
-      object_type_namespacexyz, 
-      object_type_land
-    };
+//     enum object_types_def
+//     {
+//       object_type_townhall,
+//       object_type_market,
+//       object_type_church,
+//       object_type_port,
+//       object_type_office,
+//       object_type_bank,
+//       object_type_tavern,
+//       object_type_namespacexyz, 
+//       object_type_land
+//     };
+const QGraphicsItem *currentGraphicsItem() const;
+const MapObject *currentMapObject	() const;
 
     QGraphicsItem *activeItem;
     //  QGraphicsPixmapItem *activePixmapItem;
@@ -151,7 +131,7 @@ class MapFrame : public QGraphicsView
     int x, y;
     QPoint ziel;
 
-    QFileDialog *fd;
+//     QFileDialog *fd;
     QDialog *createObjectDialog;
     QString fd_filename;
 
@@ -159,20 +139,21 @@ class MapFrame : public QGraphicsView
 
   public slots:
     void newMap();
-    void saveMap(QString);
-    void loadMap(QString);
+    void showMap();
+//     void saveMap(QString);
+//     void loadMap(QString);
 
 
     void newObjectDialog_ext();
     void newObject();
     void createObject();
-    void fileDialog(int);
+//     void fileDialog(int);
     // void fileDialog(NameFilters::NFs);
 
     //  void setMapType(QString);
-    void setObjectType(int);
-    void setToolTipString(QString);
-    void setFileString(QString);
+//     void setObjectType(int);
+//     void setToolTipString(QString);
+//     void setFileString(QString);
  
     void getObjectID(const QString&);
     void selectObject();
@@ -181,22 +162,30 @@ class MapFrame : public QGraphicsView
     void setYPos(int);
  
   protected:
-   void mousePressEvent(QMouseEvent*);
-   void mouseMoveEvent(QMouseEvent*);
-   void mouseReleaseEvent (QMouseEvent *);
-   void wheelEvent ( QWheelEvent * event );
- 
-   void keyPressEvent(QKeyEvent *);
- 
-   const MainWindow *m_MainWindow;
-   QComboBox *fktComboBox;
- 
+    void mousePressEvent(QMouseEvent*);
+    void mouseMoveEvent(QMouseEvent*);
+    void mouseReleaseEvent (QMouseEvent *);
+    void wheelEvent ( QWheelEvent * event );
+    
+    void keyPressEvent(QKeyEvent *);
+    
+    const MainWindow *m_MainWindow;
+    QComboBox *fktComboBox;
+    
+    
+    Map m_smap;
+    
+    QGraphicsItem *m_currentGraphicsItem;
+    MapObject *m_currentMapObject;
+    
+    
   private:
-     Map *m_map;
+//    Map *mapinstance();
+//      Map *m_map;
      
   signals:
     void newObjectCreated(QGraphicsItem *);
-    void fileStringChanged(QString);
+//     void fileStringChanged(QString);
     void objectSelected(QGraphicsItem *);
     void objectMoved();
  

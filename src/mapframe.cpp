@@ -50,6 +50,8 @@
 
 #include <QtSvg/QGraphicsSvgItem>
 
+#include <QtGui/QDialog>
+
 //  #include <QtGui/QPixmap>
  
  
@@ -59,7 +61,7 @@ MapFrame::MapFrame( const MainWindow *mainwin)
    
   m_MainWindow = mainwin;
   activeItem = 0;
-  m_map = new Map();
+//   m_map = 0;
   QGraphicsScene *szene = new QGraphicsScene();
   setScene(szene);
   newMap();
@@ -87,25 +89,26 @@ MapFrame::MapFrame( const MainWindow *mainwin)
 
 MapFrame::~MapFrame()
 {
-  delete m_map;
+//   delete m_map;
 }
 
 
 void MapFrame::newMap()
 {
+  m_smap = Map();
   qWarning() << "void MapFrame::newMap()";
-  maptyp = Map::Sea;
-  bgi_filename = QString();
-  mapnorth = QString(); mapwest = QString();  mapsouth = QString(); mapeast = QString();
+//   maptyp = Map::Sea;
+//   bgi_filename = QString();
+//   mapnorth = QString(); mapwest = QString();  mapsouth = QString(); mapeast = QString();
+  
+  scene()->clear();
+  mapSize = QSize(1000,1000);
+  setSceneRect(0,0,1000,1000);
+  itemSelected = false;
+  scene()->setBackgroundBrush(QBrush());
+}
 
- scene()->clear();
- mapSize = QSize(1000,1000);
- setSceneRect(0,0,1000,1000);
- itemSelected = false;
- scene()->setBackgroundBrush(QBrush());
- }
-
-void MapFrame::saveMap(QString save_filename)
+/*void MapFrame::saveMap(QString save_filename)
 {
   qWarning() << "Saving Map ..." << save_filename;
   if(!save_filename.isEmpty())
@@ -144,7 +147,7 @@ void MapFrame::saveMap(QString save_filename)
 		{
 			y++;
 			n = save_dir_string.right(y).count("/");
-// 			qWarning() << /**/"while 2";
+// 			qWarning() << "while 2";
 			if(y > save_dir_string.size())
 			{
 			qWarning() << "While 2 Aborted";
@@ -296,12 +299,12 @@ if((*saveitem)->data(Filename).toString().endsWith(".jpg") || (*saveitem)->data(
  savestream << "</map>";
  }
  
- }
+ *///}
  
- void MapFrame::loadMap(QString load_filename)
- {
+/* void MapFrame::loadMap(QString load_filename)
+{
  newMap();
- 
+
 	QDir dir;
 	dir = QDir().current();
 
@@ -706,38 +709,93 @@ if((*saveitem)->data(Filename).toString().endsWith(".jpg") || (*saveitem)->data(
 	}
  
  
- }
- 
+}*/
+
+
+
+void MapFrame::showMap()
+{
+  
+}
+
 void MapFrame::setMap(const Map &a_map)
 {
-
+  #ifdef DEBUG_MAPFRAME
   qWarning() << "void MapFrame::setMap(const Map &a_map)" << a_map.type();
+  #endif
   
-    delete m_map;
-    m_map = new Map(a_map);
+  m_smap = a_map;
   
-  qWarning() << "Map setted" << m_map->type();
+  #ifdef DEBUG_MAPFRAME
+  qWarning() << "Map setted" << m_smap.type();
+  
+  
+  if(m_smap.isCity())
+    qWarning() << "void MapFrame::setMap(const Map &a_map) ||| m_smap: Cityname: " << m_smap.city()->name();
+  #endif
+  //     *mapinstance() <= a_map;
+  
+  //   qWarning() << "Map setted" << mapinstance()->type();
 }
- 
-void MapFrame::setMap(Map *a_map)
-{
 
-  qWarning() << "void MapFrame::setMap(Map *a_map)" << a_map->type();
-  
-  if(a_map != 0)
+// void MapFrame::setMap(const Map *a_map)
+// {
+// qWarning() << "void MapFrame::setMap(const Map *a_map)";
+//   
+// //   if(a_map != 0)
+// //   {
+// //     qWarning() << "void MapFrame::setMap(const Map *a_map)" << a_map->type();
+// //     delete m_map;
+// //     qWarning() << "Old Map deleted"<<;
+//      *mapinstance() = a_map;
+// //   }
+//   
+//   qWarning() << "Map setted" << m_map->type();
+// }
+
+/*Map *MapFrame::mapinstance()
+{
+  qWarning() << "Map *MapFrame::mapinstance()";
+  if(m_map == NULL)
   {
-    delete m_map;
-    m_map = a_map;
+    qWarning() << "m_map = new Map();";
+      m_map = new Map();
   }
-  
-  qWarning() << "Map setted" << m_map->type();
+  qWarning() << "return m_map";
+  return m_map;
+}*/
+
+Map *MapFrame::map()
+{
+  return &m_smap;
 }
- 
- 
- void MapFrame::newObjectDialog_ext()
- {
- newObjectDialog(QPoint(100,100));
- }
+
+Map &MapFrame::mapref()
+{
+  return m_smap;
+}
+
+Map MapFrame::map() const
+{
+  return m_smap;
+}
+
+
+const QGraphicsItem * MapFrame::currentGraphicsItem() const
+{
+  return m_currentGraphicsItem;
+}
+
+const MapObject * MapFrame::currentMapObject () const
+{
+  return m_currentMapObject;
+}
+
+
+void MapFrame::newObjectDialog_ext()
+{
+  newObjectDialog(QPoint(100,100));
+}
  
  
  void MapFrame::newObjectDialog(QPoint destination)
@@ -1101,11 +1159,11 @@ itemSelected = true;
 
 }
 
-void MapFrame::setObjectType(int typ)
-{
+///void MapFrame::setObjectType(int typ)
+/*{
 qWarning() << "void MapFrame::setObjectType(int typ)";
 object_typ = fktComboBox->itemData(typ).toInt();
-}
+}*/
 
 
 /*void MapFrame::setObjectType(QString text)
@@ -1210,11 +1268,11 @@ qWarning() << "MapFrame::setYPos(int ypos)" << ypos;
 ziel.setY(ypos);
 }
 
-void MapFrame::setToolTipString(QString ttstring)
-{
-qWarning() << "setToolTipString(QString ttstring)" << ttstring;
-object_tooltip = ttstring;
-}
+/// void MapFrame::setToolTipString(QString ttstring)
+// {
+/*qWarning() << "setToolTipString(QString ttstring)" << ttstring;
+object_tooltip = ttstring;*/
+// }
 
 
 void MapFrame::newObject()
@@ -1337,7 +1395,7 @@ object_filename = QString();
 
 
 // void MapFrame::fileDialog(NameFilters::NFs filterarg)
-void MapFrame::fileDialog(int filterarg)
+/*void MapFrame::fileDialog(int filterarg)
 {
 qWarning() << "MapFrame::fileDialog(int filterarg)" << filterarg;
 	fd = new QFileDialog(this, Qt::Dialog);
@@ -1369,14 +1427,14 @@ qWarning() << "MapFrame::fileDialog(int filterarg)" << filterarg;
 	fd->raise();
 	connect(fd, SIGNAL(fileSelected(QString)), this, SLOT(setFileString(QString)));
 	connect(fd, SIGNAL(finished(int)), fd, SLOT(deleteLater()));
-}
+}*/
 
-void MapFrame::setFileString(QString fileString)
-{
-qWarning() << "MapFrame::setFileString(QString fileString)" << fileString;
-fd_filename = fileString;
-emit fileStringChanged(fileString);
-}
+// void MapFrame::setFileString(QString fileString)
+// {
+// qWarning() << "MapFrame::setFileString(QString fileString)" << fileString;
+// fd_filename = fileString;
+// emit fileStringChanged(fileString);
+// }
 
 
 void MapFrame::keyPressEvent(QKeyEvent *event)

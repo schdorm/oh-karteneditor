@@ -73,6 +73,9 @@ enum
 	};*/
  }
 
+
+class QTimer;
+
 class Settings : public QObject
 {
   Q_OBJECT
@@ -81,13 +84,18 @@ class Settings : public QObject
     QHash<int, QString> ObjectFunctions() const;
     QHash<int, QString> MapTypes() const;
     QString settingsfilepath() const;
+    QString autosavepath() const;
     bool oldlayout() const;
+    bool autosaveEnabled() const;
     
   public slots:
     void readSettings();
+    void enableAutosave();
+    void disableAutosave();
     
   signals:
     void changed();
+    void autosave();
     
   private:
     Settings();
@@ -96,7 +104,11 @@ class Settings : public QObject
     QHash<int, QString> m_ObjectFunctionList;
     QHash<int, QString> m_MapTypeList;
     bool m_oldlayout;
+    bool m_autosaveEnabled;
     QString m_settingsfilepath;
+    QString m_autosavepath;
+    
+    QTimer *m_autosaveTimer;
 };
 
 bool operator!=(const Settings &s1, const Settings &s2);

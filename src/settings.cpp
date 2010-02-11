@@ -23,13 +23,31 @@
 #include <QtCore/QXmlStreamReader>
 
 #include <QtDebug>
+#include <QTimer>
 
 #include "settings.h"
 #include "map.h"
+#include "qstring.h"
 
 Settings::Settings()
 {
-  m_settingsfilepath = QDir().home().absolutePath() + "/.OpenHanse/mesettings.ohc";
+  m_autosaveTimer = new QTimer(this);
+  connect(m_autosaveTimer, SIGNAL(timeout()), this, SIGNAL(autosave()));
+  
+  m_autosavepath = QDir::home().absolutePath() + "/.OpenHanse/me_autosave_map.ohc";
+  m_settingsfilepath = QDir::home().absolutePath() + "/.OpenHanse/mesettings.ohc";
+  QDir dir = QDir::home();
+  if(!dir.cd(".OpenHanse"))
+  {
+    if(dir.mkdir(".OpenHanse"))
+    {
+      dir.cd(".OpenHanse");
+    }
+    else
+    {
+      qFatal("Could not create OpenHanse settings folder");
+    }
+  }
   QString townhalllabel = tr("Rathaus"),
   marketlabel = tr("Markt"),
   churchlabel = tr("Kirche"),
@@ -90,10 +108,21 @@ QString Settings::settingsfilepath() const
   return m_settingsfilepath;
 }
 
+QString Settings::autosavepath () const
+{
+  return m_autosavepath;
+}
+
 bool Settings::oldlayout() const
 {
   return m_oldlayout;
 }
+
+bool Settings::autosaveEnabled() const
+{
+  return m_autosaveEnabled;
+}
+
 
 void Settings::readSettings()
 {
@@ -109,12 +138,22 @@ void Settings::readSettings()
     {
       case QXmlStreamReader::StartElement:
       {
-	if(reader.name().toString() == "layout")
+	if(reader.name().toString() == "oldlayout")
 	{
-	  if(reader.attributes().value("old") == QString("true"))
-	    m_oldlayout = true;
-	  else
-	    m_oldlayout = false;
+	  m_oldlayout = toBool(reader.attributes().value("value"));
+// 	  if(reader.attributes().value("old") == QString("true"))
+// 	    m_oldlayout = true;
+// 	  else
+// 	    m_oldlayout = false;
+	  
+	}
+	else if(reader.name().toString() == "autosave")
+	{
+	  m_autosaveEnabled = toBool(reader.attributes().value("value"));
+// 	  if(reader.attributes().value("value") == QString("true"))
+// 	    m_autosaveEnabled = true;
+// 	  else
+// 	    m_autosaveEnabled = false;
 	  
 	}
 	break;
@@ -131,6 +170,24 @@ void Settings::readSettings()
   {
     emit changed();
   }
+  if(m_autosaveEnabled)
+  {
+    enableAutosave();
+//     m_autosaveTimer->start(10000);
+  }
+  else
+    disableAutosave();
+//     m_autosaveTimer->stop();
+}
+
+void Settings::enableAutosave()
+{
+  m_autosaveTimer->start(10000);
+}
+
+void Settings::disableAutosave()
+{
+  m_autosaveTimer->stop();
 }
 
 bool operator==(const Settings &s1, const Settings &s2)

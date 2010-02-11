@@ -40,8 +40,15 @@ Settingswidget::Settingswidget()
   m_layout->addWidget(m_oldviewlabel, 1, 1, 1, 1, Qt::AlignHCenter);
 
   m_oldviewcheckbox = new QCheckBox(this);
-  m_layout->addWidget(m_oldviewlabel, 1, 2, 1, 1, Qt::AlignHCenter);
+  m_layout->addWidget(m_oldviewcheckbox, 1, 2, 1, 1, Qt::AlignHCenter);
   m_oldviewcheckbox->setChecked(SETTINGS->oldlayout());
+  
+  m_autosaveLabel = new QLabel(tr("Enable Autosave"), this);
+  m_layout->addWidget(m_autosaveLabel, 2, 1, 1, 1, Qt::AlignHCenter);
+
+  m_autosaveCheckBox = new QCheckBox(this);
+  m_layout->addWidget(m_autosaveCheckBox, 2, 2, 1, 1, Qt::AlignHCenter);
+  m_autosaveCheckBox->setChecked(SETTINGS->autosaveEnabled());
 
 
   m_accept = new QPushButton (tr("Accept"),this);
@@ -66,11 +73,16 @@ void Settingswidget::saveSettings()
   writer.setAutoFormatting(true);
   writer.writeStartDocument();
   writer.writeStartElement("settings");
-  writer.writeEmptyElement("layout");
+  writer.writeEmptyElement("oldlayout");
   if(m_oldviewcheckbox->isChecked())
-    writer.writeAttribute(QXmlStreamAttribute("old","true"));
+    writer.writeAttribute(QXmlStreamAttribute("value","true"));
   else
-    writer.writeAttribute(QXmlStreamAttribute("old","false"));
+    writer.writeAttribute(QXmlStreamAttribute("value","false"));
+  writer.writeEmptyElement("autosave");
+  if(m_autosaveCheckBox->isChecked())
+    writer.writeAttribute(QXmlStreamAttribute("value","true"));
+  else
+    writer.writeAttribute(QXmlStreamAttribute("value","false"));
   writer.writeEndDocument();
   file.close();
   SETTINGS->readSettings();
