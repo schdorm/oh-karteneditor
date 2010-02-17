@@ -35,104 +35,106 @@ class Map
 {
   public:
     Map();
-//     Map(const Map &);
+    //     Map(const Map &);
     Map(const Map *);		// Pointer - Copy-Constructor
-//     ~Map();
-
-//   enum MapType
-//   {
-//     
-//     Sea		= 10000,
-//     Coast	= 20000,
-//     Land	= 40000,
-//     Citymap	= 10001
-//   };
+    //     ~Map();
+    
+    //   enum MapType
+    //   {
+      //     
+      //     Sea		= 10000,
+      //     Coast	= 20000,
+      //     Land	= 40000,
+      //     Citymap	= 10001
+    //   };
     enum Type
-  {
-    Sea		= 10000,
-    Coast	= 12000,
-    Land	= 16000,
-    Citymap	= 20000
-  };
-  
-	enum Orientations
-	{
-		null	= 0,
-		North	= 128,
-		East	= 129,
-		South	= 130,
-		West	= 132
-	};
-
-// 	void loadStartMap(const QString &);
-	bool load(const QString &);
-
-	#ifdef OH_GAME
-	bool load(Orientations);
-	#endif
-	#ifdef OH_MAPEDITOR
-	void save(const QString & a_filename = QString());
-	#endif
-	
-// const City *ccity()	const	{	return m_city;		}
-bool isCity	()	const;
-
-// {	return (m_type == Map::Coast ^ Map::Citymap || m2type == Map::Land ^ Map::Citymap);	}
-// City city() const;
-// City city	()	const	{	return m_city;			}
-AbstractCity *city	()		{	return &m_city;			}
-const AbstractCity *city()	const	{	return &m_city;			}
-
-void setCity(const AbstractCity &newCity);
-// const QString &cityname()	const	{	return m_cityname;	}
-
-
-const QList <MapObject> &objectList() const	{return m_ObjectList;	}
-
-QString filename 	()	const	{	return m_filename;	}
-QPoint coordinates	()	const	{	return m_coordinates;	}
-QSize size		()	const	{	return m_size;		}
-QString background	()	const	{	return m_background;	}
-
-QString mapnorth	()	const	{	return m_mapnorth;	}
-QString mapeast		()	const	{	return m_mapeast;	}
-QString mapsouth	()	const	{	return m_mapsouth;	}
-QString mapwest		()	const	{	return m_mapwest;	} 
-
-int type		()	const	{	return m_type;		}
-
-
-void setCoordinates	(const QPoint &);
-void setSize		(const QSize &);
-void setBackground	(const QString &);
-
-void setMapnorth	(const QString &);
-void setMapsouth	(const QString &);
-void setMapwest		(const QString &);
-void setMapeast		(const QString &);
-void setType	(int);
-
-private:
-//   City *cityinstance();
-// static int mapcounter;
-
-// QString m_mapdirectory;
-
-protected:
-
-QString m_filename;
-QPoint m_coordinates;
-QSize m_size;
-AbstractCity m_city;
-QString m_background;
-QString m_mapnorth;
-QString m_mapeast;
-QString m_mapsouth;
-QString m_mapwest;
-int m_type;
-
-	QList <MapObject> m_ObjectList;
-
+    {
+      Sea		= 10000,
+      Coast	= 12000,
+      Land	= 16000,
+      Citymap	= 20000
+    };
+    
+    enum Orientations
+    {
+      null	= 0,
+      North	= 128,
+      East	= 129,
+      South	= 130,
+      West	= 132
+    };
+    
+    // 	void loadStartMap(const QString &);
+    bool load(const QString &);
+    
+    #ifdef OH_GAME
+    bool load(Orientations);
+    #endif
+    #ifdef OH_MAPEDITOR
+    void save(const QString & a_filename = QString());
+    #endif
+    
+    // const City *ccity()	const	{	return m_city;		}
+    bool isCity	()	const;
+    
+    // {	return (m_type == Map::Coast ^ Map::Citymap || m2type == Map::Land ^ Map::Citymap);	}
+    // City city() const;
+    // City city	()	const	{	return m_city;			}
+    AbstractCity *city	()		{	return &m_city;			}
+    const AbstractCity *city()	const	{	return &m_city;			}
+    
+    void setCity(const AbstractCity &newCity);
+    // const QString &cityname()	const	{	return m_cityname;	}
+    
+    
+    const QList <MapObject> &objectList() const {	return m_ObjectList;	}
+    QList <MapObject> objects  ()	const	{	return m_ObjectList;	}
+    QList <MapObject> *objects ()		{	return &m_ObjectList;	}
+    
+    QString filename 	()	const	{	return m_filename;	}
+    QPoint coordinates	()	const	{	return m_coordinates;	}
+    QSize size		()	const	{	return m_size;		}
+    QString background	()	const	{	return m_background;	}
+    
+    QString mapnorth	()	const	{	return m_mapnorth;	}
+    QString mapeast		()	const	{	return m_mapeast;	}
+    QString mapsouth	()	const	{	return m_mapsouth;	}
+    QString mapwest		()	const	{	return m_mapwest;	} 
+    
+    int type		()	const	{	return m_type;		}
+    
+    
+    void setCoordinates	(const QPoint &);
+    void setSize		(const QSize &);
+    void setBackground	(const QString &);
+    
+    void setMapnorth	(const QString &);
+    void setMapsouth	(const QString &);
+    void setMapwest		(const QString &);
+    void setMapeast		(const QString &);
+    void setType	(int);
+    
+  private:
+    //   City *cityinstance();
+    // static int mapcounter;
+    
+    // QString m_mapdirectory;
+    
+  protected:
+    
+    QString m_filename;
+    QPoint m_coordinates;
+    QSize m_size;
+    QString m_background;
+    QString m_mapnorth;
+    QString m_mapeast;
+    QString m_mapsouth;
+    QString m_mapwest;
+    int m_type;
+    AbstractCity m_city;
+    
+    QList <MapObject> m_ObjectList;
+    
 };
 
 Map &operator<=(Map &m1, const Map &m2);

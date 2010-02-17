@@ -24,27 +24,47 @@
 
 class MapObject
 {
-public:
+  public:
+    MapObject(const int , const QString &, const QString &, const QPoint &, const qreal );
+    MapObject(const int , const QString &, const QString &, const QString &, const qreal );
+    
+    enum 
+    {
+      Land_breake = 6000,
+      Land_damage = 6001,
+      Mapdecoration = 6002
+    };
+    
+    
+    
+    int 	id	 () const 	{	return m_id;		}
+    int		role 	 () const	{	return m_role;		}
+    QString	filename () const	{	return m_filename;	}
+    QString	tooltip  () const	{	return m_tooltip;	}
+    QString	name	 () const 	{	return m_name;		}
+    QPoint	position () const	{	return m_position;	}
+    double	zValue	 () const	{	return m_zValue;	}
+    
+    void setRole 	(int);
+    void setFilename	(const QString& );
+    void setTooltip	(const QString& );
+    void setName	( const QString&);
+    void setPosition	(const QPoint &);
+    void setZValue	(double);
+    
+    
+//     void operator=(const MapObject &other);
 
- MapObject(const int , const QString &, const QString &, const QPoint &, const qreal );
- MapObject(const int , const QString &, const QString &, const QString &, const qreal );
-
-
-int	role 	 () const	{	return m_role;		}
-QString	filename () const	{	return m_filename;	}
-QString	tooltip  () const	{	return m_tooltip;	}
-QPoint	position () const	{	return m_position;	}
-double	zValue	 () const	{	return m_zValue;	}
-
-private:
-int m_role;
-QString m_filename;
-QString m_tooltip;
-QPoint m_position;
-qreal m_zValue;
-
-
-
+  private:
+    int m_id;
+    int m_role;
+    QString m_filename;
+    QString m_tooltip;
+    QString m_name;
+    QPoint m_position;
+    qreal m_zValue;
 };
+
+// void operator=(MapObject &m1, const MapObject &m2);
 
 #endif

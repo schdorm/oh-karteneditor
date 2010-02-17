@@ -1,33 +1,33 @@
 SOURCES = main.cpp \
-	mainwindow.cpp\
-	mapframe.cpp \
-	sidebar.cpp \
-	settings.cpp \
-	settingswidget.cpp \
-	shared/visual_data/map.cpp \
-	mapsettingsdialog.cpp \
+	mainwidgets/mainwindow.cpp \
+	mainwidgets/mapframe.cpp \
+	mainwidgets/sidebar.cpp \
+	data/settings.cpp \
+	dialogs/settingsdialog.cpp \
+	dialogs/mapsettingsdialog.cpp \
+	dialogs/mapobjectdialog.cpp \
 	shared/data/abstractcity.cpp \
 	shared/data/goods.cpp \
-	gameparameter.cpp \
+	shared/data/gameparameter.cpp \
+	shared/visual_data/map.cpp \
 	shared/libs/qstring.cpp \
-	mapobjectdialog.cpp
 	
-HEADERS += mainwindow.h\
-	mapframe.h \
-	sidebar.h \
-	settings.h \
-	settingswidget.h \
-	mapsettingsdialog.h \
+HEADERS += mainwidgets/mainwindow.h \
+	mainwidgets/mapframe.h \
+	mainwidgets/sidebar.h \
+	data/settings.h \
+	dialogs/settingsdialog.h \
+	dialogs/mapsettingsdialog.h \
+	dialogs/mapobjectdialog.h \
+	shared/data/abstractcity.h \
+	shared/data/goods.h \
+	shared/data/gameparameter.h \
 	shared/visual_data/map.h \
 	shared/visual_data/mapobject.h \
-	shared/data/abstractcity.h \
-	shared/libs/qstring.h \
-	shared/data/goods.h \
-	gameparameter.h \
-	mapobjectdialog.h
+	shared/libs/qstring.h
 	
-FORMS       = mapsettingsdialog.ui \
-	mapobjectdialog.ui
+FORMS = dialogs/mapsettingsdialog.ui \
+	dialogs/mapobjectdialog.ui
 
 	
 TEMPLATE = app

@@ -18,4 +18,52 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "shared/visual_data/mapobject.h"
+#ifndef _MappropertyWidget_h
+#define _MappropertyWidget_h
+
+#include <QtGui/QDialog>
+#include "ui_mapsettingsdialog.h"
+#include "map.h"
+
+class MapSettingsDialog : public QDialog
+{
+  Q_OBJECT
+  public:
+    MapSettingsDialog(const Map *);
+  
+    Map map()
+    {
+      return m_map;
+    }
+    
+/*    Map smap() const
+    {
+      return s_map;
+    }*/
+    void setCityProperties();
+    
+  public slots:
+    void backgroundFileDialog();
+    void northmapFileDialog();
+    void southmapFileDialog();
+    void westmapFileDialog();
+    void eastmapFileDialog();
+    void setMapProperties();
+
+
+
+    
+    //   void startDeleteTimer();
+  signals:
+    void apply();
+    
+
+  private:
+    Ui::MapSettingsDialog ui;
+    Map m_map;
+//     Map s_map;
+  protected:
+
+};
+
+#endif

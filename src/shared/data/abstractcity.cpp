@@ -132,3 +132,4 @@ void AbstractCity::setName(const QString &name)
 // {
 //   m_id = id;
 // }
+

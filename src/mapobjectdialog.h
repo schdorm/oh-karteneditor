@@ -18,32 +18,4 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef _MapObjectDialog_H
-#define _MapObjectDialog_H
-
-#include <QtGui/QDialog>
-
-#include "ui_mapobjectdialog.h"
-
-class Map;
-class QGraphicsItem;
-
-class MapObjectDialog : public QDialog
-{
-  Q_OBJECT
-  public:
-    MapObjectDialog(const QList<QGraphicsItem*> &ObjectList, const Map *);
-    
-  public slots:
-    
-  signals:
-    
-  private:
-    Ui::MapObjectDialog ui;
-    
-    
-  protected:
-    
-};
-
-#endif
+#include "dialogs/mapobjectdialog.h"

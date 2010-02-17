@@ -161,5 +161,5 @@ QHash<int, int> m_GoodHash;
 // int *m_exchange_volume;
 };
 
-
 #endif
+

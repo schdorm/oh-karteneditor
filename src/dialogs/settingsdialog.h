@@ -18,4 +18,42 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "shared/visual_data/mapobject.h"
+#ifndef _SettingsWidget_H
+#define _SettingsWidget_H
+
+#include <QtGui/QDialog>
+
+class QCheckBox;
+class QLabel;
+class QGridLayout;
+
+class Settingswidget : public QDialog
+{
+Q_OBJECT
+public:
+  Settingswidget();
+  
+signals:
+  
+  
+private slots:
+  void saveSettings();
+  
+private:
+  QGridLayout *m_layout;
+  
+  QLabel *m_oldviewlabel;
+  QLabel *m_autosaveLabel;
+  
+  QCheckBox *m_oldviewcheckbox;
+  QCheckBox *m_autosaveCheckBox;
+  
+  QPushButton *m_accept;
+  QPushButton *m_abort;
+
+
+protected:
+
+};
+
+#endif

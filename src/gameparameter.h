@@ -17,28 +17,5 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef _gameparameter_h
-#define _gameparameter_h
 
-#include <QtCore/QHash>
-#define GAMEPARAMETER GameParameter::instance()
-
-class GameParameter : QObject
-{
-public:
-const QHash <int, QString> &GoodLabels  () const {	return m_GoodLabelHash;		}
-
-QString GoodName 	(int key) const {	return m_GoodLabelHash[key];		}
-
-static GameParameter * instance();
-
-private:
-  GameParameter();
-  static GameParameter *m_instance;
-QHash<int, QString> m_GoodLabelHash;
-
-QHash<int, QString> m_BuildingLabelHash;
-
-};
-
-#endif
+#include "shared/data/gameparameter.h"

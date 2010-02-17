@@ -17,5 +17,54 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#ifndef _gameparameter_h
+#define _gameparameter_h
 
-#include "shared/visual_data/mapobject.h"
+#include <QtCore/QHash>
+
+#include "definitions.h"
+
+#ifdef OH_MAPEDITOR
+#define GAMEPARAMETER GameParameter::instance()
+#endif
+
+class GameParameter : public QObject	// inherited for the tr()-Function (translation)
+{
+  public:
+    #ifdef OH_GAME
+    GameParameter();
+    const QHash <int, int> &GoodBasicPriceHash () const {	return m_GoodBasicPriceHash;	}
+    
+    const QString &firstName () const	{	return m_FirstName;	}
+    const QString &lastName  () const	{	return m_LastName;	}
+    #endif
+    
+    const QHash <int, QString> &GoodLabels  () const {	return m_GoodLabelHash;		}
+    const QHash <int, QString> &BuildingLabels () const { 	return m_BuildingLabelHash;	}
+    
+    QString GoodName 	(int key) const {	return m_GoodLabelHash[key];		}
+    
+    #ifdef OH_MAPEDITOR
+    static GameParameter * instance();
+    #endif
+    
+  private:
+    #ifdef OH_MAPEDITOR
+    GameParameter();
+    static GameParameter *m_instance;
+    #endif
+    
+    #ifdef OH_GAME
+    QHash<int, int> m_GoodBasicPriceHash;
+    QString m_FirstName;		//Players first /
+    QString m_LastName;			// last name
+    #endif
+    
+    QHash<int, QString> m_GoodLabelHash;
+    
+    
+    QHash<int, QString> m_BuildingLabelHash;
+    
+};
+
+#endif

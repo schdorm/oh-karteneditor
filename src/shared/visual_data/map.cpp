@@ -49,12 +49,66 @@ MapObject::MapObject(const int param_role,
 		     m_position (param_position),
 		     m_zValue (param_zvalue)
 {
+  static int MapObject_IDCounter;
+  m_id = MapObject_IDCounter;
+  MapObject_IDCounter++;
 // 	m_role = param_role;
 // 	m_filename = param_filename;
 // 	m_tooltip = param_tooltip;
 // 	m_position = param_position;
 // 	m_zValue = param_zvalue;
 
+}
+
+
+/*operator=(MapObject &m1, const MapObject &m2);
+{
+  m1.setRole(m2.role());
+  m1.setFilename(m2.filename());
+  m1.setTooltip(m2.tooltip());
+  m1.setName(m2.name());
+  m1.setPositon(m2.position());
+  m1.setZValue(m2.zValue());
+  return m1;
+}*/
+/*void MapObject::operator=(const MapObject &m2);
+{
+  setRole(m2.role());
+  setFilename(m2.filename());
+  setTooltip(m2.tooltip());
+  setName(m2.name());
+  setPositon(m2.position());
+  setZValue(m2.zValue());
+}*/
+
+void MapObject::setRole (int a_role)
+{
+  m_role = a_role;
+}
+
+void MapObject::setFilename	(const QString &a_filename)
+{
+  m_filename = a_filename;
+}
+
+void MapObject::setTooltip	(const QString &a_tooltip)
+{
+  m_tooltip = a_tooltip;
+}
+
+void MapObject::setName	( const QString &a_name)
+{
+  m_name = a_name;
+}
+
+void MapObject::setPosition	(const QPoint &a_pos)
+{
+  m_position = a_pos;
+}
+
+void MapObject::setZValue (double a_zvalue)
+{
+  m_zValue = a_zvalue;
 }
 
 MapObject::MapObject(const int a_role,
@@ -89,12 +143,14 @@ MapObject::MapObject(const int a_role,
 
 /// MAP
 Map::Map() : m_filename (QString()),
+	     m_size (QSize(1023,1023)),
+	     m_background (QString()),
 	     m_mapnorth (QString()),
 	     m_mapeast (QString()),
 	     m_mapsouth (QString()),
-	     m_mapwest(QString())
+	     m_mapwest(QString()),
+	     m_city (AbstractCity())
 	     {
-	       m_city = AbstractCity();
 	       m_type = Sea;
 	       
 /// mapcounter ++;
