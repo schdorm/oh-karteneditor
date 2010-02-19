@@ -163,7 +163,7 @@
         <widget class="QPushButton" name="Backgroundbrowse">
          <property name="icon">
           <iconset resource="../icons.qrc">
-           <normaloff>:/.img/icon_map_folder_magnifier3.png</normaloff>:/.img/icon_map_folder_magnifier3.png</iconset>
+           <normaloff>:/.img/icon_bg_folder_magnifier.png</normaloff>:/.img/icon_bg_folder_magnifier.png</iconset>
          </property>
         </widget>
        </item>
@@ -197,7 +197,7 @@
         <widget class="QPushButton" name="Northmapbrowse">
          <property name="icon">
           <iconset resource="../icons.qrc">
-           <normaloff>:/.img/icon_map_folder_magnifier3.png</normaloff>:/.img/icon_map_folder_magnifier3.png</iconset>
+           <normaloff>:/.img/icon_map_folder_magnifier.png</normaloff>:/.img/icon_map_folder_magnifier.png</iconset>
          </property>
         </widget>
        </item>
@@ -231,7 +231,7 @@
         <widget class="QPushButton" name="Southmapbrowse">
          <property name="icon">
           <iconset resource="../icons.qrc">
-           <normaloff>:/.img/icon_map_folder_magnifier3.png</normaloff>:/.img/icon_map_folder_magnifier3.png</iconset>
+           <normaloff>:/.img/icon_map_folder_magnifier.png</normaloff>:/.img/icon_map_folder_magnifier.png</iconset>
          </property>
         </widget>
        </item>
@@ -265,7 +265,7 @@
         <widget class="QPushButton" name="Westmapbrowse">
          <property name="icon">
           <iconset resource="../icons.qrc">
-           <normaloff>:/.img/icon_map_folder_magnifier3.png</normaloff>:/.img/icon_map_folder_magnifier3.png</iconset>
+           <normaloff>:/.img/icon_map_folder_magnifier.png</normaloff>:/.img/icon_map_folder_magnifier.png</iconset>
          </property>
         </widget>
        </item>
@@ -299,7 +299,7 @@
         <widget class="QPushButton" name="Eastmapbrowse">
          <property name="icon">
           <iconset resource="../icons.qrc">
-           <normaloff>:/.img/icon_map_folder_magnifier3.png</normaloff>:/.img/icon_map_folder_magnifier3.png</iconset>
+           <normaloff>:/.img/icon_map_folder_magnifier.png</normaloff>:/.img/icon_map_folder_magnifier.png</iconset>
          </property>
         </widget>
        </item>
