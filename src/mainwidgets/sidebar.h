@@ -18,62 +18,93 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
- 
- #ifndef _SIDEBAR_H
- #define _SIDEBAR_H
- 
- #include <QtGui/QWidget>
- #include <QtCore/QHash>
+
+#ifndef _SIDEBAR_H
+#define _SIDEBAR_H
+
+#include <QtGui/QWidget>
+#include <QtCore/QHash>
 
 
- class QListWidget;
- class QLineEdit;
- class QLabel;
- class QPushButton;
- class QSpinBox;
- class QComboBox;
- class MainWindow;
- class QDoubleSpinBox;
- class QGraphicsItem;
- 
- class SideBarClass : public QWidget
- {
- Q_OBJECT
- public:
-   void fillList(QList<QGraphicsItem*>);
- 
- QStringList staticListEntries;
+class QListWidget;
+class QLineEdit;
+class QLabel;
+class QPushButton;
+class QSpinBox;
+class QComboBox;
+class MainWindow;
+class QDoubleSpinBox;
+class QGraphicsItem;
 
- 
- bool CB_mapprops;
- 
- SideBarClass(const MainWindow *);
- QString maptypelabel(int) const;
+class MapObject;
 
-  QComboBox *itemTyp;
-  QListWidget *itemListWidget;
-  QPushButton *selectFileButton;
-  QLineEdit *fileView;
-  QLineEdit *nameLineEdit;
-  QLineEdit *editToolTip;
-  QSpinBox *XBox, *YBox;
-  QDoubleSpinBox *ZBox;
- //void initMapEntriesList();
- const QHash<int, QString> &functionlabels()	const	{	return functionLabels;	}
-  const QHash<int, QString> &maptypelabels()	const	{	return maptypeLabels;	}
+namespace SidebarList
+{
+  enum
+  {
+    Item_BG = ~1,
+    Item_MN = ~2,
+    Item_ME = ~3,
+    Item_MS = ~4,
+    Item_MW = ~5
+  };
+}
+    
+class SideBarClass : public QWidget
+{
+  Q_OBJECT
+  public:
+    
+    enum Filetypes
+    {
+      OpenHanseMap,
+      ItemImage,
+      Backgroundbrush
+    };
+    
+    
+    void addStaticListItems();
+    void fillList(QList<QGraphicsItem*>);
+    void fillList(const QList<MapObject> &itemlist);
 
+    
+    QStringList staticListEntries;
+    
+    
+    bool CB_mapprops;
+    
+    SideBarClass(const MainWindow *);
+    QString maptypelabel(int) const;
+    
+    QComboBox *itemTyp;
+    QListWidget *itemListWidget;
+    QPushButton *selectFileButton;
+    QLineEdit *fileView;
+    QLineEdit *nameLineEdit;
+    QLineEdit *editToolTip;
+    QSpinBox *XBox, *YBox;
+    QDoubleSpinBox *ZBox;
+    //void initMapEntriesList();
+    const QHash<int, QString> &functionlabels()	const	{	return functionLabels;	}
+    const QHash<int, QString> &maptypelabels()	const	{	return maptypeLabels;	}
+    
+  private slots:
+    void selectFile();
+    
+  protected:
+    
+    QHash<int, QString> functionLabels;
+    QHash<int, QString> maptypeLabels;
+    
+    const MainWindow *m_parent;
+    void keyPressEvent(QKeyEvent*);
+    
 
-protected:
-
-QHash<int, QString> functionLabels;
-QHash<int, QString> maptypeLabels;
-
-const MainWindow *m_parent;
-void keyPressEvent(QKeyEvent*);
-
-signals:
-void SIG_deleteObject();
-
-
- };
- #endif
+    
+  signals:
+    void SIG_deleteObject();
+    void dataChanged();
+    
+    
+};
+#endif

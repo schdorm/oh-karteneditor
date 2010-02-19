@@ -23,10 +23,13 @@
 #include "settings.h"
 #include "abstractcity.h"
 
+// #define DEBUG_MAP
+
 // int Map::mapcounter = 0;
 
-
+#ifdef DEBUG_MAP
 #include <QtDebug>
+#endif
 
 #include <QtCore/QVariant>
 
@@ -194,9 +197,15 @@ Map::Map(const Map *other) :
 //   if(!other->city() == NULL )
   if(isCity() && other->isCity())
   {
+    #ifdef DEBUG_MAP
     qWarning() << "before copiing city";
+    #endif
+    
     m_city = *other->city();
+    
+    #ifdef DEBUG_MAP
     qWarning() << "after copiiing city";
+    #endif
   }
 //   else
 //     m_city = 0;
@@ -230,10 +239,16 @@ qWarning() << "End of Destructing Map";
 
 void Map::setCity(const AbstractCity &newCity)
 {
-//   delet e m_city;
+  //   delet e m_city;
+  #ifdef DEBUG_MAP
   qWarning() << "SetCity";
+  #endif
+  
   m_city = newCity;
+  
+  #ifdef DEBUG_MAP
   qWarning() << "City setted";
+  #endif
 }
 
 
@@ -722,7 +737,9 @@ QString mapdirectory = QFileInfo(param_mapname).absoluteDir().absolutePath();
 
 bool Map::load(const QString &a_filename)
 {
+  #ifdef DEBUG_MAP
   qWarning() << "bool Map::load(const QString &a_filename)" << " (Karteladen): " << a_filename;
+  #endif
   QString mapdirectory = QFileInfo(a_filename).absoluteDir().absolutePath();
   
   QFile file(a_filename);		//Map-XML-Lesen
@@ -750,8 +767,8 @@ bool Map::load(const QString &a_filename)
 	    {
 	      QXmlStreamAttributes objectattributes = reader.attributes();
 	      
-	      m_ObjectList << MapObject(objectattributes.value("role").string()->toInt(),
-					   objectattributes.value("file").toString(), objectattributes.value("tooltip").toString(), objectattributes.value("position").toString(), objectattributes.value("zvalue").string()->toDouble());
+	      m_ObjectList << MapObject(objectattributes.value("role").toString().toInt(),
+					   objectattributes.value("file").toString(), objectattributes.value("tooltip").toString(), objectattributes.value("position").toString(), objectattributes.value("zvalue").toString().toDouble());
 	      break;
 	    }
 	    else if(elementname == "city")
@@ -777,9 +794,15 @@ bool Map::load(const QString &a_filename)
 	    }
 	    else if(reader.name().toString() == "map")
 	    {
-	      m_size.setHeight(reader.attributes().value("height").string()->toInt());
-	      m_size.setWidth(reader.attributes().value("width").string()->toInt());
-	      m_type = reader.attributes().value("type").string()->toInt();
+	       #ifdef DEBUG_MAP
+	      qWarning() << reader.attributes().value("height").string()->toInt() << reader.attributes().value("height").toString().toInt();
+	      #endif
+// 	      m_size.setHeight(reader.attributes().value("height").string()->toInt());
+// 	      m_size.setWidth(reader.attributes().value("width").string()->toInt());
+	      m_size.setHeight(reader.attributes().value("height").toString().toInt());
+	      m_size.setWidth(reader.attributes().value("width").toString().toInt());
+
+	      m_type = reader.attributes().value("type").toString().toInt();
 	      m_background = reader.attributes().value("background").toString();
 	      break;
 	    }
@@ -1076,11 +1099,19 @@ bool Map::load(const QString &a_filename)
 	
 	if (reader.hasError())
 	{
+	  #ifdef DEBUG_MAP
 	  qWarning() << reader.errorString();
+	  #endif
+	  #ifndef DEBUG_MAP
+	  qWarning(reader.errorString().toUtf8().data());
+	  #endif
+	  
 	}
 	
       }
+      #ifdef DEBUG_MAP
       qWarning() << "Returning true: Map sucessfully read!";
+      #endif
       return true;
     }
   }
@@ -1093,6 +1124,13 @@ bool Map::load(const QString &a_filename)
 // {
 //   m_filename = nfn;
 // }
+
+void Map::setName(const QString &a_name)
+{
+  m_name = a_name;
+}
+
+
 void Map::setCoordinates	(const QPoint &nc)
 {
   m_coordinates = nc;
@@ -1130,6 +1168,9 @@ void Map::setType(int a_type)
 
 void Map::save(const QString &a_filename)
 {
+  #ifdef DEBUG_MAP
+  qWarning() << "void Map::save(const QString &a_filename)" << a_filename;
+  #endif
   if(!a_filename.isEmpty())
     m_filename = a_filename;
   if(!m_filename.isEmpty())
@@ -1146,15 +1187,21 @@ void Map::save(const QString &a_filename)
     writer.writeStartElement("map");
     
     writer.writeAttribute(QXmlStreamAttribute("width",	QString::number(m_size.width())));
-    writer.writeAttribute(QXmlStreamAttribute("height",	QString::number(m_size.width())));
+    writer.writeAttribute(QXmlStreamAttribute("height",	QString::number(m_size.height())));
     writer.writeAttribute(QXmlStreamAttribute("background", m_background));
     writer.writeAttribute(QXmlStreamAttribute("type",	QString::number(m_type)));
-    writer.writeEmptyElement("adjoining maps");
-    writer.writeAttribute(QXmlStreamAttribute("north",	m_mapnorth));
-    writer.writeAttribute(QXmlStreamAttribute("east",	m_mapeast));
-    writer.writeAttribute(QXmlStreamAttribute("south",	m_mapsouth));
-    writer.writeAttribute(QXmlStreamAttribute("west",	m_mapwest));
-    
+    if(!m_mapnorth.isEmpty() || !m_mapeast.isEmpty() ||!m_mapsouth.isEmpty() ||!m_mapwest.isEmpty())
+    {
+      writer.writeEmptyElement("adjoining maps");
+//       if(!m_mapnorth.isEmpty())
+	writer.writeAttribute(QXmlStreamAttribute("north",	m_mapnorth));
+//       if(!m_mapeast.isEmpty())
+	writer.writeAttribute(QXmlStreamAttribute("east",	m_mapeast));
+//       if(!m_mapsouth.isEmpty())
+	writer.writeAttribute(QXmlStreamAttribute("south",	m_mapsouth));
+//       if(!m_mapwest.isEmpty())
+	writer.writeAttribute(QXmlStreamAttribute("west",	m_mapwest));
+    }
     if(isCity())
     {
       writer.writeStartElement("city");
@@ -1184,7 +1231,10 @@ void Map::save(const QString &a_filename)
 
 Map &operator<=(Map &m1, const Map &m2)
 {
+  #ifdef DEBUG_MAP
   qWarning() << "Map &operator<=(Map &m1, const Map &m2)";
+  #endif
+  
   m1.setBackground(m2.background());
   m1.setCoordinates(m2.coordinates());
   m1.setMapeast(m2.mapeast());
@@ -1192,17 +1242,29 @@ Map &operator<=(Map &m1, const Map &m2)
   m1.setMapsouth(m2.mapsouth());
   m1.setMapwest(m2.mapwest());
   m1.setSize(m2.size());
+  
+  #ifdef DEBUG_MAP
   qWarning() << "  int m2type = m2.type();";
+  #endif
+  
   int m2type = m2.type();
   m1.setType(m2type);
-//   if(m2type == Map::Coast ^ Map::Citymap || m2type == Map::Land ^ Map::Citymap)
+  //   if(m2type == Map::Coast ^ Map::Citymap || m2type == Map::Land ^ Map::Citymap)
   if(m2.isCity())
   {
+    
+    #ifdef DEBUG_MAP
     qWarning() << "    m1.setCity(m2.city());" << m2.city()->name();
-//     if(m2.city() != 0)
-      m1.setCity(*m2.city());
+    #endif
+    
+    //     if(m2.city() != 0)
+    m1.setCity(*m2.city());
   }
+  
+  #ifdef DEBUG_MAP
   qWarning() << "  return m1;";
+  #endif
+  
   return m1;
 }
 

@@ -87,13 +87,13 @@ class MapFrame : public QGraphicsView
     //   int maptyp;
     //   QString maptypename;
     
-    QString bgi_filename; // Backgroundimage-FN
+//     QString bgi_filename; // Backgroundimage-FN
     //  bool isCity;
-    QString cityname;
+//     QString cityname;
     
-    QString mapname;
+//     QString mapname;
     
-    QString mapnorth, mapwest, mapsouth, mapeast;
+//     QString mapnorth, mapwest, mapsouth, mapeast;
     //  QList <ObjectGraphicsItem *> ogilist;
 
 //     QSize mapSize;
@@ -104,12 +104,11 @@ class MapFrame : public QGraphicsView
 
     QGraphicsItem *activeItem;
     //  QGraphicsPixmapItem *activePixmapItem;
-    bool itemSelected;
-    bool itemGrabbed;
-    int object_typ;
-    int object_ZValue;
-    QString object_filename;
-    QString object_tooltip;
+
+//     int object_typ;
+//     int object_ZValue;
+//     QString object_filename;
+//     QString object_tooltip;
     int x, y;
     QPoint ziel;
 
@@ -117,7 +116,7 @@ class MapFrame : public QGraphicsView
     QDialog *createObjectDialog;
     QString fd_filename;
 
-    QString objectName;
+//     QString objectName;
     
     void setMapSize(const QSize &);
     QSize mapSize() const {	return m_smap.size();	}
@@ -146,11 +145,13 @@ class MapFrame : public QGraphicsView
 //     void setToolTipString(QString);
 //     void setFileString(QString);
  
-    void getObjectID(const QString&);
-    void selectObject();
+//     void getObjectID(const QString&);
+//     void selectObject();
  
     void setXPos(int);
     void setYPos(int);
+    
+    void setCurrentItem(int);
     
 
  
@@ -176,15 +177,18 @@ class MapFrame : public QGraphicsView
   private:
       MapSettingsDialog *m_MapDialog;
       MapObjectDialog *m_ObjectDialog;
-
+      MapObject *m_CurrentObject;
+      QGraphicsItem *m_CurrentItem;
+      bool m_itemSelected;
+      bool m_itemGrabbed;
 //    Map *mapinstance();
 //      Map *m_map;
      
   signals:
     void mapChanged();
-    void newObjectCreated(QGraphicsItem *);
+//     void newObjectCreated(QGraphicsItem *);
 //     void fileStringChanged(QString);
-    void objectSelected(QGraphicsItem *);
+    void objectSelected(int);
     void objectMoved();
  
     void SIG_deleteObject();

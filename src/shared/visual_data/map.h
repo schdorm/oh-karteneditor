@@ -92,6 +92,7 @@ class Map
     QList <MapObject> *objects ()		{	return &m_ObjectList;	}
     
     QString filename 	()	const	{	return m_filename;	}
+    QString name	() 	const 	{	return m_name;		}
     QPoint coordinates	()	const	{	return m_coordinates;	}
     QSize size		()	const	{	return m_size;		}
     QString background	()	const	{	return m_background;	}
@@ -107,6 +108,7 @@ class Map
     void setCoordinates	(const QPoint &);
     void setSize		(const QSize &);
     void setBackground	(const QString &);
+    void setName(const QString&);
     
     void setMapnorth	(const QString &);
     void setMapsouth	(const QString &);
@@ -123,6 +125,7 @@ class Map
   protected:
     
     QString m_filename;
+    QString m_name;
     QPoint m_coordinates;
     QSize m_size;
     QString m_background;

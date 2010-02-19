@@ -73,13 +73,18 @@ class MainWindow : public QMainWindow
     
     void addNewObjectToList(QGraphicsItem *);
     
-    void updateItemList(int);
+    void updateData();
+    void updateSideBar(int);
     void updateSpinbox();
+    
+    void markListItem(int);	// argument is object-/item-id
+    
+    void sidebarHandler();
     
     void nameLineEditHandler(const QString &);
     void lineEditHandler(const QString &);
-    void sideBar_SelectFile();
-    void sideBar_FileSelected();
+//     void sideBar_SelectFile();
+//     void sideBar_FileSelected();
     void spinboxHandler();
     void typeComboBoxHandler(int);
     void markListItem(QGraphicsItem *);
@@ -97,11 +102,11 @@ class MainWindow : public QMainWindow
     void createOldLayout();
 
 enum itemListItemNames{
-en_mapproperties,
-en_mapnorth,
-en_mapwest,
-en_mapsouth,
-en_mapeast
+en_mapproperties = 0,
+en_mapnorth = 1,
+en_mapwest = 2,
+en_mapsouth = 3,
+en_mapeast = 4
 };
 
 

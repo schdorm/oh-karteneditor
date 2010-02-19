@@ -99,7 +99,8 @@ MainWindow::MainWindow()
 	QString message = tr("A context menu is available by right-clicking");
 	statusBar()->showMessage(message);
 
-	setWindowTitle(tr("Karteneditor"));
+	setWindowTitle(tr("OpenHanse Mapeditor"));
+	setWindowIcon(QIcon(":.img/icon_map_vertikal2.png"));
 	setMinimumSize(480, 360);
 	resize(800, 600);
 	
@@ -122,14 +123,16 @@ MainWindow::MainWindow()
 // 	connect(SideBar, SIGNAL(SIG_deleteObject()), this, SLOT(deleteCurrentObject()));
 // 	SideBar->itemListWidget->setCurrentRow(0);
 	}
-
-
-
+	
+	
+	connect(MapView, SIGNAL(mapChanged()), this, SLOT(updateData()));
+	
 	connect(MapView, SIGNAL(newObjectCreated(QGraphicsItem *)), this, SLOT(addNewObjectToList(QGraphicsItem*)));
 	
 
-	
-	connect(MapView, SIGNAL(objectSelected(QGraphicsItem*)), this, SLOT(markListItem(QGraphicsItem*)));
+	connect(MapView, SIGNAL(objectSelected(int)), this, SLOT(markListItem(int)));
+
+// 	connect(MapView, SIGNAL(objectSelected(QGraphicsItem*)), this, SLOT(markListItem(QGraphicsItem*)));
 	
 	connect(MapView, SIGNAL(objectMoved()), this, SLOT(updateSpinbox()));
 	
@@ -235,16 +238,17 @@ void MainWindow::createOldLayout()
   SideBar = new SideBarClass(this);
   SideBar->setParent(centralWidget());
   centralWidget()->layout()->addWidget(SideBar);
-  connect(SideBar->nameLineEdit, SIGNAL(textEdited(QString)), this, SLOT(nameLineEditHandler(QString)));
+  //    connect(SideBar->nameLineEdit, SIGNAL(textEdited(QString)), this, SLOT(nameLineEditHandler(QString)));
   connect(SideBar->itemListWidget, SIGNAL(currentRowChanged(int)), this, SLOT(updateItemList(int)));
-  connect(SideBar->itemTyp, SIGNAL(activated(int)), this, SLOT(typeComboBoxHandler(int)));
-  connect(SideBar->selectFileButton, SIGNAL(clicked()), this, SLOT(sideBar_SelectFile()));
-  connect(SideBar->editToolTip, SIGNAL(textEdited(QString)), this, SLOT(lineEditHandler(QString)));
-  connect(SideBar->XBox, SIGNAL(valueChanged(int)), this, SLOT(spinboxHandler()));
-  connect(SideBar->YBox, SIGNAL(valueChanged(int)), this, SLOT(spinboxHandler()));
-  // 	connect(SideBar->XBox, SIGNAL(editingFinished()), this, SLOT(spinboxHandler()));
-  // 	connect(SideBar->YBox, SIGNAL(editingFinished()), this, SLOT(spinboxHandler()));
-  connect(SideBar->ZBox, SIGNAL(valueChanged(double)), this, SLOT(spinboxHandler()));
+  //   connect(SideBar->itemTyp, SIGNAL(activated(int)), this, SLOT(typeComboBoxHandler(int)));
+  //   connect(SideBar->selectFileButton, SIGNAL(clicked()), this, SLOT(sideBar_SelectFile()));
+  //   connect(SideBar->editToolTip, SIGNAL(textEdited(QString)), this, SLOT(lineEditHandler(QString)));
+  //   connect(SideBar->XBox, SIGNAL(valueChanged(int)), this, SLOT(spinboxHandler()));
+  //   connect(SideBar->YBox, SIGNAL(valueChanged(int)), this, SLOT(spinboxHandler()));
+  //   // 	connect(SideBar->XBox, SIGNAL(editingFinished()), this, SLOT(spinboxHandler()));
+  //   // 	connect(SideBar->YBox, SIGNAL(editingFinished()), this, SLOT(spinboxHandler()));
+  //   connect(SideBar->ZBox, SIGNAL(valueChanged(double)), this, SLOT(spinboxHandler()));
+  connect(SideBar, SIGNAL(dataChanged()), this, SLOT(updateData()));
   connect(SideBar, SIGNAL(SIG_deleteObject()), this, SLOT(deleteCurrentObject()));
   SideBar->fillList(MapView->scene()->items());
   SideBar->itemListWidget->setCurrentRow(0);
@@ -256,7 +260,8 @@ void MainWindow::newMap()
   if(SETTINGS->oldlayout())
   {
     SideBar->itemListWidget->clear();
-    SideBar->itemListWidget->addItems(SideBar->staticListEntries);
+//     SideBar->itemListWidget->addItems(SideBar->staticListEntries);
+    SideBar->addStaticListItems();
     SideBar->XBox->setValue(1000);
     SideBar->YBox->setValue(1000);
     SideBar->ZBox->setValue(0);
@@ -287,6 +292,7 @@ void MainWindow::loadAutoSave()
       MapView->newMap();
     }
   }
+  
 }
 
 //  void MainWindow::open()
@@ -311,6 +317,9 @@ void MainWindow::loadMap()
   }
   
   MapView->loadMap(mapfilename);
+  
+  setWindowTitle(QFileInfo(MapView->map()->filename()).baseName() + tr(" - OpenHanse Mapeditor"));
+
   
   if(SETTINGS->oldlayout())
     SideBar->itemListWidget->setCurrentRow(0);
@@ -351,7 +360,7 @@ void MainWindow::autoSave()
  
   MapView->map()->save( QFileDialog::getSaveFileName(this, tr("Save File"), QString() , tr("OpenHanse maps (*.ohm);; All Files (*)")));
 
-  setWindowTitle(MapView->map()->filename());
+  setWindowTitle(QFileInfo(MapView->map()->filename()).baseName() + tr(" - OpenHanse Mapeditor"));
  //MapView->saveMap(MapView->filename);
  ///connect(MapView->fd, SIGNAL(accepted()), this, SLOT(savef()));
  
@@ -444,7 +453,7 @@ qWarning() << "MainWindow::addNewObjectToList(QGraphicsItem *newObject) :: ID:" 
 if(SETTINGS->oldlayout())
 {
   QListWidgetItem *lwi = new QListWidgetItem(newObject->data(MapFrame::Name).toString(), SideBar->itemListWidget);
-  lwi->setData(64, newObject->data(MapFrame::ID).toInt());
+  lwi->setData(Qt::UserRole, newObject->data(MapFrame::ID).toInt());
   // 	SideBar->itemListWidget->addItem(newObject->data(MapFrame::Name));
   
   qWarning() << newObject->data(MapFrame::Name);
@@ -455,7 +464,18 @@ if(SETTINGS->oldlayout())
 }
 }
 
-void MainWindow::updateItemList(int selectedItemRow)
+
+void MainWindow::updateData()
+{
+  autoSaved = false;
+  
+  if(SETTINGS->oldlayout())
+  {
+    spinboxHandler();
+  }
+}
+
+void MainWindow::updateSideBar(int selectedItemRow)
 {
   if(SETTINGS->oldlayout())
   {
@@ -471,15 +491,16 @@ void MainWindow::updateItemList(int selectedItemRow)
 // 			SideBar->fileView->setText(QString(MapView->bgi_filename).right(39).prepend("..."));
 // 		}
 // 		else
-		SideBar->fileView->setText(MapView->bgi_filename);
+		SideBar->fileView->setText(MapView->map()->background());
 		SideBar->nameLineEdit->setEnabled(true);
 		//SideBar->editToolTip->setToolTip(tr("Comment"));
 // 		SideBar->editToolTip->setEnabled(false);
 // 		SideBar->editToolTip->setText(QString());
-		if(MapView->maptyp == (Map::Land ^ Map::Citymap) || MapView->maptyp == (Map::Coast ^ Map::Citymap))
+// 		if(MapView->maptyp == (Map::Land ^ Map::Citymap) || MapView->maptyp == (Map::Coast ^ Map::Citymap))
+		if(MapView->map()->isCity())
 		{
 			SideBar->editToolTip->setEnabled(true);
-			SideBar->editToolTip->setText(MapView->cityname);
+			SideBar->editToolTip->setText(MapView->map()->city()->name());
 		}
 		else
 		{
@@ -504,17 +525,18 @@ void MainWindow::updateItemList(int selectedItemRow)
 				}
 			
 			SideBar->CB_mapprops = true;
-			int MapTypeRow = MapView->maptyp;
-			qWarning() << MapTypeRow;
+// 			int MapTypeRow = MapView->maptyp;
+// 			qWarning() << MapTypeRow;
 // 			SideBar->itemTyp->setCurrentIndex(SideBar->itemTyp->findText(MapView->maptypename));
-			SideBar->itemTyp->setCurrentIndex(MapTypeRow);
+// 			SideBar->itemTyp->setCurrentIndex(MapTypeRow);
 		}
-		SideBar->nameLineEdit->setText(MapView->mapname);
+	  SideBar->itemTyp->setCurrentIndex(SideBar->itemTyp->findData(QVariant(MapView->map()->type())));
+		SideBar->nameLineEdit->setText(MapView->map()->filename());
 		SideBar->ZBox->setEnabled(false);
 		SideBar->YBox->setEnabled(true);
 		SideBar->XBox->setEnabled(true);
-		SideBar->XBox->setValue(MapView->mapSize().width());
-		SideBar->YBox->setValue(MapView->mapSize().height());
+		SideBar->XBox->setValue(MapView->map()->size().width());
+		SideBar->YBox->setValue(MapView->map()->size().height());
 		break;
 	}
 
@@ -531,7 +553,7 @@ void MainWindow::updateItemList(int selectedItemRow)
 // 			SideBar->fileView->setText(QString(MapView->mapnorth).right(39).prepend("..."));
 // 		}
 // 		else
-		SideBar->fileView->setText(MapView->mapnorth);
+		SideBar->fileView->setText(MapView->map()->mapnorth());
 		SideBar->ZBox->setEnabled(false);
 		SideBar->YBox->setEnabled(false);
 		SideBar->XBox->setEnabled(false);
@@ -550,7 +572,7 @@ void MainWindow::updateItemList(int selectedItemRow)
 // 			SideBar->fileView->setText(QString(MapView->mapwest).right(39).prepend("..."));
 // 		}
 // 		else
-		SideBar->fileView->setText(MapView->mapwest);
+		SideBar->fileView->setText(MapView->map()->mapwest());
 		SideBar->ZBox->setEnabled(false);
 		SideBar->YBox->setEnabled(false);
 		SideBar->XBox->setEnabled(false);
@@ -570,7 +592,7 @@ void MainWindow::updateItemList(int selectedItemRow)
 // 			SideBar->fileView->setText(QString(MapView->mapsouth).right(39).prepend("..."));
 // 		}
 // 		else
-		SideBar->fileView->setText(MapView->mapsouth);
+		SideBar->fileView->setText(MapView->map()->mapsouth());
 		SideBar->ZBox->setEnabled(false);
 		SideBar->YBox->setEnabled(false);
 		SideBar->XBox->setEnabled(false);
@@ -590,7 +612,7 @@ void MainWindow::updateItemList(int selectedItemRow)
 // 			SideBar->fileView->setText(QString(MapView->mapeast).right(39).prepend("..."));
 // 		}
 // 		else
-		SideBar->fileView->setText(MapView->mapeast);
+		SideBar->fileView->setText(MapView->map()->mapeast());
 		SideBar->ZBox->setEnabled(false);
 		SideBar->YBox->setEnabled(false);
 		SideBar->XBox->setEnabled(false);
@@ -623,10 +645,10 @@ void MainWindow::updateItemList(int selectedItemRow)
 // 		for(QList<QGraphicsItem>::iterator it = MapView->ogilist.begin(); it != MapView->ogilist.end(); ++it)
 		foreach(MapView->activeItem, MapView->scene()->items())
 		{
-			qWarning() << "Item-ID:" << MapView->activeItem->data(MapFrame::ID).toInt();
-			if(MapView->activeItem->data(MapFrame::ID).toInt() == SideBar->itemListWidget->currentItem()->data(64).toInt())
+			qWarning() << "Item-ID:" << MapView->activeItem->data(Qt::UserRole).toInt();
+			if(MapView->activeItem->data(Qt::UserRole).toInt() == SideBar->itemListWidget->currentItem()->data(Qt::UserRole).toInt())
 			{
-				qWarning() << MapView->activeItem->data(MapFrame::ID);
+				qWarning() << MapView->activeItem->data(Qt::UserRole);
 				break;
 			}
 		}
@@ -689,89 +711,91 @@ void MainWindow::updateItemList(int selectedItemRow)
   } // endif oldlayout
 }
 
-void MainWindow::sideBar_SelectFile()
-{
-  if(SETTINGS->oldlayout())
-  {
-    qWarning() << "MainWindow::sideBar_SelectFile()";
-    if(SideBar->itemListWidget->currentRow() == 0 || SideBar->itemListWidget->currentRow() > 4)
-    {
-      ///MapView->fileDialog(NameFilters::Img);
-    }
-    else
-    {
-      ///MapView->fileDialog(NameFilters::Map);
-    }
-    /// connect(MapView->fd, SIGNAL(accepted()), this, SLOT(sideBar_FileSelected()));
-  }
-}
+// void MainWindow::sideBar_SelectFile()
+// {
+//   if(SETTINGS->oldlayout())
+//   {
+//     qWarning() << "MainWindow::sideBar_SelectFile()";
+//     if(SideBar->itemListWidget->currentRow() == 0 || SideBar->itemListWidget->currentRow() > 4)
+//     {
+//       ///MapView->fileDialog(NameFilters::Img);
+//     }
+//     else
+//     {
+//       ///MapView->fileDialog(NameFilters::Map);
+//     }
+//     /// connect(MapView->fd, SIGNAL(accepted()), this, SLOT(sideBar_FileSelected()));
+//   }
+// }
 
-void MainWindow::sideBar_FileSelected()
-{
-  autoSaved = false;
-  
-  qWarning() << "MainWindow::sideBar_FileSelected()";
-  ///disconnect(MapView->fd, SIGNAL(accepted()), this, SLOT(sideBar_FileSelected()));
-	
-	if(SETTINGS->oldlayout())
-	  SideBar->fileView->setText(MapView->fd_filename);
-
-	switch(SideBar->itemListWidget->currentRow())
-	{
-	case 0:
-	{
-		MapView->bgi_filename = MapView->fd_filename;
-		MapView->scene()->setBackgroundBrush(QBrush(QImage(MapView->bgi_filename)));
-		break;
-	}
-	case 1:
-	{
-		MapView->mapnorth = MapView->fd_filename;
-		break;
-	}
-	case 2:
-	{
-		MapView->mapwest = MapView->fd_filename;
-		break;
-	}
-	case 3:
-	{
-		MapView->mapsouth = MapView->fd_filename;
-		break;
-	}
-	case 4:
-	{
-		MapView->mapeast = MapView->fd_filename;
-		break;
-	}
-	default:
-	{
-
-		if(MapView->fd_filename.endsWith(".svg") && MapView->activeItem->data(MapFrame::Filename).toString().endsWith(".svg"))
-		{
-		QMessageBox *warning = new QMessageBox();
-		warning->setText("Change SVG-Files is not supported yet!");
-		warning->exec();
-// 		QGraphicsSvgItem *svgitem = qgraphicsitem_cast<QGraphicsSvgItem*>(MapView->activeItem);
-		}
-		else
-		{
-		MapView->activeItem->setData(MapFrame::Filename, MapView->fd_filename);
-
-		QGraphicsPixmapItem *gpi = qgraphicsitem_cast<QGraphicsPixmapItem*>(MapView->activeItem);
-		
-		if(gpi != 0)
-		{
-		gpi->setPixmap(QPixmap(MapView->fd_filename));
-		}
-// 		GI2GPMI( MapView->activeItem )->setPixmap(QPixmap(MapView->fd_filename));
-		
-//		MapView->pixmapItemList[MapView->activeItem]->setPixmap(QPixmap(MapView->fd_filename));
-		}
-		break;
-	}
-	}
-}
+// void MainWindow::sideBar_FileSelected()
+// {
+//   autoSaved = false;
+//   
+//   qWarning() << "MainWindow::sideBar_FileSelected()";
+//   ///disconnect(MapView->fd, SIGNAL(accepted()), this, SLOT(sideBar_FileSelected()));
+//   
+//   if(SETTINGS->oldlayout())
+//   {
+//     SideBar->fileView->setText(MapView->fd_filename);
+//     
+//     switch(SideBar->itemListWidget->currentRow())
+//     {
+//       case 0:
+//       {
+// 	// 		MapView->bgi_filename = MapView->fd_filename;
+// 	// 		MapView->scene()->setBackgroundBrush(QBrush(QImage(MapView->bgi_filename)));
+// 	break;
+//       }
+//       case 1:
+//       {
+// 	// 		MapView->mapnorth = MapView->fd_filename;
+// 	break;
+//       }
+//       case 2:
+//       {
+// 	// 		MapView->mapwest = MapView->fd_filename;
+// 	break;
+//       }
+//       case 3:
+//       {
+// 	// 		MapView->mapsouth = MapView->fd_filename;
+// 	break;
+//       }
+//       case 4:
+//       {
+// 	// 		MapView->mapeast = MapView->fd_filename;
+// 	break;
+//       }
+//       default:
+//       {
+// 	
+// 	/*		if(MapView->fd_filename.endsWith(".svg") && MapView->activeItem->data(MapFrame::Filename).toString().endsWith(".svg"))
+// 	{
+// 	  QMessageBox *warning = new QMessageBox();
+// 	  warning->setText("Change SVG-Files is not supported yet!");
+// 	  warning->exec();
+// 	  // 		QGraphicsSvgItem *svgitem = qgraphicsitem_cast<QGraphicsSvgItem*>(MapView->activeItem);
+//       }
+//       else
+//       {
+// 	MapView->activeItem->setData(MapFrame::Filename, MapView->fd_filename);
+// 	
+// 	QGraphicsPixmapItem *gpi = qgraphicsitem_cast<QGraphicsPixmapItem*>(MapView->activeItem);
+// 	
+// 	if(gpi != 0)
+// 	{
+// 	  gpi->setPixmap(QPixmap(MapView->fd_filename));
+//       }
+//       // 		GI2GPMI( MapView->activeItem )->setPixmap(QPixmap(MapView->fd_filename));
+//       
+//       //		MapView->pixmapItemList[MapView->activeItem]->setPixmap(QPixmap(MapView->fd_filename));
+//     }
+//     break;*/
+//       }
+//     }
+//   }
+// }
 
 void MainWindow::spinboxHandler()
 {
@@ -820,17 +844,17 @@ void MainWindow::typeComboBoxHandler(/*const QString &*/ int typ)
 	if(!SideBar->CB_mapprops)		// holds the property, if the type-combo-box contains the maptype-Properties or the object-type-properties
 	{
 // 		MapView->setObjectType(typ);
-		MapView->activeItem->setData(MapFrame::Function, SideBar->itemTyp->itemData(typ));
-		qWarning() << MapView->object_typ << MapView->activeItem->data(MapFrame::Function).toInt();
+/// 		MapView->activeItem->setData(MapFrame::Function, SideBar->itemTyp->itemData(typ));
+// 		qWarning() << MapView->activeItem->data(MapFrame::Function).toInt();
 	}
 	else
 	{
 // 		MapView->setMapType(typ);
 		MapView->maptyp = SideBar->itemTyp->itemData(typ).toInt();
-		if(MapView->maptyp == (Map::Land ^ Map::Citymap) || MapView->maptyp == (Map::Coast ^ Map::Citymap))
+		if(MapView->map()->isCity())
 		{
 			SideBar->editToolTip->setEnabled(true);
-			SideBar->editToolTip->setText(MapView->cityname);
+			SideBar->editToolTip->setText(MapView->map()->city()->name());
 		}
 		else
 		{
@@ -848,12 +872,12 @@ void MainWindow::lineEditHandler(const QString &text)
     autoSaved = false;
 	if(SideBar->itemListWidget->currentRow() == 0 )
 	{
-	MapView->cityname = text;
+	MapView->map()->city()->setName(text);
 	}
 	else if(SideBar->itemListWidget->currentRow() > 4)
 	{
-	MapView->activeItem->setData(MapFrame::Tooltip, text);
- 	MapView->activeItem->setToolTip(text);
+// 	MapView->activeItem->setData(MapFrame::Tooltip, text);
+//  	MapView->activeItem->setToolTip(text);
 	}
   }
 }
@@ -866,13 +890,37 @@ void MainWindow::nameLineEditHandler(const QString &text)
     autoSaved = false;
 	if(SideBar->itemListWidget->currentRow() == 0 )
 	{
-	MapView->mapname = text;
+	MapView->map()->setName(text);
 	}
 	else if(SideBar->itemListWidget->currentRow() > 4 && !QString(text).trimmed().simplified().isEmpty())
 	{
-	MapView->activeItem->setData(MapFrame::Name, text);
-	SideBar->itemListWidget->currentItem()->setText(text);
+// 	MapView->activeItem->setData(MapFrame::Name, text);
+// 	SideBar->itemListWidget->currentItem()->setText(text);
 	}
+  }
+}
+
+void MainWindow::markListItem(int a_objectid)
+{
+  if(SETTINGS->oldlayout())
+  {
+    qWarning() << "void MainWindow::markListItem(int a_objectid)";
+    if(a_objectid > 0)
+    {
+      for(int i = 0; i < SideBar->itemListWidget->count(); i++)
+      {
+	qWarning() << SideBar->itemListWidget->item(i)->data(Qt::UserRole);
+	if(SideBar->itemListWidget->item(i)->data(Qt::UserRole).toInt() == a_objectid)
+	{
+	  SideBar->itemListWidget->setCurrentRow(i);
+	  i = SideBar->itemListWidget->count();
+	}
+      }
+    }
+    else if(a_objectid == -1)
+    {
+      SideBar->itemListWidget->setCurrentRow(0);
+    }
   }
 }
 
@@ -894,7 +942,7 @@ void MainWindow::markListItem(QGraphicsItem *selectedItem)
 	for(int i = 0; i < SideBar->itemListWidget->count(); i++)
 	{
 	  qWarning() << SideBar->itemListWidget->item(i)->data(0);
-	  if(SideBar->itemListWidget->item(i)->data(64).toInt() == selectedItem->data(MapFrame::ID))
+	  if(SideBar->itemListWidget->item(i)->data(Qt::UserRole).toInt() == selectedItem->data(MapFrame::ID))
 	  {
 		SideBar->itemListWidget->setCurrentRow(i);
 		break;
@@ -904,6 +952,242 @@ void MainWindow::markListItem(QGraphicsItem *selectedItem)
   }
 }
 
+void MainWindow::sidebarHandler()
+{
+  int selectedItemRow;
+  if(SETTINGS->oldlayout())
+  {
+    if(selectedItemRow >= 0)
+    {
+      qWarning() << "MainWindow::updateItemList(int selectedItemRow)" << selectedItemRow;
+      switch(selectedItemRow)
+      {
+	case en_mapproperties:	//mapbackgroundimagefilepath !-! allgemeine Mapprops
+	{
+// 		if(MapView->bgi_filename.size() > 43)
+// 		{
+// 			SideBar->fileView->setText(QString(MapView->bgi_filename).right(39).prepend("..."));
+// 		}
+// 		else
+		SideBar->fileView->setText(MapView->map()->background());
+		SideBar->nameLineEdit->setEnabled(true);
+		//SideBar->editToolTip->setToolTip(tr("Comment"));
+// 		SideBar->editToolTip->setEnabled(false);
+// 		SideBar->editToolTip->setText(QString());
+// 		if(MapView->maptyp == (Map::Land ^ Map::Citymap) || MapView->maptyp == (Map::Coast ^ Map::Citymap))
+		if(MapView->map()->isCity())
+		{
+			SideBar->editToolTip->setEnabled(true);
+			SideBar->editToolTip->setText(MapView->map()->city()->name());
+		}
+		else
+		{
+			SideBar->editToolTip->setEnabled(false);
+			SideBar->editToolTip->setText(QString());
+		}
+		
+		SideBar->selectFileButton->setEnabled(true);
+//  		SideBar->selectFileButton->setDefault(true);
+
+		SideBar->itemTyp->setEnabled(true);
+		if(!SideBar->CB_mapprops)
+		{
+			SideBar->itemTyp->clear();
+// 			SideBar->itemTyp->addItems(MapView->MapTypeEntries);
+			
+				QHashIterator <int, QString> it(SideBar->maptypelabels());
+				while(it.hasNext())
+				{
+					it.next();
+					SideBar->itemTyp->addItem(it.value(), it.key());
+				}
+			
+			SideBar->CB_mapprops = true;
+// 			int MapTypeRow = MapView->maptyp;
+// 			qWarning() << MapTypeRow;
+// 			SideBar->itemTyp->setCurrentIndex(SideBar->itemTyp->findText(MapView->maptypename));
+// 			SideBar->itemTyp->setCurrentIndex(MapTypeRow);
+		}
+	  SideBar->itemTyp->setCurrentIndex(SideBar->itemTyp->findData(QVariant(MapView->map()->type())));
+		SideBar->nameLineEdit->setText(MapView->map()->filename());
+		SideBar->ZBox->setEnabled(false);
+		SideBar->YBox->setEnabled(true);
+		SideBar->XBox->setEnabled(true);
+		SideBar->XBox->setValue(MapView->map()->size().width());
+		SideBar->YBox->setValue(MapView->map()->size().height());
+		break;
+	}
+
+	case en_mapnorth:		//Map: North
+	{
+		SideBar->itemTyp->setEnabled(false);
+		SideBar->editToolTip->setEnabled(false);
+		SideBar->nameLineEdit->setEnabled(false);
+		SideBar->selectFileButton->setEnabled(true);
+		SideBar->editToolTip->setText(QString());
+		SideBar->nameLineEdit->setText(QString());
+// 		if(MapView->mapnorth.size() > 43)
+// 		{
+// 			SideBar->fileView->setText(QString(MapView->mapnorth).right(39).prepend("..."));
+// 		}
+// 		else
+		SideBar->fileView->setText(MapView->map()->mapnorth());
+		SideBar->ZBox->setEnabled(false);
+		SideBar->YBox->setEnabled(false);
+		SideBar->XBox->setEnabled(false);
+		break;
+	}
+	case en_mapwest:	//Map: West
+	{
+		SideBar->itemTyp->setEnabled(false);
+		SideBar->editToolTip->setEnabled(false);
+		SideBar->nameLineEdit->setEnabled(false);
+		SideBar->selectFileButton->setEnabled(true);
+		SideBar->editToolTip->setText(QString());
+		SideBar->nameLineEdit->setText(QString());
+// 		if(MapView->mapwest.size() > 43)
+// 		{
+// 			SideBar->fileView->setText(QString(MapView->mapwest).right(39).prepend("..."));
+// 		}
+// 		else
+		SideBar->fileView->setText(MapView->map()->mapwest());
+		SideBar->ZBox->setEnabled(false);
+		SideBar->YBox->setEnabled(false);
+		SideBar->XBox->setEnabled(false);
+		break;
+	}
+	case en_mapsouth:	//Map: South
+	{
+		SideBar->itemTyp->setEnabled(false);
+		SideBar->editToolTip->setEnabled(false);
+		SideBar->nameLineEdit->setEnabled(false);
+		SideBar->selectFileButton->setEnabled(true);
+		SideBar->editToolTip->setText(QString());
+		SideBar->nameLineEdit->setText(QString());
+
+// 		if(MapView->mapsouth.size() > 43)
+// 		{
+// 			SideBar->fileView->setText(QString(MapView->mapsouth).right(39).prepend("..."));
+// 		}
+// 		else
+		SideBar->fileView->setText(MapView->map()->mapsouth());
+		SideBar->ZBox->setEnabled(false);
+		SideBar->YBox->setEnabled(false);
+		SideBar->XBox->setEnabled(false);
+		break;
+	}
+	case en_mapeast:	//Map: East
+	{
+		SideBar->itemTyp->setEnabled(false);
+		SideBar->editToolTip->setEnabled(false);
+		SideBar->nameLineEdit->setEnabled(false);
+		SideBar->selectFileButton->setEnabled(true);
+		SideBar->editToolTip->setText(QString());
+		SideBar->nameLineEdit->setText(QString());
+
+// 		if(MapView->mapeast.size() > 43)
+// 		{
+// 			SideBar->fileView->setText(QString(MapView->mapeast).right(39).prepend("..."));
+// 		}
+// 		else
+		SideBar->fileView->setText(MapView->map()->mapeast());
+		SideBar->ZBox->setEnabled(false);
+		SideBar->YBox->setEnabled(false);
+		SideBar->XBox->setEnabled(false);
+		break;
+	}
+	default:		//MapObject
+	{
+		SideBar->editToolTip->setEnabled(true);
+		SideBar->selectFileButton->setEnabled(true);
+		SideBar->nameLineEdit->setEnabled(true);
+		SideBar->YBox->setEnabled(true);
+		SideBar->XBox->setEnabled(true);
+		SideBar->ZBox->setEnabled(true);
+		SideBar->itemTyp->setEnabled(true);
+		
+		if(SideBar->CB_mapprops)
+		{
+			SideBar->itemTyp->clear();
+				QHashIterator <int, QString> it(SideBar->functionlabels());
+				while(it.hasNext())
+				{
+					it.next();
+					SideBar->itemTyp->addItem(it.value(), it.key());
+				}
+// 			SideBar->itemTyp->addItems(MapView->ObjectTypeEntries);
+			SideBar->CB_mapprops = false;
+		}
+// 		QGraphicsItem *blah = new QGraphicsItem();
+// 		MapView->activeItem = blah:
+// 		for(QList<QGraphicsItem>::iterator it = MapView->ogilist.begin(); it != MapView->ogilist.end(); ++it)
+		foreach(MapView->activeItem, MapView->scene()->items())
+		{
+			qWarning() << "Item-ID:" << MapView->activeItem->data(Qt::UserRole).toInt();
+			if(MapView->activeItem->data(Qt::UserRole).toInt() == SideBar->itemListWidget->currentItem()->data(Qt::UserRole).toInt())
+			{
+				qWarning() << MapView->activeItem->data(Qt::UserRole);
+				break;
+			}
+		}
+//  		MapView->activeItem = MapView->itemMapList.value(SideBar->itemListWidget->currentItem()->text());
+		
+// 		MapView->activeItem->setPos(10000,1000);
+// 				qWarning() << "DebugMeldung";
+		
+		SideBar->XBox->setValue(MapView->activeItem->x());
+		SideBar->YBox->setValue(MapView->activeItem->y());
+
+		SideBar->ZBox->setValue(MapView->activeItem->zValue());
+		
+		
+		int obj_id = MapView->activeItem->data(MapFrame::Function).toInt();
+		qWarning() << obj_id;
+		
+		for(int i = 0; i< SideBar->itemTyp->count(); i++)
+		{
+			if(SideBar->itemTyp->itemData(i).toInt() == obj_id)
+			{
+			SideBar->itemTyp->setCurrentIndex(i);
+			break;
+			}
+		}
+// 		if(obj_id < 100)
+// 		{
+// 			SideBar->itemTyp->setCurrentIndex(obj_id);
+// 		}
+// 		else if(obj_id >= 100 && obj_id < 500)
+// 		{
+// 			SideBar->itemTyp->setCurrentIndex(SideBar->itemTyp->count() - 3);
+// 		}
+// 		else if(obj_id >= 500 && obj_id < 1000)
+// 		{
+// 			SideBar->itemTyp->setCurrentIndex(SideBar->itemTyp->count() - 2);
+// 		}
+// 		else if(obj_id >= 1000)
+// 		{
+// 			SideBar->itemTyp->setCurrentIndex(SideBar->itemTyp->count() - 1);
+// 		}
+		SideBar->editToolTip->setText(MapView->activeItem->data(MapFrame::Tooltip).toString());
+		SideBar->nameLineEdit->setText(MapView->activeItem->data(MapFrame::Name).toString());
+		
+		
+// 		if(MapView->activeItem->data(MapFrame::Filename).toString().size() > 43)
+// 		{
+// 			SideBar->fileView->setText(QString(MapView->activeItem->data(MapFrame::Filename).toString().right(39).prepend("...")));
+// 			
+// 		}
+// 		else
+		{
+			SideBar->fileView->setText(MapView->activeItem->data(MapFrame::Filename).toString());
+		}
+		
+		break;
+	}
+      } // end switch-case
+    } // endif selectedRow >= 0
+  } // endif oldlayout
+}
 
 void MainWindow::deleteCurrentObject()
 { 

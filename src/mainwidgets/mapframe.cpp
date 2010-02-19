@@ -84,7 +84,7 @@ MapFrame::MapFrame( const MainWindow *mainwin)
 //  mt_land_city = tr("Land (Stadt)");
 //  MapTypeEntries << mt_sea  << mt_coast << mt_land << mt_coast_city << mt_land_city;
  
-  itemGrabbed = false;
+  m_itemGrabbed = false;
 }
 
 MapFrame::~MapFrame()
@@ -103,7 +103,7 @@ void MapFrame::newMap()
   
   scene()->clear();
   setSceneRect(QRectF(QPoint(0, 0), m_smap.size()));
-  itemSelected = false;
+  m_itemSelected = false;
   scene()->setBackgroundBrush(QBrush());
 }
 
@@ -114,7 +114,13 @@ void MapFrame::saveMap(const QString &a_filename)
 
 bool MapFrame::loadMap(const QString &a_filename)
 {
-  return m_smap.load(a_filename);
+  if(m_smap.load(a_filename))
+  {
+    applyMapSettings();
+    return true;
+  }
+  else
+    return false;
 }
 
 /*void MapFrame::saveMap(QString save_filename)
@@ -692,6 +698,7 @@ void MapFrame::showMap()		/// generates a viewable result of the data stored in 
 void MapFrame::applyMapSettings()
 {
   scene()->setBackgroundBrush(QBrush(QPixmap(m_smap.background())));
+  setSceneRect(QRectF(sceneRect().topLeft(), m_smap.size()));
 }
 
 void MapFrame::setMap(const Map &a_map)
@@ -755,6 +762,27 @@ Map MapFrame::map() const
 {
   return m_smap;
 }
+
+void MapFrame::setCurrentItem(int a_id)
+{
+  //   QGraphicsItem *f_item;
+  if(m_currentGraphicsItem->data(Qt::UserRole).toInt() != a_id)
+  {
+    for(QList<QGraphicsItem*>::const_iterator f_item = scene()->items().begin(); f_item != scene()->items().end() || (*f_item)->data(Qt::UserRole).toInt() == a_id; ++ f_item)
+    {
+      m_currentGraphicsItem = *f_item;
+    }
+  }
+  if(m_currentMapObject->id() != a_id)
+  {
+//     const QList<MapObject*> &molist = map()->objects();
+    for(QList<MapObject>::iterator f_mo = m_smap.objects()->begin(); f_mo != m_smap.objects()->end() || f_mo->id() == a_id; ++ f_mo)
+    {
+      m_currentMapObject = &*f_mo;
+    }
+  }
+}
+
 
 
 const QGraphicsItem * MapFrame::currentGraphicsItem() const
@@ -876,143 +904,111 @@ const MapObject * MapFrame::currentMapObject () const
 		connect(YBox_MV, SIGNAL(valueChanged(int)), this, SLOT(setYPos(int)));
 // 		setObjectType(ot_market);
  }*/
- 
- void MapFrame::mousePressEvent(QMouseEvent *event)
- {
-   
- qWarning() << "MapFrame::mousePressEvent(QMouseEvent *event)";
- if(event->buttons() == Qt::LeftButton)
- {
- if(!itemGrabbed)
- {
+
+void MapFrame::mousePressEvent(QMouseEvent *event)
+{
+  qWarning() << "MapFrame::mousePressEvent(QMouseEvent *event)";
+  if(event->buttons() == Qt::LeftButton)
+  {
+    if(!m_itemGrabbed)
+    {
       int tx = event->x() + horizontalScrollBar()->value();
       int ty = event->y() + verticalScrollBar()->value();
       ziel = QPoint(tx, ty);
-//  ziel = event->pos();
-	QList<QGraphicsItem *> QGIlistAtClick = items(event->pos());
-	QList<QGraphicsItem *> &gilist = QGIlistAtClick;
+      
+      QList<QGraphicsItem *> f_gilist = items(event->pos());
+      //       QList<QGraphicsItem *> &gilist = QGIlistAtClick;
+      
+      qWarning() << "items(event->pos()); - Anzahl:" <<  f_gilist.size();
+      if(f_gilist.isEmpty())
+      {
+	event->ignore();
+	return;
+      }
+      else if(f_gilist.size() == 1)
+      {
 	
-// 		 QGraphicsItem *Cit = 0;
-// 	 QGIlistAtClick.clear();
-// 	 QGIlistAtClick = scene()->items();
-// 		foreach(Cit, QGIlistAtClick)
-// 		{
-// 		qWarning() << "CIT-Data(0)"<< Cit->data(0).toInt();
-// 		}
+	activeItem = f_gilist.first();
+	m_currentGraphicsItem = activeItem;
+	setCurrentItem(m_currentGraphicsItem->data(Qt::UserRole).toInt());
 	
+	emit objectSelected(m_currentGraphicsItem->data(Qt::UserRole).toInt());
+	m_itemSelected = true;
 	
-	qWarning() << "items(event->pos()); - Anzahl:" <<  QGIlistAtClick.size();
-	if(QGIlistAtClick.isEmpty())
-	{
-	  event->ignore();
-	  return;
-// 		object_tooltip = QString();
-// 		object_filename = QString();
-// 		fd_filename = QString();
-// 		newObjectDialog(ziel);
-	}
-	else
-	{
-// 		ObjectGraphicsItem *tempogi = 0;
-/*		QList<ObjectGraphicsItem *> matchingOGI;
-		for(QList<QGraphicsItem *>::iterator Cit = QGIlistAtClick.begin(); Cit != QGIlistAtClick.end(); ++Cit)
-// QGraphicsItem *Cit = 0;
-// 		foreach(Cit, QGIlistAtClick)
+      }
+      else if(f_gilist.contains(activeItem) && m_itemSelected)
+      {
+	m_itemGrabbed = true;
+      }
+      
+    }
+  }
+  else if(event->button() == Qt::RightButton)
+  {
+    activeItem = 0;
+    m_currentGraphicsItem = 0;
+    m_currentMapObject = 0;
+    m_itemSelected = false;
+    m_itemGrabbed = false;
+    emit objectSelected( -1 );
+  }
+}
+// 	else
+	// 	{
+	  // 		ObjectGraphicsItem *tempogi = 0;
+	  /*		QList<ObjectGraphicsItem *> matchingOGI;
+	  for(QList<QGraphicsItem *>::iterator Cit = QGIlistAtClick.begin(); Cit != QGIlistAtClick.end(); ++Cit)
+	  // QGraphicsItem *Cit = 0;
+	  // 		foreach(Cit, QGIlistAtClick)
+	  {
+	    // 		qWarning() << "test";
+	    for(QList<ObjectGraphicsItem*>::iterator it = ogilist.begin(); it != ogilist.end(); ++it)
+	    {
+	      qWarning() << "test2" << (*it)->data(0).toInt() << (*Cit)->data(0).toInt() << (*it)->pos() << (*Cit)->pos();
+	      //  				if((*it)->pos() == (*Cit)->pos())
+	      {
+		// 				qWarning() << "test 3";
+		if((*it)->data(0).toInt() == (*Cit)->data(0).toInt() *//*&& (*it)->toolTip() == (*Cit)->toolTip()*//*)
 		{
-// 		qWarning() << "test";
- 			for(QList<ObjectGraphicsItem*>::iterator it = ogilist.begin(); it != ogilist.end(); ++it)
+		  qWarning() << "test 4";
+		  matchingOGI << *it;
+		  break;
+	      }
+	    }
+	    }
+	    // 			tempogi = qgraphicsitem_cast<ObjectGraphicsItem*>(Cit);
+	    // 			tempogi = dynamic_cast<ObjectGraphicsItem*>(Cit);
+	    // 			qWarning() << "gecastet";
+	    // 			if(tempogi != 0)
+	    // 			{
+	      // 			matchingOGI << tempogi;
+	      // 			qWarning() << "added To List";
+	      // 			}
+	  }
+	  qWarning() << "OGI-Size:" << matchingOGI.size();
+	  */
+	  
+	  // ---> dynamic cast // qgraphicsitem_cast(qgi)
+	  // 		ObjectGraphicsItem *OGI;
+/// ***************************************************************************************************//{
+/*			else
 			{
-			qWarning() << "test2" << (*it)->data(0).toInt() << (*Cit)->data(0).toInt() << (*it)->pos() << (*Cit)->pos();
-//  				if((*it)->pos() == (*Cit)->pos())
- 				{
-// 				qWarning() << "test 3";
- 					if((*it)->data(0).toInt() == (*Cit)->data(0).toInt() *//*&& (*it)->toolTip() == (*Cit)->toolTip()*//*)
- 					{
-						qWarning() << "test 4";
- 						matchingOGI << *it;
- 						break;
- 					}
- 				}
-			}
-// 			tempogi = qgraphicsitem_cast<ObjectGraphicsItem*>(Cit);
-// 			tempogi = dynamic_cast<ObjectGraphicsItem*>(Cit);
-// 			qWarning() << "gecastet";
-// 			if(tempogi != 0)
-// 			{
-// 			matchingOGI << tempogi;
-// 			qWarning() << "added To List";
-// 			}
-		}
-				qWarning() << "OGI-Size:" << matchingOGI.size();
-		*/
-		
-		// ---> dynamic cast // qgraphicsitem_cast(qgi)
-// 		ObjectGraphicsItem *OGI;
-
-		if(gilist.size() == 1)
-		{
-// 			if(activeItem == gilist.first())
-// 			{
-// 			emit objectSelected(activeItem);
-// 			itemGrabbed = true;
-// 			}
-// 			else
-// 			{
-// 			ObjectGraphicsItem *matchingOGI;
-// 			for(QList<ObjectGraphicsItem>::iterator it = ogilist.begin; it != ogilist.end(); ++it)
-// 			{
-// 			if(it->pos() == QGIlistAtClick.first()->pos())
-// 			{
-// 			if(it->boundingRect() == QGIlistAtClick.first()->boundingRect() && it->toolTip() == QGIlistAtClick.first()->toolTip())
-// 			{
-// 			matchingOGI = &*it;
-// 			break;
-// 			}
-// 			}
-			
-//  			}
-			activeItem = QGIlistAtClick.first();
-			
-// 			activeItem = matchingOGI.first();
-			emit objectSelected(activeItem);
-			itemSelected = true;
-			qWarning() << "Move-Item-ID "<< activeItem->data(Qt::UserRole).toInt();
-// 			}
-// 			QGIlistAtClick = scene()->items(curser);
-// 		for(QList<QGraphicsItem *>::iterator Cit = QGIlistAtClick.begin(); Cit != QGIlistAtClick.end(); ++Cit)
-// 		{
-// 			qWarning() << "test2" <<  (*Cit)->data(0).toInt()  << (*Cit)->pos();
-// 		}
-// 		for(QList<ObjectGraphicsItem*>::iterator it = ogilist.begin(); it != ogilist.end(); ++it)
-// 			{
-// 				qWarning() << "test 3" << (*it)->data(0).toInt() << (*it)->pos();
-// 			}
-
-			
-		}
-
-
-		else if(QGIlistAtClick.size() >1)
-		{
-			if(gilist.contains(activeItem) && itemSelected)
-			{
-				itemGrabbed = true;
-				
-			}
-			else
-			{
+			  
 			QDialog *selectObjectDialog = new QDialog(this);
 			selectObjectDialog->setModal(true);
 			
 			QComboBox *objectList = new QComboBox(selectObjectDialog);
 			
-			QStringList objectNameList;	QGraphicsItem *GIit;
+			QStringList objectNameList;	QGraphicsItem *GIit;*/
+/// ***************************************************************************************************//}
 // 			ObjectGraphicsItem *ogiit;	//ObjectGraphicsItemIterator
 // 			foreach(ogiit, matchingOGI)
 // 			{
 // 				objectNameList << QString(qgiit->data(17).toString()).append(QString("; ").append(qgiit->data(1).toString()).append(QString(" ...").append(qgiit->data(2).toString().right(15))));
 // 				objectNameList << ogiit->data(Name).toString();
 //  			}
+/// ***************************************************************************************************//{
+/*
 			foreach(GIit, gilist)
 			{
 				objectNameList << GIit->data(Name).toString();
@@ -1031,24 +1027,8 @@ const MapObject * MapFrame::currentMapObject () const
 			connect(objectList, SIGNAL(activated(QString)), this, SLOT(getObjectID(QString)));
 			getObjectID(objectList->currentText());
 // 			qgilist = QGIlistAtClick;
-			}
-		}
-
-	}
-}
-	else
-	{
-	itemGrabbed = true;
-// 	itemSelected = false;
-// 	emit objectMoved();
-	}
-}
-else if(event->button() == Qt::RightButton)
-{
-activeItem = 0;
-itemSelected = false;
-}
-}
+			}*/
+/// ***************************************************************************************************//}
 
 
 void MapFrame::mouseMoveEvent(QMouseEvent *event)
@@ -1060,7 +1040,7 @@ curser = event->pos();
 
 static int oldxpos, oldypos;
 
-if(!(oldxpos == 0 && oldypos == 0) && itemGrabbed /*&& (oldtime == time(NULL) || oldtime == time(NULL) - 1)*/)
+if(!(oldxpos == 0 && oldypos == 0) && m_itemGrabbed /*&& (oldtime == time(NULL) || oldtime == time(NULL) - 1)*/)
 {
  	activeItem->moveBy( event->x() - oldxpos,  event->y() - oldypos);
 	emit objectMoved();
@@ -1073,20 +1053,21 @@ oldypos = event->y();
 
 void MapFrame::mouseReleaseEvent(QMouseEvent *event)
 {
-if(itemGrabbed)
+if(m_itemGrabbed)
   {
-  itemGrabbed = false;
+  m_itemGrabbed = false;
 //   itemSelected=false;
   emit objectMoved();
   }
  if(event->button() == Qt::RightButton)
  {
- itemSelected = false;
+ m_itemSelected = false;
  }
 }
 
-void MapFrame::getObjectID(const QString &objname)
-{
+///************************************
+// void MapFrame::getObjectID(const QString &objname)
+// {
 // QString copy = objname;
 // int n = 0;
 // while(!objname.left(n).contains(";"))
@@ -1094,9 +1075,9 @@ void MapFrame::getObjectID(const QString &objname)
 // n++;
 // }
 
-qWarning() << objname/*.left(n-1)<< n*/;
-objectName = objname/*.left(n-1)*/;
- QGraphicsItem *it;
+/*qWarning() << objname/*.left(n-1)<< n*/;
+/*objectName = objname/*.left(n-1)*/;
+ /*QGraphicsItem *it;
 
  foreach(it, scene()->items())
 {
@@ -1107,12 +1088,12 @@ objectName = objname/*.left(n-1)*/;
 	qWarning() << "ActiveItem->ID new" << activeItem->data(ID).toInt();
 		return;
 	}
-}
+}*/
 
+// }
+/// ***************************************************************************************************//{
 
-}
-
-void MapFrame::selectObject()
+/*void MapFrame::selectObject()
 {
 itemSelected = true;
  QGraphicsItem *it;
@@ -1136,7 +1117,8 @@ itemSelected = true;
 // }
 
 
-}
+}*/
+/// ***************************************************************************************************//}
 
 ///void MapFrame::setObjectType(int typ)
 /*{
@@ -1265,7 +1247,7 @@ object_tooltip = ttstring;*/
 
 void MapFrame::newObject(const MapObject &a_newObject)
 {
-qWarning() << "MapFrame::newObject()";
+qWarning() << "MapFrame::newObject(const MapObject &a_newObject)";
 /*object_filename = fd_filename;
 	if(!object_filename.isEmpty())
 	{
@@ -1354,32 +1336,32 @@ qWarning() << "MapFrame::newObject()";
  }
  */
 
-void MapFrame::setGraphicsItemProperties(QGraphicsItem *paramitem)
+/*void MapFrame::setGraphicsItemProperties(QGraphicsItem *paramitem)
 {
   #define setData(x, y) setData(x, QVariant(y))
-  static int idcounter;
-  idcounter ++;
-  paramitem->setData(ID, idcounter);
-  paramitem->setData(Function, object_typ);
-  paramitem->setData(Tooltip, object_tooltip);
+//   static int idcounter;
+//   idcounter ++;
+//   paramitem->setData(ID, idcounter);
+//   paramitem->setData(Function, object_typ);
+//   paramitem->setData(Tooltip, object_tooltip);
   
-  paramitem->setData(Filename, object_filename);
-  paramitem->setPos(ziel);
+//   paramitem->setData(Filename, object_filename);
+//   paramitem->setPos(ziel);
   //  paramitem->setData(
   
-  if(objectName.isEmpty())
-  {
-    objectName = QString("%1 ").arg(idcounter).append(object_tooltip).append(" ").append(QString(object_filename).right(9));
-  }
-  paramitem->setData(Name, objectName);
-  emit newObjectCreated(paramitem);
+//   if(objectName.isEmpty())
+//   {
+//     objectName = QString("%1 ").arg(idcounter).append(object_tooltip).append(" ").append(QString(object_filename).right(9));
+//   }
+//   paramitem->setData(Name, objectName);
+//   emit newObjectCreated(paramitem);
   
-  objectName = QString();
-  object_tooltip = QString();
-  object_filename = QString();
+//   objectName = QString();
+//   object_tooltip = QString();
+//   object_filename = QString();
   
   #undef setData
-}
+}*/
 
 
 

@@ -44,6 +44,7 @@ class MapObjectDialog : public QDialog
     };
     
   public slots:
+    void setObjectFile();
     void changeItem();
     void applyChanges(QAbstractButton *);
     

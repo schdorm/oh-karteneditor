@@ -209,9 +209,26 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>BrowseObjectFileButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MapObjectDialog</receiver>
+   <slot>setObjectFile()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>481</x>
+     <y>178</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>259</x>
+     <y>213</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>setChanges()</slot>
   <slot>applyChanges(QAbstractButton*)</slot>
+  <slot>setObjectFile()</slot>
  </slots>
 </ui>
