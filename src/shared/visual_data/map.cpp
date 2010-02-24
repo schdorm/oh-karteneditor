@@ -521,7 +521,8 @@ bool Map::load(const QString &a_filename)
 		      
 		      MapObject newMO(f_role, f_file.toString(), toPoint(f_position.toString()), f_name.toString() , f_tooltip.toString(), f_zvalue);
 		      
-		      m_Objects[newMO.id()] = newMO;
+		      if(!f_file.isEmpty())
+			m_Objects[newMO.id()] = newMO;
 		      
 		      f_file = f_position = f_name = f_tooltip = QStringRef();
 		      f_role = -1;
