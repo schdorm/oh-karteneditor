@@ -22,6 +22,7 @@
 #define _MapObjectDialog_H
 
 #include <QtGui/QDialog>
+#include <QtCore/QHash>
 
 #include "ui_mapobjectdialog.h"
 

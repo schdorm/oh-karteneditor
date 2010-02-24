@@ -86,7 +86,9 @@ SideBarClass::SideBarClass(const MainWindow *parentWindow)
   selectFileButton = new QPushButton ("...", this);
   objectFileLayout->addWidget(selectFileButton);
   
+    #if QT_VERSION > 0x040501
   objectFileLayout->setStretch(0,5);
+  #endif
   
   QWidget *wid2 = new QWidget(this);
   SideBarLayout->addWidget(wid2);

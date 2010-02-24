@@ -163,7 +163,9 @@ void MainWindow::createActions()
   connect(saveAct, SIGNAL(triggered()), this, SLOT(saveMap()));
 
   saveAsAct = new QAction(tr("Save As ..."), this);
+  #if QT_VERSION > 0x040501
   saveAsAct->setShortcuts(QKeySequence::SaveAs);
+  #endif
   saveAsAct->setStatusTip(tr("Save the map to disk"));
   connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveMapAs()));
   
