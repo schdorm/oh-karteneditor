@@ -178,20 +178,16 @@ class MapFrame : public QGraphicsView
     
     Map m_smap;
     
-//     QGraphicsItem *m_currentGraphicsItem;
     
     
   private:
       MapSettingsDialog *m_MapDialog;
       MapObjectDialog *m_ObjectDialog;
-//       MapObject *m_CurrentObject;
       QGraphicsItem *m_currentGraphicsItem;
       MapObject *m_currentMapObject;
 
       bool m_itemSelected;
       bool m_itemGrabbed;
-//    Map *mapinstance();
-//      Map *m_map;
       QPointF m_mousepos;
      
   signals:

@@ -52,7 +52,6 @@ class MapObject
     QString	name	 () const 	{	return m_name;			}
     QPoint	position () const	{	return m_position.toPoint();	}
     QPointF	positionF() const	{	return m_position;		}
-//     QString	positionS() const;
     double	zValue	 () const	{	return m_zValue;		}
     
     void setRole 	(int);

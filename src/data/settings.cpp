@@ -155,45 +155,37 @@ void Settings::readSettings()
   qWarning() << "Settingsfilepath:" << settingsfilepath();
 
   QFile settingsfile(m_settingsfilepath);
-  settingsfile.open(QIODevice::ReadOnly);
-  QXmlStreamReader reader(&settingsfile);
-  while(!reader.atEnd())
+  if(settingsfile.open(QIODevice::ReadOnly))
   {
-    switch(reader.readNext())
+    QXmlStreamReader reader(&settingsfile);
+    while(!reader.atEnd())
     {
-      case QXmlStreamReader::StartElement:
+      switch(reader.readNext())
       {
-	if(reader.name().toString() == "oldlayout")
+	case QXmlStreamReader::StartElement:
 	{
-	  m_oldlayout = toBool(reader.attributes().value("value"));
-// 	  if(reader.attributes().value("old") == QString("true"))
-// 	    m_oldlayout = true;
-// 	  else
-// 	    m_oldlayout = false;
-	  
+	  if(reader.name().toString() == "oldlayout")
+	  {
+	    m_oldlayout = toBool(reader.attributes().value("value"));
+	  }
+	  else if(reader.name().toString() == "autosave")
+	  {
+	    m_autosaveEnabled = toBool(reader.attributes().value("value"));
+	  }
+	  break;
 	}
-	else if(reader.name().toString() == "autosave")
-	{
-	  m_autosaveEnabled = toBool(reader.attributes().value("value"));
-// 	  if(reader.attributes().value("value") == QString("true"))
-// 	    m_autosaveEnabled = true;
-// 	  else
-// 	    m_autosaveEnabled = false;
-	  
-	}
-	break;
+	case QXmlStreamReader::EndElement:
+	  break;
+	default:
+	  break;
       }
-      case QXmlStreamReader::EndElement:
-	break;
-      default:
-	break;
     }
-  }
-  settingsfile.close();
-  
-  if(ol != m_oldlayout)
-  {
-    emit changed();
+    settingsfile.close();
+    
+    if(ol != m_oldlayout)
+    {
+      emit changed();
+    }
   }
   if(m_autosaveEnabled)
   {

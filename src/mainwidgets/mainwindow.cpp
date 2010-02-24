@@ -255,19 +255,9 @@ void MainWindow::newMap()
     SideBar->editToolTip->setText(QString());
     SideBar->itemListWidget->setCurrentRow(0);
   }
-  
-// 	connect(saveAct, SIGNAL(triggered()), this, SLOT(save()));
-// 	disconnect(saveAct, SIGNAL(triggered()), this, SLOT(savef()));
   existingMapFile = false;
 }
 
-//  void MainWindow::newFile()
-//  {
-// 
-// 	connect(saveAct, SIGNAL(triggered()), this, SLOT(save()));
-// 	disconnect(saveAct, SIGNAL(triggered()), this, SLOT(savef()));
-// 	
-//  }
 
 void MainWindow::loadAutoSave()
 {
@@ -282,11 +272,6 @@ void MainWindow::loadAutoSave()
   
 }
 
-//  void MainWindow::open()
-//  {
-//  MapView->fileDialog(NameFilters::Map);
-// connect(MapView->fd, SIGNAL(accepted()), this, SLOT(openMap()));
-//  }
 
 void MainWindow::loadMap()
 {
@@ -332,14 +317,10 @@ void MainWindow::autoSaveMap()
 
  void MainWindow::saveMapAs()
  {
- ///MapView->fileDialog(NameFilters::Map|NameFilters::Save);
  
   MapView->map()->save( QFileDialog::getSaveFileName(this, tr("Save File"), QString() , tr("OpenHanse maps (*.ohm);; All Files (*)")));
 
   setWindowTitle(QFileInfo(MapView->map()->filename()).baseName() + tr(" - OpenHanse Mapeditor"));
- //MapView->saveMap(MapView->filename);
- ///connect(MapView->fd, SIGNAL(accepted()), this, SLOT(savef()));
- 
 }
 
 void MainWindow::saveMap()

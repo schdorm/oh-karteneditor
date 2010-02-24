@@ -24,17 +24,15 @@
 
 
 #include <QtGui/QMainWindow>
- 
-//  #include <QtGui/QAction>
-//  #include <QtGui/QMenu>
- 
- class QMenu;
- class QAction;
- class MapFrame;
- class SideBarClass;
- class QGraphicsItem;
- class QTimer;
- class QSignalMapper;
+
+
+class QMenu;
+class QAction;
+class MapFrame;
+class SideBarClass;
+class QGraphicsItem;
+class QTimer;
+class QSignalMapper;
 //  #include "mapframe.h"
 //  #include "sidebar.h"
 
@@ -100,52 +98,52 @@ class MainWindow : public QMainWindow
     void createActions();
     void createMenus();
     void createOldLayout();
-
-enum itemListItemNames{
-en_mapproperties = 0,
-en_mapnorth = 1,
-en_mapwest = 2,
-en_mapsouth = 3,
-en_mapeast = 4
+    
+    enum itemListItemNames{
+      en_mapproperties = 0,
+      en_mapnorth = 1,
+      en_mapwest = 2,
+      en_mapsouth = 3,
+      en_mapeast = 4
+    };
+    
+    
+    MapFrame *MapView;
+    
+    
+    QMenu *fileMenu;
+    QMenu *editMenu;
+    QMenu *helpMenu;
+    
+    QAction *newAct;
+    QAction *openAct;
+    QAction *saveAct;
+    QAction *saveAsAct;
+    
+    QAction *loadAutoSaveAct;
+    QAction *autoSaveAct;
+    
+    QSignalMapper *m_AS_loadMapper;
+    QSignalMapper *m_AS_saveMapper;
+    
+    //  QAction *disableAutoSaveAct;
+    
+    QAction *quitAct;
+    
+    QAction *newObjectAct;
+    QAction *rmcurrentObjectAct;
+    
+    QAction *m_MapPropertiesAction;
+    
+    QAction *m_PreferencesAction;
+    QAction *m_AboutAction;
+    
+    
+    bool existingMapFile;		// if true, no request for mapfile name
+    bool m_autoSaved;
+    //  bool activeMapView;
 };
 
 
-  MapFrame *MapView;
-
- 
- QMenu *fileMenu;
- QMenu *editMenu;
- QMenu *helpMenu;
-
- QAction *newAct;
- QAction *openAct;
- QAction *saveAct;
- QAction *saveAsAct;
- 
- QAction *loadAutoSaveAct;
- QAction *autoSaveAct;
- 
- QSignalMapper *m_AS_loadMapper;
- QSignalMapper *m_AS_saveMapper;
-
- //  QAction *disableAutoSaveAct;
- 
- QAction *quitAct;
- 
- QAction *newObjectAct;
- QAction *rmcurrentObjectAct;
- 
- QAction *m_MapPropertiesAction;
- 
- QAction *m_PreferencesAction;
- QAction *m_AboutAction;
- 
-//  QTimer *autoSaveTimer;
- 
-//  QString mapfilename;
- bool existingMapFile;		// if true, no request for mapfile name
- bool m_autoSaved;
-//  bool activeMapView;
- };
  #endif
 
