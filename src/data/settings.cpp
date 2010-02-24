@@ -34,10 +34,11 @@ Settings *Settings::m_pointer;
 
 Settings::Settings()
 {
+  
   m_autosaveTimer = new QTimer(this);
   connect(m_autosaveTimer, SIGNAL(timeout()), this, SIGNAL(autosave()));
   m_OHConfPath = QDir::home().absolutePath() + "/.OpenHanse/mapeditor/";
-  m_autosavepath = m_OHConfPath + "autosave_map.ohc";
+  m_autosavepath = m_OHConfPath + "autosave_map.ohm";
   m_settingsfilepath = m_OHConfPath + "settings.ohc";
   QDir dir = QDir::home();
   if(!dir.cd(".OpenHanse"))

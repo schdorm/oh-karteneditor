@@ -67,6 +67,8 @@ class SideBarClass : public QWidget
     void fillList(QList<QGraphicsItem*>);
     void fillList(const QList<MapObject> &itemlist);
 
+    int currentRow() const;
+    int currentRowData	() ;
     
     QStringList staticListEntries;
     

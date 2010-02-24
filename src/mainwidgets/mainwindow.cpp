@@ -107,21 +107,6 @@ MainWindow::MainWindow()
 	if(SETTINGS->oldlayout())
 	{
 	  createOldLayout();
-//  	SideBar = new SideBarClass(this);
-// 	SideBar->setParent(zentralwidget);
-// 	layout->addWidget(SideBar);
-// 	connect(SideBar->nameLineEdit, SIGNAL(textEdited(QString)), this, SLOT(nameLineEditHandler(QString)));
-// 	connect(SideBar->itemListWidget, SIGNAL(currentRowChanged(int)), this, SLOT(updateItemList(int)));
-// 	connect(SideBar->itemTyp, SIGNAL(activated(int)), this, SLOT(typeComboBoxHandler(int)));
-// 	connect(SideBar->selectFileButton, SIGNAL(clicked()), this, SLOT(sideBar_SelectFile()));
-// 	connect(SideBar->editToolTip, SIGNAL(textEdited(QString)), this, SLOT(lineEditHandler(QString)));
-//  	connect(SideBar->XBox, SIGNAL(valueChanged(int)), this, SLOT(spinboxHandler()));
-// 	connect(SideBar->YBox, SIGNAL(valueChanged(int)), this, SLOT(spinboxHandler()));
-// // 	connect(SideBar->XBox, SIGNAL(editingFinished()), this, SLOT(spinboxHandler()));
-// // 	connect(SideBar->YBox, SIGNAL(editingFinished()), this, SLOT(spinboxHandler()));
-// 	connect(SideBar->ZBox, SIGNAL(valueChanged(double)), this, SLOT(spinboxHandler()));
-// 	connect(SideBar, SIGNAL(SIG_deleteObject()), this, SLOT(deleteCurrentObject()));
-// 	SideBar->itemListWidget->setCurrentRow(0);
 	}
 	
 	
@@ -139,6 +124,8 @@ MainWindow::MainWindow()
 	connect(MapView, SIGNAL(SIG_deleteObject()), this, SLOT(deleteCurrentObject()));
 	
 	connect(SETTINGS, SIGNAL(changed()), this, SLOT(applySettings()));
+	
+	connect(MapView, SIGNAL(dataChanged()), this, SLOT(autoSaveMap()));
 
 
 	connect(SETTINGS, SIGNAL(autosave()), this, SLOT(autoSave()));
@@ -326,32 +313,21 @@ void MainWindow::loadMap()
   
 }
 
-// void MainWindow::saveHandler()
-// {
-//   autoSave();
-//   qWarning() << "void MainWindow::saveHandler()";
-//   if(existingMapFile)
-//   {
-//     savef();
-//     return;
-//   }
-//   
-//   else
-//   {
-//     save();
-//     return;
-//   }  
-// }
 
 void MainWindow::autoSave()
 {
-  if(!autoSaved)
+  if(!m_autoSaved)
   {
     MapView->saveMap(SETTINGS->autosavepath());
-    autoSaved = true;
+    m_autoSaved = true;
   }
 }
 
+void MainWindow::autoSaveMap()
+{
+  MapView->saveMap(SETTINGS->autosavepath());
+  m_autoSaved = true;
+}
 
 
  void MainWindow::saveMapAs()
@@ -377,20 +353,6 @@ void MainWindow::saveMap()
 }
 
 
-
-//  void MainWindow::savef()
-//  {
-// 	disconnect(saveAct, SIGNAL(triggered()), this, SLOT(save()));
-// 	connect(saveAct, SIGNAL(triggered()), this, SLOT(savef()));
-
-	///disconnect(MapView->fd, SIGNAL(accepted()), this, SLOT(savef()));
-// 	if(!existingMapFile)
-// 	{
-///	mapfilename = MapView->fd_filename;
-// 	}
-// 	setWindowTitle(tr("Karteneditor: ").append(mapfilename));
-// 	MapView->saveMap(mapfilename);
-//  }
 
 void MainWindow::createMenus()
  {
@@ -444,7 +406,7 @@ void MainWindow::createMenus()
  
 void MainWindow::addNewObjectToList(QGraphicsItem *newObject)
 {
-autoSaved = false;
+m_autoSaved = false;
 
 // SideBar->MapEntries << entry->data(0).toString().append(entry->data(1).toString()).append(entry->data(2).toString());
 qWarning() << "MainWindow::addNewObjectToList(QGraphicsItem *newObject) :: ID:" << newObject->data(MapFrame::ID).toInt();
@@ -467,7 +429,7 @@ if(SETTINGS->oldlayout())
 
 void MainWindow::updateData()
 {
-  autoSaved = false;
+  m_autoSaved = false;
   
   if(SETTINGS->oldlayout())
   {
@@ -801,7 +763,7 @@ void MainWindow::spinboxHandler()
 {
   if(SETTINGS->oldlayout())
   {
-    autoSaved = false;
+    m_autoSaved = false;
     // qWarning() << "MainWindow::spinboxHandler()";
 
     if(SideBar->XBox->hasFocus() || SideBar->YBox->hasFocus() || SideBar->ZBox->hasFocus())
@@ -828,7 +790,7 @@ void MainWindow::updateSpinbox()
 {
   if(SETTINGS->oldlayout())
   {
-    autoSaved = false;
+    m_autoSaved = false;
     SideBar->XBox->setValue(MapView->activeItem->x());
     SideBar->YBox->setValue(MapView->activeItem->y());
   }
@@ -840,7 +802,7 @@ void MainWindow::typeComboBoxHandler(/*const QString &*/ int typ)
   if(SETTINGS->oldlayout())
   {
     qWarning() << "MainWindow::typeComboBoxHandler(int typ)" << typ << "ID:" << SideBar->itemTyp->itemData(typ).toInt();
-    autoSaved = false;
+    m_autoSaved = false;
 	if(!SideBar->CB_mapprops)		// holds the property, if the type-combo-box contains the maptype-Properties or the object-type-properties
 	{
 // 		MapView->setObjectType(typ);
@@ -869,7 +831,7 @@ void MainWindow::lineEditHandler(const QString &text)
 {
   if(SETTINGS->oldlayout())
   {
-    autoSaved = false;
+    m_autoSaved = false;
 	if(SideBar->itemListWidget->currentRow() == 0 )
 	{
 	MapView->map()->city()->setName(text);
@@ -887,7 +849,7 @@ void MainWindow::nameLineEditHandler(const QString &text)
 {
   if(SETTINGS->oldlayout())
   {
-    autoSaved = false;
+    m_autoSaved = false;
 	if(SideBar->itemListWidget->currentRow() == 0 )
 	{
 	MapView->map()->setName(text);
@@ -954,9 +916,10 @@ void MainWindow::markListItem(QGraphicsItem *selectedItem)
 
 void MainWindow::sidebarHandler()
 {
-  int selectedItemRow;
   if(SETTINGS->oldlayout())
   {
+    int selectedItemRow = SideBar->currentRowData();
+
     if(selectedItemRow >= 0)
     {
       qWarning() << "MainWindow::updateItemList(int selectedItemRow)" << selectedItemRow;
@@ -1192,7 +1155,7 @@ void MainWindow::sidebarHandler()
 void MainWindow::deleteCurrentObject()
 { 
   qWarning() << "MainWindow::deleteCurrentObject()" << MapView->activeItem->data(MapFrame::Filename).toString();
-  autoSaved = false;
+  m_autoSaved = false;
   if(SETTINGS->oldlayout())
   {
     int currentListRow = SideBar->itemListWidget->currentRow();

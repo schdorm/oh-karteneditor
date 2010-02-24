@@ -31,6 +31,7 @@ const int const_goodnumber = 30;
 
 #define GOODLABEL(x) 
 
+class QXmlStreamAttributes;
 
 class Goods
 {
@@ -149,6 +150,9 @@ int operator[](int key) const
 
 
 QList<int> keys(int filter = 0) const;
+
+QXmlStreamAttributes xmlAttributes() const;
+void setXmlAttributes (const QXmlStreamAttributes &);
 
 
 private:

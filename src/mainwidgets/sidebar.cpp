@@ -179,7 +179,7 @@ void SideBarClass::addStaticListItems()
     {
 //       if(~identifier == 
       f_lwi = new QListWidgetItem(staticListEntries.value(f_identifier), itemListWidget);
-      f_lwi->setData(Qt::UserRole, QVariant(~f_identifier));
+      f_lwi->setData(Qt::UserRole, QVariant((~f_identifier)));
     }
     
 //   }
@@ -307,4 +307,15 @@ void SideBarClass::selectFile()
   }
   fileView->setText(filepath);
 }
+
+int SideBarClass::currentRow() const
+{
+  return itemListWidget->currentRow();
+}
+
+int SideBarClass::currentRowData()
+{
+  return itemListWidget->currentItem()->data(Qt::UserRole).toInt();
+}
+
 

@@ -37,6 +37,8 @@
  #include <QtGui/QLineEdit>
  #include <QtGui/QSpinBox>
  
+ #include <QtGui/QImageReader>
+ 
  #include <QtGui/QScrollBar>
  
  #include <QtGui/QKeyEvent>
@@ -49,13 +51,14 @@
 
 
 #include <QtSvg/QGraphicsSvgItem>
+#include <QtSvg/QSvgRenderer>
 
 #include <QtGui/QDialog>
 
 //  #include <QtGui/QPixmap>
  
  
-MapFrame::MapFrame( const MainWindow *mainwin)
+MapFrame::MapFrame( const MainWindow *mainwin) : m_ObjectDialog (0), m_currentGraphicsItem (0), m_currentMapObject(0)
 {
   qWarning() << "MapFrame::MapFrame( const MainWindow *mainwin)";
    
@@ -65,6 +68,7 @@ MapFrame::MapFrame( const MainWindow *mainwin)
   QGraphicsScene *szene = new QGraphicsScene();
   setScene(szene);
   newMap();
+  /*
 //  ot_townhall = tr("Rathaus");
 //  ot_market = tr("Markt");
 //  ot_church = tr("Kirche");
@@ -82,7 +86,7 @@ MapFrame::MapFrame( const MainWindow *mainwin)
 //  mt_land = tr("Land");
 //  mt_coast_city = tr("Kueste (Stadt)");
 //  mt_land_city = tr("Land (Stadt)");
-//  MapTypeEntries << mt_sea  << mt_coast << mt_land << mt_coast_city << mt_land_city;
+//  MapTypeEntries << mt_sea  << mt_coast << mt_land << mt_coast_city << mt_land_city;*/
  
   m_itemGrabbed = false;
 }
@@ -117,6 +121,7 @@ bool MapFrame::loadMap(const QString &a_filename)
   if(m_smap.load(a_filename))
   {
     applyMapSettings();
+    repaintMap();
     return true;
   }
   else
@@ -649,7 +654,7 @@ if((*saveitem)->data(Filename).toString().endsWith(".jpg") || (*saveitem)->data(
 						object_ZValue = ohoehe;
 						object_filename = odatei;
 						object_tooltip = otooltip;
-						ziel = QPoint(oposx, oposy);
+						m_mousepos = QPoint(oposx, oposy);
 						createObjectDialog = 0;
 						createObject();
 // 						}
@@ -686,18 +691,205 @@ if((*saveitem)->data(Filename).toString().endsWith(".jpg") || (*saveitem)->data(
  
 }*/
 
-
+void MapFrame::repaintMap()
+{
+  scene()->clear();
+  
+  QList<MapObject> f_molist = m_smap.objects();
+  int f_moid;
+  QString f_imgpath;
+  QGraphicsItem *f_graphicsItem = 0;
+  
+  for(QList<MapObject>::iterator f_moit = f_molist.begin(); f_moit != f_molist.end(); ++f_moit)
+  {
+      f_imgpath = f_moit->imagepath();
+      //       if(imgpath.endsWith(".png", Qt::CaseInsensitive) || imgpath.endsWith(".jpg", Qt::CaseInsensitive) || imgpath.endsWith(".jpeg", Qt::CaseInsensitive) || imgpath.endsWith(".gif ") || imgpath.endsWith(".ppm", Qt::CaseInsensitive) || imgpath.endsWith(".tiff", Qt::CaseInsensitive) || imgpath.endsWith(".xbm", Qt::CaseInsensitive) || imgpath.endsWith(".xpm", Qt::CaseInsensitive))
+      if(QImageReader(f_imgpath).canRead())
+      {
+	if(!f_imgpath.endsWith(".svg", Qt::CaseInsensitive))
+	{
+	  QGraphicsPixmapItem *f_pixmapItem = scene()->addPixmap(QPixmap(f_imgpath));
+	  f_graphicsItem = f_pixmapItem;
+	}
+	else
+	{
+	  QGraphicsSvgItem *f_svgItem = new QGraphicsSvgItem(f_imgpath);
+	  scene()->addItem(f_svgItem);
+	  f_graphicsItem = f_svgItem;
+	}
+	if(!f_graphicsItem == 0)
+	{
+	  f_graphicsItem->setData(Qt::UserRole, QVariant(f_moid));
+	  f_graphicsItem->setPos(f_moit->position());
+	  f_graphicsItem->setToolTip(f_moit->tooltip());
+	  f_graphicsItem->setZValue(f_moit->zValue());
+	  f_graphicsItem = 0;
+	}
+      }
+      else
+	qWarning() << "Image hasn't a readable Format!";
+    
+  }
+}
 
 void MapFrame::showMap()		/// generates a viewable result of the data stored in m_smap
 {
-  if(QFile(m_smap.background()).exists())
+  QList<MapObject> f_molist = m_smap.objects();
+  QList<QGraphicsItem *> f_gilist = scene()->items();
+  QList<QGraphicsItem *>::iterator f_giit;
+  bool f_gifound;	// true, if graphicsitem exists
+  int f_moid;
+  QString f_imgpath;
+  QGraphicsItem *f_graphicsItem = 0;
+  
+  for(QList<MapObject>::iterator f_moit = f_molist.begin(); f_moit != f_molist.end(); ++f_moit)
   {
+    f_gifound = false;
+    f_moid = f_moit->id();
+    for(f_giit = f_gilist.begin(); f_giit != f_gilist.end() && !f_gifound; ++f_giit)
+    {
+      f_gifound = ((*f_giit)->data(Qt::UserRole).toInt() == f_moid);
+    }
+    if(!f_gifound)
+    {
+      f_imgpath = f_moit->imagepath();
+      //       if(imgpath.endsWith(".png", Qt::CaseInsensitive) || imgpath.endsWith(".jpg", Qt::CaseInsensitive) || imgpath.endsWith(".jpeg", Qt::CaseInsensitive) || imgpath.endsWith(".gif ") || imgpath.endsWith(".ppm", Qt::CaseInsensitive) || imgpath.endsWith(".tiff", Qt::CaseInsensitive) || imgpath.endsWith(".xbm", Qt::CaseInsensitive) || imgpath.endsWith(".xpm", Qt::CaseInsensitive))
+      if(QImageReader(f_imgpath).canRead())
+      {
+	if(f_imgpath.endsWith(".svg", Qt::CaseInsensitive))
+	{
+	  QGraphicsPixmapItem *f_pixmapItem = scene()->addPixmap(QPixmap(f_imgpath));
+	  f_graphicsItem = f_pixmapItem;
+	}
+	else
+	{
+	  QGraphicsSvgItem *f_svgItem = new QGraphicsSvgItem(f_imgpath);
+	  scene()->addItem(f_svgItem);
+	  f_graphicsItem = f_svgItem;
+	}
+	if(!f_graphicsItem == 0)
+	{
+	  f_graphicsItem->setData(Qt::UserRole, QVariant(f_moid));
+	  f_graphicsItem->setPos(f_moit->position());
+	  f_graphicsItem->setToolTip(f_moit->tooltip());
+	  f_graphicsItem->setZValue(f_moit->zValue());
+	  f_graphicsItem = 0;
+	}
+      }
+      else
+	qWarning() << "Image hasn't a readable Format!";
+    }
   }
+}
+
+
+
+void MapFrame::addObject(MapObject *a_newObject)
+{
+  m_smap.addObject(a_newObject);
+  QGraphicsItem *f_graphicsItem;
+  QString f_imgpath = a_newObject->imagepath() ;
+    qWarning() << "void MapFrame::addObject(MapObject *a_newObject)"<< f_imgpath << a_newObject->id();
+
+  //       if(imgpath.endsWith(".png", Qt::CaseInsensitive) || imgpath.endsWith(".jpg", Qt::CaseInsensitive) || imgpath.endsWith(".jpeg", Qt::CaseInsensitive) || imgpath.endsWith(".gif ") || imgpath.endsWith(".ppm", Qt::CaseInsensitive) || imgpath.endsWith(".tiff", Qt::CaseInsensitive) || imgpath.endsWith(".xbm", Qt::CaseInsensitive) || imgpath.endsWith(".xpm", Qt::CaseInsensitive))
+  if(QImageReader(f_imgpath).canRead())
+  {
+    qWarning() << "QImageReader(f_imgpath).canRead() = true";
+    if(!f_imgpath.endsWith(".svg", Qt::CaseInsensitive))
+    {
+      QGraphicsPixmapItem *f_pixmapItem = scene()->addPixmap(QPixmap(f_imgpath));
+      f_graphicsItem = f_pixmapItem;
+    }
+    else
+    {
+      QGraphicsSvgItem *f_svgItem = new QGraphicsSvgItem(f_imgpath);
+      scene()->addItem(f_svgItem);
+      f_graphicsItem = f_svgItem;
+    }
+    if(!f_graphicsItem == 0)
+    {
+      f_graphicsItem->setData(Qt::UserRole, QVariant(a_newObject->id()));
+      f_graphicsItem->setPos(a_newObject->position());
+      f_graphicsItem->setToolTip(a_newObject->tooltip());
+      f_graphicsItem->setZValue(a_newObject->zValue());
+    }
+  }
+  else
+    qWarning() << "Image hasn't a readable Format!";
+  emit dataChanged();
+}
+
+
+void MapFrame::updateObject(int a_id)
+{
+  qWarning() << "void MapFrame::updateObject(int a_id)";
+  QList<QGraphicsItem *> f_gilist = scene()->items();
+  QList<QGraphicsItem *>::iterator f_giit;
+  bool f_gifound(false);	// true, if graphicsitem exists
+  const MapObject *f_mo = m_smap.object(a_id);
+  
+  for(f_giit = f_gilist.begin(); f_giit != f_gilist.end() && !f_gifound; ++f_giit)
+  {
+    if((*f_giit)->data(Qt::UserRole).toInt() == a_id)
+    {
+      QGraphicsItem *f_graphicsItem = (*f_giit);
+      f_graphicsItem->setPos(f_mo->position());
+      f_graphicsItem->setToolTip(f_mo->tooltip());
+      f_graphicsItem->setZValue(f_mo->zValue());
+      f_gifound = true;
+    }
+  }
+  emit dataChanged();
+}
+
+void MapFrame::updateObjectImage(int a_id)
+{
+  QList<QGraphicsItem *> f_gilist = scene()->items();
+  QList<QGraphicsItem *>::iterator f_giit;
+  bool f_gifound(false);			// true, if graphicsitem exists --> aborting the for-loop
+  const MapObject *f_mo = m_smap.object(a_id);
+  QString f_imagepath = f_mo->imagepath();
+  if(QFile::exists(f_imagepath) && QImageReader(f_imagepath).canRead())
+  {
+    for(f_giit = f_gilist.begin(); f_giit != f_gilist.end() && !f_gifound; ++f_giit)
+    {
+      if((*f_giit)->data(Qt::UserRole).toInt() == a_id)
+      {
+	QGraphicsItem *f_graphicsItem = (*f_giit);
+	f_gifound = true;
+	if(!f_imagepath.endsWith(".svg", Qt::CaseInsensitive))
+	{
+	  QGraphicsPixmapItem *f_GPI = qgraphicsitem_cast<QGraphicsPixmapItem*>(f_graphicsItem);
+	  if(f_GPI != 0)
+	  {
+	    f_GPI->setPixmap(QPixmap(f_imagepath));
+	  }
+	}
+	else /*if(f_imagepath.endsWith(".svg", Qt::CaseInsensitive))*/
+	{
+	  QGraphicsSvgItem *f_GSvgItem = qgraphicsitem_cast<QGraphicsSvgItem*>(f_graphicsItem);
+	  if(f_GSvgItem != 0)
+	  {
+	    QSvgRenderer *f_renderer = new QSvgRenderer (f_imagepath);
+	    f_GSvgItem->setSharedRenderer(f_renderer);
+	    
+	    // 	  f_GSvgI->setPixmap(QPixmap(f_mo->imagepath()));
+	  }
+	}
+      }
+    }
+  }
+    emit dataChanged();
+
 }
 
 void MapFrame::applyMapSettings()
 {
-  scene()->setBackgroundBrush(QBrush(QPixmap(m_smap.background())));
+  if(QFile(m_smap.background()).exists())
+  {
+    scene()->setBackgroundBrush(QBrush(QPixmap(m_smap.background())));
+  }
+  
   setSceneRect(QRectF(sceneRect().topLeft(), m_smap.size()));
 }
 
@@ -721,7 +913,7 @@ void MapFrame::setMap(const Map &a_map)
   //   qWarning() << "Map setted" << mapinstance()->type();
 }
 
-// void MapFrame::setMap(const Map *a_map)
+/*// void MapFrame::setMap(const Map *a_map)
 // {
 // qWarning() << "void MapFrame::setMap(const Map *a_map)";
 //   
@@ -734,7 +926,7 @@ void MapFrame::setMap(const Map &a_map)
 // //   }
 //   
 //   qWarning() << "Map setted" << m_map->type();
-// }
+// }*/
 
 /*Map *MapFrame::mapinstance()
 {
@@ -766,20 +958,28 @@ Map MapFrame::map() const
 void MapFrame::setCurrentItem(int a_id)
 {
   //   QGraphicsItem *f_item;
+  qWarning() << "void MapFrame::setCurrentItem(int a_id)";
   if(m_currentGraphicsItem->data(Qt::UserRole).toInt() != a_id)
   {
-    for(QList<QGraphicsItem*>::const_iterator f_item = scene()->items().begin(); f_item != scene()->items().end() || (*f_item)->data(Qt::UserRole).toInt() == a_id; ++ f_item)
+    for(QList<QGraphicsItem*>::const_iterator f_item = scene()->items().begin(); f_item != scene()->items().end() && (*f_item)->data(Qt::UserRole).toInt() == a_id; ++ f_item)
     {
       m_currentGraphicsItem = *f_item;
     }
   }
-  if(m_currentMapObject->id() != a_id)
+  qWarning() << "current GraphicsItem setted; following Object";
+  if(m_currentMapObject == 0)
   {
-//     const QList<MapObject*> &molist = map()->objects();
-    for(QList<MapObject>::iterator f_mo = m_smap.objects()->begin(); f_mo != m_smap.objects()->end() || f_mo->id() == a_id; ++ f_mo)
-    {
-      m_currentMapObject = &*f_mo;
-    }
+    m_currentMapObject = m_smap.object(a_id);
+  }
+  else if(m_currentMapObject->id() != a_id)
+  {
+    //     const QList<MapObject*> &molist = map()->objects();
+//     QList<MapObject> molist = m_smap.objects();
+//     for(QList<MapObject>::iterator f_mo = molist.begin(); f_mo != molist.end() || f_mo->id() == a_id; ++ f_mo)
+//     {
+//       m_currentMapObject = &*f_mo;
+	 m_currentMapObject = m_smap.object(a_id);
+//     }
   }
 }
 
@@ -795,18 +995,17 @@ const MapObject * MapFrame::currentMapObject () const
   return m_currentMapObject;
 }
 
-
-// void MapFrame::newObjectDialog_ext()
+/*// void MapFrame::newObjectDialog_ext()
 // {
 //   newObjectDialog(QPoint(100,100));
 // }
- 
- 
+
+*/
 /* void MapFrame::newObjectDialog(QPoint destination)
  {
- ziel = destination;
- ziel.setX(ziel.x() + horizontalScrollBar()->value());
- ziel.setY(ziel.y() + verticalScrollBar()->value());
+ m_mousepos = destination;
+ m_mousepos.setX(m_mousepos.x() + horizontalScrollBar()->value());
+ m_mousepos.setY(m_mousepos.y() + verticalScrollBar()->value());
  		createObjectDialog = new QDialog();
 		createObjectDialog->setModal(true);
 		createObjectDialog->setWindowTitle(tr("Create new Object ..."));
@@ -850,11 +1049,11 @@ const MapObject * MapFrame::currentMapObject () const
 		
 		QSpinBox *XBox_MV = new QSpinBox(createObjectDialog);
 		XBox_MV->setRange(0, mapSize.width());
-		XBox_MV->setValue(ziel.x());
+		XBox_MV->setValue(m_mousepos.x());
 		
 		QSpinBox *YBox_MV = new QSpinBox(createObjectDialog);
 		YBox_MV->setRange(0, mapSize.height());
-		YBox_MV->setValue(ziel.y());
+		YBox_MV->setValue(m_mousepos.y());
 		
 		QHBoxLayout spinboxlayout;
 //		spinboxlayout.addSpacing(20);
@@ -912,20 +1111,21 @@ void MapFrame::mousePressEvent(QMouseEvent *event)
   {
     if(!m_itemGrabbed)
     {
-      int tx = event->x() + horizontalScrollBar()->value();
-      int ty = event->y() + verticalScrollBar()->value();
-      ziel = QPoint(tx, ty);
+//       int tx = event->x() + horizontalScrollBar()->value();
+//       int ty = event->y() + verticalScrollBar()->value();
+//       m_mousepos = QPoint(tx, ty);
+      m_mousepos = mapToScene(event->pos());
       
-      QList<QGraphicsItem *> f_gilist = items(event->pos());
+      QList<QGraphicsItem *> f_gilist = items(m_mousepos.toPoint());
       //       QList<QGraphicsItem *> &gilist = QGIlistAtClick;
       
-      qWarning() << "items(event->pos()); - Anzahl:" <<  f_gilist.size();
+      qWarning() << "items(event->pos()); - Anzahl:" <<  f_gilist.size() << "Pos: " << event->pos() << m_mousepos << mapToScene(event->pos());
       if(f_gilist.isEmpty())
       {
 	event->ignore();
 	return;
       }
-      else if(f_gilist.size() == 1)
+      else if(f_gilist.size() == 1 && !f_gilist.contains(activeItem))
       {
 	
 	activeItem = f_gilist.first();
@@ -1035,19 +1235,20 @@ void MapFrame::mouseMoveEvent(QMouseEvent *event)
 {
 // qWarning() << "void MapFrame::mouseMoveEvent(QMouseEvent *event)";
 
-curser = event->pos();
 // setStatusTip(QString("%1 %2").arg(curser.x(), curser.y()));
 
-static int oldxpos, oldypos;
-
-if(!(oldxpos == 0 && oldypos == 0) && m_itemGrabbed /*&& (oldtime == time(NULL) || oldtime == time(NULL) - 1)*/)
+if(m_itemGrabbed)
 {
- 	activeItem->moveBy( event->x() - oldxpos,  event->y() - oldypos);
-	emit objectMoved();
-
+  QPointF point (mapToScene(event->pos()));
+  qreal f_dx (m_mousepos.x() - point.x()), f_dy (m_mousepos.y() - point.y());
+  m_currentGraphicsItem->moveBy(f_dx, f_dy);
+  m_currentMapObject->moveBy(f_dx, f_dy);
+  m_mousepos = point;
 }
-oldxpos = event->x();
-oldypos = event->y();
+
+//  	activeItem->moveBy( event->x() - oldxpos,  event->y() - oldypos);
+// 	emit objectMoved();
+
 }
 
 
@@ -1057,12 +1258,14 @@ if(m_itemGrabbed)
   {
   m_itemGrabbed = false;
 //   itemSelected=false;
-  emit objectMoved();
+  emit objectMoved(m_currentGraphicsItem->data(Qt::UserRole).toInt());
   }
  if(event->button() == Qt::RightButton)
  {
  m_itemSelected = false;
  }
+ emit dataChanged();
+
 }
 
 ///************************************
@@ -1229,13 +1432,13 @@ void MapFrame::setMapSize(const QSize &a_newSize)
 void MapFrame::setXPos(int xpos)
 {
 qWarning() << "MapFrame::setXPos(int xpos)" << xpos;
-ziel.setX(xpos);
+m_mousepos.setX(xpos);
 }
 
 void MapFrame::setYPos(int ypos)
 {
 qWarning() << "MapFrame::setYPos(int ypos)" << ypos;
-ziel.setY(ypos);
+m_mousepos.setY(ypos);
 }
 
 /// void MapFrame::setToolTipString(QString ttstring)
@@ -1276,7 +1479,7 @@ qWarning() << "MapFrame::newObject(const MapObject &a_newObject)";
 /* void MapFrame::createObject()
  {
  qWarning() << "MapFrame::createObject()" << object_filename;
-   qWarning() << "ziel" << ziel;
+   qWarning() << "m_mousepos" << m_mousepos;
 	delete createObjectDialog;
 	
 	const QString &paramstring = object_filename;
@@ -1307,7 +1510,7 @@ qWarning() << "MapFrame::newObject(const MapObject &a_newObject)";
 	{
 	ObjectGraphicsItem *itemToAdd = new ObjectGraphicsItem(object_filename);
 //   QGraphicsPixmapItem *itemtoAdd = scene()->addPixmap(QPixmap(object_filename));
-		itemToAdd->setPos(ziel);
+		itemToAdd->setPos(m_mousepos);
 		itemToAdd->setZValue(object_ZValue);
 
 	itemToAdd->setToolTip(object_tooltip);
@@ -1346,7 +1549,7 @@ qWarning() << "MapFrame::newObject(const MapObject &a_newObject)";
 //   paramitem->setData(Tooltip, object_tooltip);
   
 //   paramitem->setData(Filename, object_filename);
-//   paramitem->setPos(ziel);
+//   paramitem->setPos(m_mousepos);
   //  paramitem->setData(
   
 //   if(objectName.isEmpty())
@@ -1400,12 +1603,12 @@ qWarning() << "MapFrame::fileDialog(int filterarg)" << filterarg;
 	connect(fd, SIGNAL(finished(int)), fd, SLOT(deleteLater()));
 }*/
 
-// void MapFrame::setFileString(QString fileString)
+/*// void MapFrame::setFileString(QString fileString)
 // {
 // qWarning() << "MapFrame::setFileString(QString fileString)" << fileString;
 // fd_filename = fileString;
 // emit fileStringChanged(fileString);
-// }
+// }*/
 
 
 void MapFrame::keyPressEvent(QKeyEvent *event)
@@ -1422,6 +1625,10 @@ void MapFrame::keyPressEvent(QKeyEvent *event)
     activeItem->setData(100, QVariant(1));
 
     
+  }
+  if(event->key() == Qt::Key_C)
+  {
+    qWarning() << "Anzahl Mapobjekte" << m_smap.objects().count();
   }
 }
 

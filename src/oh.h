@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2009 - 2010 by Christian Doerffel                       *
- *   schdorm@googlemail.com                                                *
+ *   oh.devs@googlemail.com                                                *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -18,54 +18,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef _MapObjectDialog_H
-#define _MapObjectDialog_H
 
-#include <QtGui/QDialog>
+#define OH_MAPEDITOR 0x0303
 
-#include "ui_mapobjectdialog.h"
-
-#include "mapobject.h"
-
-class Map;
-class QAbstractButton;
-class QGraphicsItem;
-
-class MapObjectDialog : public QDialog
-{
-  Q_OBJECT
-  public:
-    MapObjectDialog( Map *, const QPoint &, const QList<QGraphicsItem*> &ObjectList = QList<QGraphicsItem*>(), QGraphicsItem *a_currentGraphicsItem = 0);
-    
-    enum
-    {
-//       NewObjectItem = -1
-      NewObjectSelectionBoxItem = -2,
-    };
-    
-    void getObjectData(const MapObject *a_mapobject);
-    void setObjectData(MapObject *a_mapobject);
-    MapObject *newMapObject()	{	return &m_newMapObject; };
-    
-  public slots:
-    void setObjectFile();
-    void changeItem();
-    void buttonClick(QAbstractButton *);
-    
-  signals:
-    void newMapObjectCreated(MapObject *);
-//     void newMapObjectCreated();
-    void objectDataChanged(int);
-    void objectImageChanged(int);
-    
-  private:
-    Ui::MapObjectDialog ui;
-    QHash<int, MapObject*> m_MapObjects;
-    MapObject m_newMapObject;
-    
-    bool m_lockItemData;
-  protected:
-    
-};
-
-#endif

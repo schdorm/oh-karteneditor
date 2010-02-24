@@ -20,11 +20,82 @@
 
 #include "qstring.h"
 
-QString removeWithespace(QString string)
+#include <QtCore/QSize>
+#include <QtCore/QPoint>
+
+QString removeWithespace(const QString &a_string)
 {
+  QString string(a_string);
   string.simplified();
   string.remove(" ");
   return string;
+}
+
+QString removeWithespaceRef(QString &a_string)
+{
+  a_string.simplified();
+  a_string.remove(" ");
+  return a_string;
+}
+
+#ifdef USE_SETVALID
+QString setValid(const QString &a_string)
+{
+  if(!a_string.isEmpty())
+  {
+    return a_string;
+  }
+  else
+    return "0";
+}
+
+QString getFromValid(const QString &a_string)
+{
+  if(a_string == "0")
+  {
+    return QString();
+  }
+  else
+    return a_string;
+}
+#endif
+
+QString fromPoint1(const QPoint &a_point)
+{
+  return QString("Point(" + QString::number(a_point.x()) + "|" + QString::number(a_point.y()) + ")");
+}
+
+QString fromPoint(const QPoint &a_point)
+{
+  return QString("Point(%1|%2)").arg(a_point.x()).arg(a_point.y());
+}
+
+
+QPoint toPoint(const QString &a_string)
+{
+  QString w_string(a_string);
+  removeWithespaceRef(w_string);
+  w_string.remove("Point(");
+  w_string.remove(")");
+  int c_index = w_string.indexOf("|");
+  return QPoint(w_string.left(c_index).toInt(), w_string.right(w_string.size() - 1 - c_index).toInt());
+}
+
+
+QString fromSize(const QSize &a_size)
+{
+  return QString("Size(%1|%2)").arg(a_size.width()).arg(a_size.height());
+}
+
+
+QSize toSize(const QString &a_string)
+{
+  QString w_string(a_string);
+  removeWithespaceRef(w_string);
+  w_string.remove("Size(");
+  w_string.remove(")");
+  int c_index = w_string.indexOf("|");
+  return QSize(w_string.left(c_index).toInt(), w_string.right(w_string.size() - 1 - c_index).toInt());
 }
 
 QString fromBool(bool boolean)
@@ -39,11 +110,6 @@ bool toBool(const QString &string)
 {
   return (string == "true" || string.toInt() == 1);
 }
-
-// bool toBool(const QString string)
-// {
-//   
-// }
 
 bool toBool(const QStringRef stringref)
 {

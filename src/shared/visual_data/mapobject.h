@@ -19,14 +19,21 @@
  ***************************************************************************/
 #ifndef _MAPOBJECT_H
 #define _MAPOBJECT_H
+
 #include <QtCore/QPoint>
 #include <QtCore/QString>
+
+#include "oh.h"
 
 class MapObject
 {
   public:
-    MapObject(const int , const QString &, const QString &, const QPoint &, const qreal );
-    MapObject(const int , const QString &, const QString &, const QString &, const qreal );
+    MapObject(int a_role, const QString &a_filename, const QPoint &a_position, const QString &a_name, const QString &a_tooltip, double a_zvalue);
+//     MapObject(const int , const QString &, const QString &, const QString &, const QString & , const qreal );
+    
+    #ifdef OH_MAPEDITOR
+    MapObject();
+    #endif
     
     enum 
     {
@@ -37,19 +44,24 @@ class MapObject
     
     
     
-    int 	id	 () const 	{	return m_id;		}
-    int		role 	 () const	{	return m_role;		}
-    QString	filename () const	{	return m_filename;	}
-    QString	tooltip  () const	{	return m_tooltip;	}
-    QString	name	 () const 	{	return m_name;		}
-    QPoint	position () const	{	return m_position;	}
-    double	zValue	 () const	{	return m_zValue;	}
+    int 	id	 () const 	{	return m_id;			}
+    int		role 	 () const	{	return m_role;			}
+    QString	filename () const	{	return m_filename;		}
+    QString	imagepath() const 	{	return m_filename;		}
+    QString	tooltip  () const	{	return m_tooltip;		}
+    QString	name	 () const 	{	return m_name;			}
+    QPoint	position () const	{	return m_position.toPoint();	}
+    QPointF	positionF() const	{	return m_position;		}
+//     QString	positionS() const;
+    double	zValue	 () const	{	return m_zValue;		}
     
     void setRole 	(int);
     void setFilename	(const QString& );
+    void setImagepath	(const QString& );
     void setTooltip	(const QString& );
     void setName	( const QString&);
-    void setPosition	(const QPoint &);
+    void setPosition	(const QPointF & );
+    void moveBy		(qreal, qreal);
     void setZValue	(double);
     
     
@@ -59,12 +71,16 @@ class MapObject
     int m_id;
     int m_role;
     QString m_filename;
-    QString m_tooltip;
+    QPointF m_position;
     QString m_name;
-    QPoint m_position;
-    qreal m_zValue;
+    QString m_tooltip;
+
+
+    double m_zValue;
+    static int MapObject_IDCounter;
 };
 
 // void operator=(MapObject &m1, const MapObject &m2);
+bool operator==(const MapObject &m1, const MapObject &m2);
 
 #endif

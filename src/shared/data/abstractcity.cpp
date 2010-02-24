@@ -19,12 +19,14 @@
  ***************************************************************************/
 
 #include "abstractcity.h"
-#include <QtDebug>
 #include "qstring.h"
 
 
 #ifdef DEBUG_CITY
- int AbstractCity::citycounter = 0;
+
+#include <QtDebug>
+
+int AbstractCity::citycounter = 0;
 
 
 AbstractCity::AbstractCity(const AbstractCity &other) : m_name (other.name()), m_production(other.production()), m_inhabitants (other.inhabitants())
@@ -55,19 +57,7 @@ AbstractCity::AbstractCity(const QString &param_cityname) : m_name (param_cityna
   #endif
 }
 
-/*City::City(const City *other) : m_id (other->id()),
-//  m_name (other->nameref()),
- m_inhabitants (other->inhabitants())//,
-//   m_production (other->production())
-{
-  qWarning() << "Before setting name";
-   m_name = other->name();
- m_production = other->production();
-  qWarning() << "City successfull copied!";
-qWarning() << other->name();
-qWarning() << m_name;
 
-}*/
 
 void AbstractCity::init()
 {

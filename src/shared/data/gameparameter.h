@@ -39,8 +39,10 @@ class GameParameter : public QObject	// inherited for the tr()-Function (transla
     const QString &lastName  () const	{	return m_LastName;	}
     #endif
     
-    const QHash <int, QString> &GoodLabels  () const {	return m_GoodLabelHash;		}
-    const QHash <int, QString> &BuildingLabels () const { 	return m_BuildingLabelHash;	}
+    const QHash <int, QString> &GoodLabels	() const {	return m_GoodLabelHash;		}
+    const QHash <int, QString> &BuildingLabels	() const { 	return m_BuildingLabelHash;	}
+    
+    const QList<int> &goodEnums			() const {	return m_GoodEnumList;		}
     
     QString GoodName 	(int key) const {	return m_GoodLabelHash[key];		}
     
@@ -61,7 +63,7 @@ class GameParameter : public QObject	// inherited for the tr()-Function (transla
     #endif
     
     QHash<int, QString> m_GoodLabelHash;
-    
+    QList<int> 		m_GoodEnumList;
     
     QHash<int, QString> m_BuildingLabelHash;
     

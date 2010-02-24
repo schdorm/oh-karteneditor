@@ -23,8 +23,8 @@
 
 #include <QtCore/QString>
 
-  #include "goods.h"
-  #include "definitions.h"
+#include "goods.h"
+#include "definitions.h"
 //   #define DEBUG_CITY
 
 
@@ -32,54 +32,62 @@ class QXmlStreamAttributes;
 
 class AbstractCity /*: public QObject*/
 {
-// Q_OBJECT
+  // Q_OBJECT
   public:
     #ifdef DEBUG_CITY
-      AbstractCity(const AbstractCity &other);
-      // AbstractCity(const AbstractCity *);
-      ~AbstractCity();
+    AbstractCity(const AbstractCity &other);
+    ~AbstractCity();
     #endif
     
-AbstractCity( const QString & = 0);
+    AbstractCity( const QString & = 0);
+    
+    
+    void init();
+    
 
+    void setName		(const QString &);
+    
+    void setProduction	(int, const QString&);
+    
+    
+    
+    int id 			() const	{	return m_id;		}
+    QString name		() const	{	return m_name;		}
+    // const QString &nameref	() const	{	return m_name;		}
+    
+    int inhabitants		() const	{	return m_inhabitants;	}
+    
+    // returns production-things 
+    const Goods &production	() const	{	return m_production;		}
+    Goods &production 		() 		{	return m_production;		}
 
-void init();
-
-void setID();
-/*void setID		(const QList<int>&);
-void setID		(int id = -1);*/
-void setName		(const QString &);
-void setProduction	(int, const QString&);
-//QString ;
-
-int id 			() const	{	return m_id;		}
-QString name		() const	{	return m_name;		}
-// const QString &nameref	() const	{	return m_name;		}
-
-int inhabitants		() const	{	return m_inhabitants;	}
-
-const Goods &production	() const	{	return m_production;		}	// returns production-things 
-
-QString lowproduction	() const 	{	return m_lowproduction;		}
-QString normalproduction() const 	{	return m_normalproduction;	}
-QString highproduction	() const 	{	return m_highproduction;	}
-
-
-QXmlStreamAttributes characteristics () const;
-void setCharacteristics (const QXmlStreamAttributes &);
-
-private:
-  int m_id;
-  QString m_name;
-  int m_inhabitants;
-  Goods m_production;
-  QString m_lowproduction, m_normalproduction, m_highproduction;
-  
-  
-#ifdef DEBUG_CITY
-  static int citycounter;
-#endif
-
+    #ifdef OH_MAPEDITOR
+    #if OH_MAPEDITOR < 0x0302
+    QString lowproduction	() const 	{	return m_lowproduction;		}
+    QString normalproduction	() const 	{	return m_normalproduction;	}
+    QString highproduction	() const 	{	return m_highproduction;	}
+    #endif
+    #endif
+    
+    QXmlStreamAttributes characteristics () const;
+    void setCharacteristics (const QXmlStreamAttributes &);
+    
+  private:
+    int m_id;
+    QString m_name;
+    int m_inhabitants;
+    Goods m_production;
+    
+    #ifdef OH_MAPEDITOR
+    #if OH_MAPEDITOR < 0x0302
+    QString m_lowproduction, m_normalproduction, m_highproduction;
+    #endif
+    #endif
+    
+    #ifdef DEBUG_CITY
+    static int citycounter;
+    #endif
+    
 };
 
 

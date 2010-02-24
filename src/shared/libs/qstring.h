@@ -23,12 +23,35 @@
 
 #include <QtCore/QString>
 
-QString removeWithespace(QString string);
+//#define USE_SETVALID
+
+class QSize;
+class QPoint;
+
+
+QString removeWithespace(const QString &string);
+QString removeWithespaceRef(QString &string);
+
 /*{
   string.simplified();
   string.remove(" ");
   return string;
 }*/
+
+
+#ifdef USE_SETVALID
+
+ QString setValid(const QString &a_string);	// if argument is an empty string, "0" will be returned 
+ QString getFromValid(const QString &a_string);
+ 
+#endif
+
+QString fromPoint(const QPoint &a_point);
+QString fromPoint1(const QPoint &a_point);
+QPoint  toPoint(const QString &);
+
+QString fromSize(const QSize &a_size);
+QSize toSize(const QString &);
 
 QString fromBool(bool boolean);
 /*{

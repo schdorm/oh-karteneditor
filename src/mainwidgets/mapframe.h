@@ -110,7 +110,7 @@ class MapFrame : public QGraphicsView
 //     QString object_filename;
 //     QString object_tooltip;
     int x, y;
-    QPoint ziel;
+    QPointF ziel;
 
 //     QFileDialog *fd;
     QDialog *createObjectDialog;
@@ -135,7 +135,13 @@ class MapFrame : public QGraphicsView
     void closeObjectDialog(int);
     
 //     void newObjectDialog_ext();
+     void addObject();
+     void addObject(MapObject *a_newObject);
      void newObject(const MapObject &a_newObject);
+     
+     void updateObject(int);
+     void updateObjectImage(int);
+
 //     void createObject();
 //     void fileDialog(int);
     // void fileDialog(NameFilters::NFs);
@@ -164,33 +170,38 @@ class MapFrame : public QGraphicsView
     
     void keyPressEvent(QKeyEvent *);
     
+    void repaintMap();
+    
     const MainWindow *m_MainWindow;
     QComboBox *fktComboBox;
     
     
     Map m_smap;
     
-    QGraphicsItem *m_currentGraphicsItem;
-    MapObject *m_currentMapObject;
+//     QGraphicsItem *m_currentGraphicsItem;
     
     
   private:
       MapSettingsDialog *m_MapDialog;
       MapObjectDialog *m_ObjectDialog;
-      MapObject *m_CurrentObject;
-      QGraphicsItem *m_CurrentItem;
+//       MapObject *m_CurrentObject;
+      QGraphicsItem *m_currentGraphicsItem;
+      MapObject *m_currentMapObject;
+
       bool m_itemSelected;
       bool m_itemGrabbed;
 //    Map *mapinstance();
 //      Map *m_map;
+      QPointF m_mousepos;
      
   signals:
     void mapChanged();
 //     void newObjectCreated(QGraphicsItem *);
 //     void fileStringChanged(QString);
     void objectSelected(int);
-    void objectMoved();
+    void objectMoved(int);
  
     void SIG_deleteObject();
+    void dataChanged();
 };
  #endif

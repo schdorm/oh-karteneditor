@@ -69,6 +69,32 @@ m_GoodLabelHash.insert(Goods::Gold, tr("gold"));	//Gold
 m_GoodLabelHash.insert(Goods::Jewellery, tr("jewellery"));//Schmuck
 
 
+m_GoodEnumList
+<< Goods::Trunks
+<< Goods::Shelves 
+<< Goods::Charcoal 
+<< Goods::Pitch 
+<< Goods::Bricks
+<< Goods::IronOre
+<< Goods::MalleableIron 
+<< Goods::Tools
+<< Goods::Leather
+<< Goods::Wool
+<< Goods::Cloth 
+<< Goods::Hemp
+
+<< Goods::Beer
+<< Goods::Cereal
+<< Goods::Bread 
+<< Goods::Salt
+<< Goods::Meat 
+<< Goods::Fish
+<< Goods::Cheese
+<< Goods::Wine 
+<< Goods::Spicery
+<< Goods::Gold 
+<< Goods::Jewellery ;
+
 
 
 #ifdef OH_GAME

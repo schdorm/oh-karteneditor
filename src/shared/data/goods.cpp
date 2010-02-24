@@ -19,15 +19,16 @@
  ***************************************************************************/
 
 #include "goods.h"
+#include <QtCore/QXmlStreamAttributes>
 
 Goods::Goods()
 {
-  m_GoodHash[Taler] = 0;
+//   m_GoodHash[Taler] = 0;
 //   m_taler = &m_GoodHash[Taler];
   
-  m_GoodHash[Capacity] = 0;
-  m_GoodHash[Fill] = 0;
-  m_GoodHash[ExchangeVolume] = 0;
+//   m_GoodHash[Capacity] = 0;
+//   m_GoodHash[Fill] = 0;
+//   m_GoodHash[ExchangeVolume] = 0;
   
 //   m_capacity = &m_GoodHash[Capacity];
 //   m_filling = &m_GoodHash[Fill];
@@ -115,4 +116,28 @@ QList<int> Goods::keys(int filter) const
     return keylist;
   
 }
+
+
+QXmlStreamAttributes Goods::xmlAttributes() const
+{
+  QXmlStreamAttributes attributes;
+  QHash<int, int>::const_iterator it;
+  for(it = m_GoodHash.begin(); it != m_GoodHash.end(); ++ it)
+  {
+    attributes.append("g" + QString::number(it.key()), QString::number(it.value()));
+  }
+  
+  return attributes;
+}
+
+
+void Goods::setXmlAttributes (const QXmlStreamAttributes &a_attributes)
+{
+  QXmlStreamAttributes::const_iterator it;
+  for(it = a_attributes.begin(); it != a_attributes.end(); ++it)
+  {
+    m_GoodHash[it->name().toString().remove("g", Qt::CaseInsensitive).toInt()] = it->value().toString().toInt();
+  }
+}
+
 

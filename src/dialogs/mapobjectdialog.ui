@@ -13,9 +13,16 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
+  <property name="modal">
+   <bool>true</bool>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QComboBox" name="ObjectSelectionBox"/>
+    <widget class="QComboBox" name="ObjectSelectionBox">
+     <property name="editable">
+      <bool>true</bool>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="QGroupBox" name="ObjectGroupBox">
@@ -63,7 +70,7 @@
        </widget>
       </item>
       <item row="6" column="0">
-       <widget class="QLabel" name="XLabel">
+       <widget class="QLabel" name="PositionLabel">
         <property name="frameShape">
          <enum>QFrame::Box</enum>
         </property>
@@ -135,7 +142,7 @@
        <widget class="QDoubleSpinBox" name="ZSpinBox"/>
       </item>
       <item row="6" column="1">
-       <widget class="QLabel" name="label">
+       <widget class="QLabel" name="XLabel">
         <property name="text">
          <string>X:</string>
         </property>
@@ -197,7 +204,7 @@
    <sender>buttonBox</sender>
    <signal>clicked(QAbstractButton*)</signal>
    <receiver>MapObjectDialog</receiver>
-   <slot>applyChanges(QAbstractButton*)</slot>
+   <slot>buttonClick(QAbstractButton*)</slot>
    <hints>
     <hint type="sourcelabel">
      <x>259</x>
@@ -225,10 +232,27 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>ObjectSelectionBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>MapObjectDialog</receiver>
+   <slot>changeItem()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>259</x>
+     <y>17</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>259</x>
+     <y>213</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>setChanges()</slot>
-  <slot>applyChanges(QAbstractButton*)</slot>
+  <slot>buttonClick(QAbstractButton*)</slot>
   <slot>setObjectFile()</slot>
+  <slot>changeItem()</slot>
  </slots>
 </ui>

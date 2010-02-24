@@ -67,7 +67,7 @@ class MainWindow : public QMainWindow
     void saveMap();
     void saveMapAs();
     
-    
+    void autoSaveMap();
     void autoSave();
     void loadAutoSave();
     
@@ -144,7 +144,7 @@ en_mapeast = 4
  
 //  QString mapfilename;
  bool existingMapFile;		// if true, no request for mapfile name
- bool autoSaved;
+ bool m_autoSaved;
 //  bool activeMapView;
  };
  #endif

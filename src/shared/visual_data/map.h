@@ -87,9 +87,17 @@ class Map
     // const QString &cityname()	const	{	return m_cityname;	}
     
     
-    const QList <MapObject> &objectList() const {	return m_ObjectList;	}
-    QList <MapObject> objects  ()	const	{	return m_ObjectList;	}
-    QList <MapObject> *objects ()		{	return &m_ObjectList;	}
+    void addObject			(const MapObject *);
+    void removeObject	(int);
+    
+    QList <MapObject> objects 		() const	{	return m_Objects.values();	}
+    MapObject * object			(int a_id)	{	return &m_Objects[a_id];	}
+    MapObject object			(int a_id) const{	return m_Objects.value(a_id);	}
+    
+    //     const MapObject *object		(int a_id) const{	return &m_Objects[a_id];	}
+    //     QList <MapObject> *objects ()		{	return &m_ObjectList;	}
+    //     const QList <MapObject> &objectList	() const	{	return m_ObjectLists		}
+    
     
     QString filename 	()	const	{	return m_filename;	}
     QString name	() 	const 	{	return m_name;		}
@@ -98,9 +106,9 @@ class Map
     QString background	()	const	{	return m_background;	}
     
     QString mapnorth	()	const	{	return m_mapnorth;	}
-    QString mapeast		()	const	{	return m_mapeast;	}
+    QString mapeast	()	const	{	return m_mapeast;	}
     QString mapsouth	()	const	{	return m_mapsouth;	}
-    QString mapwest		()	const	{	return m_mapwest;	} 
+    QString mapwest	()	const	{	return m_mapwest;	} 
     
     int type		()	const	{	return m_type;		}
     
@@ -137,6 +145,7 @@ class Map
     AbstractCity m_city;
     
     QList <MapObject> m_ObjectList;
+    QHash <int, MapObject> m_Objects;
     
 };
 
