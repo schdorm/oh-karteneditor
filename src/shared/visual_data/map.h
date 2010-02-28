@@ -21,7 +21,7 @@
 #ifndef _MAPCLASS_H
 #define _MAPCLASS_H
 
-#include "definitions.h"
+#include "oh.h"
 
 #include "mapobject.h"
 #include <QtCore/QList>

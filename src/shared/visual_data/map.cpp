@@ -684,6 +684,7 @@ void Map::addObject(const MapObject *a_newMO)
   }
 }
 
+
 void Map::removeObject(int a_id)
 {
   m_Objects.remove(a_id);

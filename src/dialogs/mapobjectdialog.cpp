@@ -65,12 +65,11 @@ MapObjectDialog::MapObjectDialog(Map *a_map, const QPoint &a_point, const QList<
   
   
   //   ui.ObjectSelectionBox.setItemData(ui.ObjectSelectionBox.currentIndex(), QVariant(NewObjectSelectionBoxItem));
-  ui.ObjectSelectionBox->addItem(tr("<New Object>"), QVariant(NewObjectSelectionBoxItem));
   
   QHash<int, MapObject*>::iterator f_mopit;
   for(f_mopit = m_MapObjects.begin(); f_mopit != m_MapObjects.end(); f_mopit++)
   {
-    ui.ObjectSelectionBox->addItem((*f_mopit)->name(), QVariant(f_mopit.key()));
+    ui.ObjectSelectionBox->addItem(/*QString::number(f_mopit.key()) +*/ (*f_mopit)->name(), QVariant(f_mopit.key()));
   }
   
 
@@ -98,6 +97,7 @@ MapObjectDialog::MapObjectDialog(Map *a_map, const QPoint &a_point, const QList<
       changeItem();
     }
   }
+  ui.ObjectSelectionBox->addItem(tr("<New Object>"), QVariant(NewObjectSelectionBoxItem));
   m_lockItemData = false;
 }
 
@@ -264,6 +264,8 @@ void MapFrame::objectDialog(const QPoint &a_point)
     delete m_ObjectDialog;
     m_ObjectDialog = 0;
   }
+  
+//    qWarning() << "void MapFrame::objectDialog(const QPoint &a_point)" << f_ol.count() << f_ol.first()->data(Qt::UserRole) << m_currentGraphicsItem->data(Qt::UserRole);
   
   m_ObjectDialog = new MapObjectDialog(map(), a_point, f_ol, m_currentGraphicsItem);
 //   m_ObjectDialog->exec();

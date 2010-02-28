@@ -33,6 +33,7 @@ class SideBarClass;
 class QGraphicsItem;
 class QTimer;
 class QSignalMapper;
+class QToolButton;
 //  #include "mapframe.h"
 //  #include "sidebar.h"
 
@@ -94,6 +95,10 @@ class MainWindow : public QMainWindow
     void preferences(); 
     void applySettings();
     
+    
+    
+    void changeViewSlot();
+    
   private:
     void createActions();
     void createMenus();
@@ -137,7 +142,7 @@ class MainWindow : public QMainWindow
     
     QAction *m_PreferencesAction;
     QAction *m_AboutAction;
-    
+    QToolButton *m_ChangePerspectiveButton;
     
     bool existingMapFile;		// if true, no request for mapfile name
     bool m_autoSaved;

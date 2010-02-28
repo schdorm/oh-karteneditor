@@ -33,6 +33,7 @@
 #include <QtGui/QStatusBar>
 
 #include <QtGui/QToolBar>
+#include <QtGui/QToolButton>
 
 #include <QtGui/QHBoxLayout>
 //#include <QtGui/QVBoxLayout>
@@ -143,25 +144,25 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::createActions()
- {
+{
   newAct = new QAction(tr("&New"), this);
   newAct->setShortcuts(QKeySequence::New);
   newAct->setStatusTip(tr("Create a new map"));
   newAct->setIcon(QIcon(":.img/icon_new_map_01.png"));
   connect(newAct, SIGNAL(triggered()), this, SLOT(newMap()));
   connect(newAct, SIGNAL(triggered()), MapView, SLOT(newMap()));
-
+  
   openAct = new QAction(tr("&Open..."), this);
   openAct->setShortcuts(QKeySequence::Open);
   openAct->setStatusTip(tr("Open an existing map"));
   openAct->setIcon(QIcon(":.img/icon_open_map_03.png"));
   connect(openAct, SIGNAL(triggered()), this, SLOT(loadMap()));
-
+  
   saveAct = new QAction(tr("&Save"), this);
   saveAct->setShortcuts(QKeySequence::Save);
   saveAct->setStatusTip(tr("Save the map with the current name to disk"));
   connect(saveAct, SIGNAL(triggered()), this, SLOT(saveMap()));
-
+  
   saveAsAct = new QAction(tr("Save As ..."), this);
   #if QT_VERSION > 0x040501
   saveAsAct->setShortcuts(QKeySequence::SaveAs);
@@ -190,10 +191,10 @@ void MainWindow::createActions()
   
   
   
-//   disableAutoSaveAct = new QAction(tr("Disable Autosaves"), this);
-//   disableAutoSaveAct->setStatusTip(tr("Disables autosaves for this session (temporary)"));
-//   connect(disableAutoSaveAct, SIGNAL(triggered()), SETTINGS, SLOT(disableAutosave()));
-   
+  //   disableAutoSaveAct = new QAction(tr("Disable Autosaves"), this);
+  //   disableAutoSaveAct->setStatusTip(tr("Disables autosaves for this session (temporary)"));
+  //   connect(disableAutoSaveAct, SIGNAL(triggered()), SETTINGS, SLOT(disableAutosave()));
+  
   quitAct = new QAction(tr("&Exit"), this);
   quitAct->setShortcut(tr("Ctrl+Q"));
   quitAct->setStatusTip(tr("Close the application"));
@@ -202,12 +203,12 @@ void MainWindow::createActions()
   
   newObjectAct = new QAction(tr("&New Object"), this);
   newObjectAct->setStatusTip(tr("Open Dialog for creating a new Object"));
- // QSignalMapper newObjectMapper;
-//   connect(newObjectAct, SIGNAL(triggered()), &newObjectMapper, SLOT(map()));
-//   newObjectMapper.setMapping(newObjectAct, QString("100,100"));
-//   connect(&newObjectMapper, SIGNAL(mapped(QString)), MapView, SLOT(newObjectDialog(QPoint)));
+  // QSignalMapper newObjectMapper;
+  //   connect(newObjectAct, SIGNAL(triggered()), &newObjectMapper, SLOT(map()));
+  //   newObjectMapper.setMapping(newObjectAct, QString("100,100"));
+  //   connect(&newObjectMapper, SIGNAL(mapped(QString)), MapView, SLOT(newObjectDialog(QPoint)));
   connect(newObjectAct, SIGNAL(triggered()), MapView, SLOT(newObjectDialog_ext()));
-
+  
   rmcurrentObjectAct = new QAction(tr("&Remove current Object"), this);
   rmcurrentObjectAct->setStatusTip(tr("Removes the currently active Object"));
   connect(rmcurrentObjectAct, SIGNAL(triggered()), this, SLOT(deleteCurrentObject()));
@@ -219,9 +220,43 @@ void MainWindow::createActions()
   m_PreferencesAction = new QAction(tr("Preferences"), this);
   m_PreferencesAction->setStatusTip("Set your preferences in the settings-dialog.");
   connect(m_PreferencesAction, SIGNAL(triggered()), this, SLOT(preferences()));
+  
+  m_ChangePerspectiveButton = new QToolButton(this);
+  m_ChangePerspectiveButton->setText("View");
+  m_ChangePerspectiveButton->setEnabled(false);
+  connect(m_ChangePerspectiveButton, SIGNAL(clicked()), this, SLOT(changeViewSlot()));
+}
 
- }
- 
+void MainWindow::createMenus()
+{
+  fileMenu = menuBar()->addMenu(tr("&File"));
+  fileMenu->addAction(newAct);
+  fileMenu->addAction(openAct);
+  fileMenu->addAction(saveAct);
+  fileMenu->addAction(saveAsAct);
+  fileMenu->addSeparator();
+  fileMenu->addAction(loadAutoSaveAct);
+  fileMenu->addAction(autoSaveAct);
+  //   fileMenu->addAction(disableAutoSaveAct);
+  fileMenu->addSeparator();
+  fileMenu->addAction(quitAct);
+  
+  editMenu = menuBar()->addMenu(tr("&Edit"));
+  editMenu->addAction(newObjectAct);
+  editMenu->addAction(rmcurrentObjectAct);
+  
+  helpMenu = menuBar()->addMenu(tr("&Help"));
+  helpMenu->addAction(m_PreferencesAction);
+  
+  QToolBar *tb = addToolBar(tr("Maintoolbar"));
+  tb->addAction(newAct);
+  tb->addAction(openAct);
+  tb->addSeparator();
+  tb->addAction(m_MapPropertiesAction);
+  tb->addWidget(m_ChangePerspectiveButton);
+}
+
+
 void MainWindow::createOldLayout()
 {
   SideBar = new SideBarClass(this);
@@ -337,32 +372,7 @@ void MainWindow::saveMap()
 
 
 
-void MainWindow::createMenus()
- {
-  fileMenu = menuBar()->addMenu(tr("&File"));
-  fileMenu->addAction(newAct);
-  fileMenu->addAction(openAct);
-  fileMenu->addAction(saveAct);
-  fileMenu->addAction(saveAsAct);
-  fileMenu->addSeparator();
-  fileMenu->addAction(loadAutoSaveAct);
-  fileMenu->addAction(autoSaveAct);
-//   fileMenu->addAction(disableAutoSaveAct);
-  fileMenu->addSeparator();
-  fileMenu->addAction(quitAct);
 
-  editMenu = menuBar()->addMenu(tr("&Edit"));
-  editMenu->addAction(newObjectAct);
-  editMenu->addAction(rmcurrentObjectAct);
-
-  helpMenu = menuBar()->addMenu(tr("&Help"));
-  helpMenu->addAction(m_PreferencesAction);
-  
-  	QToolBar *tb = addToolBar(tr("Maintoolbar"));
-	tb->addAction(newAct);
-	tb->addAction(openAct);
-	tb->addAction(m_MapPropertiesAction);
- }
  
  void MainWindow::preferences()
  {
@@ -588,27 +598,27 @@ void MainWindow::updateSideBar(int selectedItemRow)
 // 		QGraphicsItem *blah = new QGraphicsItem();
 // 		MapView->activeItem = blah:
 // 		for(QList<QGraphicsItem>::iterator it = MapView->ogilist.begin(); it != MapView->ogilist.end(); ++it)
-		foreach(MapView->activeItem, MapView->scene()->items())
-		{
+///		foreach(MapView->activeItem, MapView->scene()->items())
+/*		{
 			qWarning() << "Item-ID:" << MapView->activeItem->data(Qt::UserRole).toInt();
 			if(MapView->activeItem->data(Qt::UserRole).toInt() == SideBar->itemListWidget->currentItem()->data(Qt::UserRole).toInt())
 			{
 				qWarning() << MapView->activeItem->data(Qt::UserRole);
 				break;
 			}
-		}
+		}*/ ///**************************************
 //  		MapView->activeItem = MapView->itemMapList.value(SideBar->itemListWidget->currentItem()->text());
 		
 // 		MapView->activeItem->setPos(10000,1000);
 // 				qWarning() << "DebugMeldung";
 		
-		SideBar->XBox->setValue(MapView->activeItem->x());
-		SideBar->YBox->setValue(MapView->activeItem->y());
+		SideBar->XBox->setValue(MapView->activeItem()->x());
+		SideBar->YBox->setValue(MapView->activeItem()->y());
 
-		SideBar->ZBox->setValue(MapView->activeItem->zValue());
+		SideBar->ZBox->setValue(MapView->activeItem()->zValue());
 		
 		
-		int obj_id = MapView->activeItem->data(MapFrame::Function).toInt();
+		int obj_id = MapView->activeItem()->data(MapFrame::Function).toInt();
 		qWarning() << obj_id;
 		
 		for(int i = 0; i< SideBar->itemTyp->count(); i++)
@@ -635,8 +645,8 @@ void MainWindow::updateSideBar(int selectedItemRow)
 // 		{
 // 			SideBar->itemTyp->setCurrentIndex(SideBar->itemTyp->count() - 1);
 // 		}
-		SideBar->editToolTip->setText(MapView->activeItem->data(MapFrame::Tooltip).toString());
-		SideBar->nameLineEdit->setText(MapView->activeItem->data(MapFrame::Name).toString());
+		SideBar->editToolTip->setText(MapView->activeItem()->data(MapFrame::Tooltip).toString());
+		SideBar->nameLineEdit->setText(MapView->activeItem()->data(MapFrame::Name).toString());
 		
 		
 // 		if(MapView->activeItem->data(MapFrame::Filename).toString().size() > 43)
@@ -646,7 +656,7 @@ void MainWindow::updateSideBar(int selectedItemRow)
 // 		}
 // 		else
 		{
-			SideBar->fileView->setText(MapView->activeItem->data(MapFrame::Filename).toString());
+			SideBar->fileView->setText(MapView->activeItem()->data(MapFrame::Filename).toString());
 		}
 		
 		break;
@@ -755,8 +765,8 @@ void MainWindow::spinboxHandler()
 	{
 // 		MapView->itemMapList.value(SideBar->itemListWidget->currentItem()->text())->setPos(SideBar->XBox->value(), SideBar->YBox->value());
 // 		MapView->itemMapList.value(SideBar->itemListWidget->currentRow() - 6)->setZValue(SideBar->ZBox->value());
-		MapView->activeItem->setPos(SideBar->XBox->value(), SideBar->YBox->value());
-		MapView->activeItem->setZValue(SideBar->ZBox->value());
+///		MapView->activeItem->setPos(SideBar->XBox->value(), SideBar->YBox->value());
+///		MapView->activeItem->setZValue(SideBar->ZBox->value());
 	}
 	else if(SideBar->itemListWidget->currentRow() <= 4)
 	{
@@ -774,8 +784,8 @@ void MainWindow::updateSpinbox()
   if(SETTINGS->oldlayout())
   {
     m_autoSaved = false;
-    SideBar->XBox->setValue(MapView->activeItem->x());
-    SideBar->YBox->setValue(MapView->activeItem->y());
+    SideBar->XBox->setValue(MapView->activeItem()->x());
+    SideBar->YBox->setValue(MapView->activeItem()->y());
   }
 }
 
@@ -1067,27 +1077,27 @@ void MainWindow::sidebarHandler()
 // 		QGraphicsItem *blah = new QGraphicsItem();
 // 		MapView->activeItem = blah:
 // 		for(QList<QGraphicsItem>::iterator it = MapView->ogilist.begin(); it != MapView->ogilist.end(); ++it)
-		foreach(MapView->activeItem, MapView->scene()->items())
-		{
+///		foreach(MapView->activeItem, MapView->scene()->items())
+/*		{
 			qWarning() << "Item-ID:" << MapView->activeItem->data(Qt::UserRole).toInt();
 			if(MapView->activeItem->data(Qt::UserRole).toInt() == SideBar->itemListWidget->currentItem()->data(Qt::UserRole).toInt())
 			{
 				qWarning() << MapView->activeItem->data(Qt::UserRole);
 				break;
 			}
-		}
+		}*/ ///*****************************************************************************/////
 //  		MapView->activeItem = MapView->itemMapList.value(SideBar->itemListWidget->currentItem()->text());
 		
 // 		MapView->activeItem->setPos(10000,1000);
 // 				qWarning() << "DebugMeldung";
 		
-		SideBar->XBox->setValue(MapView->activeItem->x());
-		SideBar->YBox->setValue(MapView->activeItem->y());
+		SideBar->XBox->setValue(MapView->activeItem()->x());
+		SideBar->YBox->setValue(MapView->activeItem()->y());
 
-		SideBar->ZBox->setValue(MapView->activeItem->zValue());
+		SideBar->ZBox->setValue(MapView->activeItem()->zValue());
 		
 		
-		int obj_id = MapView->activeItem->data(MapFrame::Function).toInt();
+		int obj_id = MapView->activeItem()->data(MapFrame::Function).toInt();
 		qWarning() << obj_id;
 		
 		for(int i = 0; i< SideBar->itemTyp->count(); i++)
@@ -1114,8 +1124,8 @@ void MainWindow::sidebarHandler()
 // 		{
 // 			SideBar->itemTyp->setCurrentIndex(SideBar->itemTyp->count() - 1);
 // 		}
-		SideBar->editToolTip->setText(MapView->activeItem->data(MapFrame::Tooltip).toString());
-		SideBar->nameLineEdit->setText(MapView->activeItem->data(MapFrame::Name).toString());
+		SideBar->editToolTip->setText(MapView->activeItem()->data(MapFrame::Tooltip).toString());
+		SideBar->nameLineEdit->setText(MapView->activeItem()->data(MapFrame::Name).toString());
 		
 		
 // 		if(MapView->activeItem->data(MapFrame::Filename).toString().size() > 43)
@@ -1125,7 +1135,7 @@ void MainWindow::sidebarHandler()
 // 		}
 // 		else
 		{
-			SideBar->fileView->setText(MapView->activeItem->data(MapFrame::Filename).toString());
+			SideBar->fileView->setText(MapView->activeItem()->data(MapFrame::Filename).toString());
 		}
 		
 		break;
@@ -1137,7 +1147,7 @@ void MainWindow::sidebarHandler()
 
 void MainWindow::deleteCurrentObject()
 { 
-  qWarning() << "MainWindow::deleteCurrentObject()" << MapView->activeItem->data(MapFrame::Filename).toString();
+  qWarning() << "MainWindow::deleteCurrentObject()" << MapView->activeItem()->data(MapFrame::Filename).toString();
   m_autoSaved = false;
   if(SETTINGS->oldlayout())
   {
@@ -1158,9 +1168,8 @@ void MainWindow::deleteCurrentObject()
       // MapView->ogilist.removeOne(MapView->activeItem);
 
       qWarning() << "Deleting Item";
-      MapView->scene()->removeItem(MapView->activeItem);
+      MapView->removeCurrentItem();
 
-      delete MapView->activeItem;
  
       //  if(!ogilist.isEmpty())
       //  {
@@ -1174,9 +1183,11 @@ void MainWindow::deleteCurrentObject()
   }
   else if(!MapView->scene()->items().isEmpty())
   {
-    MapView->scene()->removeItem(MapView->activeItem);
-    delete MapView->activeItem;
-    MapView->activeItem = 0;
+    MapView->removeCurrentItem();
   }
 }
 
+void MainWindow::changeViewSlot()
+{
+  m_ChangePerspectiveButton->setDown(MapView->changePerspective());
+}

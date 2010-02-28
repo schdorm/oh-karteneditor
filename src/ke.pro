@@ -11,6 +11,8 @@ SOURCES = main.cpp \
 	shared/data/gameparameter.cpp \
 	shared/visual_data/map.cpp \
 	shared/libs/qstring.cpp \
+	shared/libs/math.cpp
+	
 	
 HEADERS += mainwidgets/mainwindow.h \
 	mainwidgets/mapframe.h \
@@ -24,7 +26,8 @@ HEADERS += mainwidgets/mainwindow.h \
 	shared/data/gameparameter.h \
 	shared/visual_data/map.h \
 	shared/visual_data/mapobject.h \
-	shared/libs/qstring.h
+	shared/libs/qstring.h \
+	shared/libs/math.h
 	
 FORMS = dialogs/mapsettingsdialog.ui \
 	dialogs/mapobjectdialog.ui

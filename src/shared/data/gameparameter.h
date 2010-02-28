@@ -22,7 +22,7 @@
 
 #include <QtCore/QHash>
 
-#include "definitions.h"
+#include "oh.h"
 
 #ifdef OH_MAPEDITOR
 #define GAMEPARAMETER GameParameter::instance()

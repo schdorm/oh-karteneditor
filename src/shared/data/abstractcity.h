@@ -24,7 +24,7 @@
 #include <QtCore/QString>
 
 #include "goods.h"
-#include "definitions.h"
+#include "oh.h"
 //   #define DEBUG_CITY
 
 

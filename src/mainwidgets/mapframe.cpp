@@ -55,15 +55,17 @@
 
 #include <QtGui/QDialog>
 
+#include <math.h>
+
 //  #include <QtGui/QPixmap>
  
  
-MapFrame::MapFrame( const MainWindow *mainwin) : m_ObjectDialog (0), m_currentGraphicsItem (0), m_currentMapObject(0)
+MapFrame::MapFrame( const MainWindow *mainwin) : m_ChangePerspective (false), m_translationD (0), m_scaleF (1), m_rotateXAngle(0), m_rotateYAngle(0), m_rotateZAngle(0), m_ObjectDialog (0), m_currentGraphicsItem (0), m_currentMapObject(0)
 {
   qWarning() << "MapFrame::MapFrame( const MainWindow *mainwin)";
    
   m_MainWindow = mainwin;
-  activeItem = 0;
+//   activeItem = 0;
 //   m_map = 0;
   QGraphicsScene *szene = new QGraphicsScene();
   setScene(szene);
@@ -129,7 +131,7 @@ bool MapFrame::loadMap(const QString &a_filename)
 }
 
 
-void MapFrame::repaintMap()
+void MapFrame::repaintMap()		// clears the scene and adds each Object again to it
 {
   scene()->clear();
   
@@ -144,6 +146,7 @@ void MapFrame::repaintMap()
       //       if(imgpath.endsWith(".png", Qt::CaseInsensitive) || imgpath.endsWith(".jpg", Qt::CaseInsensitive) || imgpath.endsWith(".jpeg", Qt::CaseInsensitive) || imgpath.endsWith(".gif ") || imgpath.endsWith(".ppm", Qt::CaseInsensitive) || imgpath.endsWith(".tiff", Qt::CaseInsensitive) || imgpath.endsWith(".xbm", Qt::CaseInsensitive) || imgpath.endsWith(".xpm", Qt::CaseInsensitive))
       if(QImageReader(f_imgpath).canRead())
       {
+	f_moid = f_moit->id();
 	if(!f_imgpath.endsWith(".svg", Qt::CaseInsensitive))
 	{
 	  QGraphicsPixmapItem *f_pixmapItem = scene()->addPixmap(QPixmap(f_imgpath));
@@ -410,6 +413,15 @@ const MapObject * MapFrame::currentMapObject () const
 
 void MapFrame::mousePressEvent(QMouseEvent *event)
 {
+  m_mousepos = (mapToScene(event->pos()));
+//   m_mousepos = (mapToScene(event->pos() + QPoint(horizontalScrollBar()->value(), verticalScrollBar()->value())));
+//   m_mousepos = mapToScene(event->pos());
+
+  if(m_ChangePerspective)
+  {
+    qWarning() << "Change Perspective ...";
+    return;
+  }
   qWarning() << "MapFrame::mousePressEvent(QMouseEvent *event)";
   if(event->buttons() == Qt::LeftButton)
   {
@@ -417,30 +429,29 @@ void MapFrame::mousePressEvent(QMouseEvent *event)
     {
 //       int tx = event->x() + horizontalScrollBar()->value();
 //       int ty = event->y() + verticalScrollBar()->value();
-//       m_mousepos = QPoint(tx, ty);
-      m_mousepos = mapToScene(event->pos());
       
-      QList<QGraphicsItem *> f_gilist = items(m_mousepos.toPoint());
-      //       QList<QGraphicsItem *> &gilist = QGIlistAtClick;
+      QList<QGraphicsItem *> f_gilist = scene()->items(m_mousepos.toPoint());
       
-      qWarning() << "items(event->pos()); - Anzahl:" <<  f_gilist.size() << "Pos: " << event->pos() << m_mousepos << mapToScene(event->pos());
+//       qWarning() << "items(event->pos()); - Anzahl:" <<  f_gilist.size() << "Pos: " << event->pos() << m_mousepos << mapToScene(event->pos()) << event->pos() + QPoint(horizontalScrollBar()->value(), verticalScrollBar()->value()) << (event->pos() + QPoint(horizontalScrollBar()->value(), verticalScrollBar()->value()) == mapToScene(event->pos()));
+//       QGraphicsItem *item;
+//       foreach(item, scene()->items())
+// 	qWarning() << mapFromScene(item->sceneBoundingRect()) << item->sceneBoundingRect() << item->sceneBoundingRect().contains(m_mousepos) << item->sceneBoundingRect().contains(event->pos());
+      
       if(f_gilist.isEmpty())
       {
 	event->ignore();
 	return;
       }
-      else if(f_gilist.size() == 1 && !f_gilist.contains(activeItem))
+      else if(f_gilist.size() == 1 && !f_gilist.contains(m_currentGraphicsItem))
       {
-	
-	activeItem = f_gilist.first();
-	m_currentGraphicsItem = activeItem;
+	m_currentGraphicsItem = f_gilist.first();
 	setCurrentItem(m_currentGraphicsItem->data(Qt::UserRole).toInt());
 	
 	emit objectSelected(m_currentGraphicsItem->data(Qt::UserRole).toInt());
 	m_itemSelected = true;
 	
       }
-      else if(f_gilist.contains(activeItem) && m_itemSelected)
+      else if(f_gilist.contains(m_currentGraphicsItem) && m_itemSelected)
       {
 	m_itemGrabbed = true;
       }
@@ -449,7 +460,7 @@ void MapFrame::mousePressEvent(QMouseEvent *event)
   }
   else if(event->button() == Qt::RightButton)
   {
-    activeItem = 0;
+//     activeItem = 0;
     m_currentGraphicsItem = 0;
     m_currentMapObject = 0;
     m_itemSelected = false;
@@ -534,21 +545,39 @@ void MapFrame::mousePressEvent(QMouseEvent *event)
 			}*/
 /// ***************************************************************************************************//}
 
+qreal toRad(qreal arg)
+{
+  const qreal PI = 3.1415926535;
+  return (arg * PI / 180);
+}
 
 void MapFrame::mouseMoveEvent(QMouseEvent *event)
 {
-// qWarning() << "void MapFrame::mouseMoveEvent(QMouseEvent *event)";
-
-// setStatusTip(QString("%1 %2").arg(curser.x(), curser.y()));
-
-if(m_itemGrabbed)
-{
+  //  qWarning() << "void MapFrame::mouseMoveEvent(QMouseEvent *event)";
+  // setStatusTip(QString("%1 %2").arg(curser.x(), curser.y()));
   QPointF point (mapToScene(event->pos()));
-  qreal f_dx (point.x() - m_mousepos.x()), f_dy (point.y() - m_mousepos.y());
-  m_currentGraphicsItem->moveBy(f_dx, f_dy);
-  m_currentMapObject->moveBy(f_dx, f_dy);
+
+  const qreal f_dx = point.x() - m_mousepos.x();
+  const qreal f_dy = point.y() - m_mousepos.y();
+  if(m_itemGrabbed)
+  {
+    m_currentGraphicsItem->moveBy(f_dx, f_dy);
+     usleep(4000);
+    m_currentMapObject->setPosition(m_currentGraphicsItem->pos());
+    /*
+    m_currentMapObject->moveBy(f_dx, f_dy);
+    usleep(2000);
+    m_currentGraphicsItem->setPos(m_currentMapObject->position());*/
+
+  }
+  else if(m_ChangePerspective)
+  {
+     m_rotateXAngle += (cos(toRad(m_rotateYAngle)) * f_dy + (sin(toRad(m_rotateYAngle)) * f_dx))/100;
+     m_rotateYAngle += (cos(toRad(m_rotateXAngle)) * f_dx + (sin(toRad(m_rotateXAngle)) * f_dy))/100;
+     //      m_rotateZAngle;
+     setViewTransform();
+  }
   m_mousepos = point;
-}
 
 //  	activeItem->moveBy( event->x() - oldxpos,  event->y() - oldypos);
 // 	emit objectMoved();
@@ -558,18 +587,18 @@ if(m_itemGrabbed)
 
 void MapFrame::mouseReleaseEvent(QMouseEvent *event)
 {
-if(m_itemGrabbed)
+  if(m_itemGrabbed)
   {
-  m_itemGrabbed = false;
-//   itemSelected=false;
-  emit objectMoved(m_currentGraphicsItem->data(Qt::UserRole).toInt());
+    m_itemGrabbed = false;
+    //   itemSelected=false;
+    emit objectMoved(m_currentGraphicsItem->data(Qt::UserRole).toInt());
   }
- if(event->button() == Qt::RightButton)
- {
- m_itemSelected = false;
- }
- emit dataChanged();
-
+  if(event->button() == Qt::RightButton)
+  {
+    m_itemSelected = false;
+  }
+  emit dataChanged();
+  
 }
 
 ///************************************
@@ -662,6 +691,16 @@ qWarning() << "MapFrame::newObject(const MapObject &a_newObject)";
 
 }
 
+void MapFrame::removeCurrentItem()
+{
+  scene()->removeItem(m_currentGraphicsItem);
+  delete m_currentGraphicsItem;
+  m_currentGraphicsItem = 0;
+
+  m_smap.removeObject(m_currentMapObject->id());
+  m_currentMapObject = 0;
+  
+}
 
 
 void MapFrame::keyPressEvent(QKeyEvent *event)
@@ -672,12 +711,18 @@ void MapFrame::keyPressEvent(QKeyEvent *event)
   }
   if(event->key() == Qt::Key_O)
   {
-    activeItem->resetTransform();
-    activeItem->setData(98, QVariant(0));
-    activeItem->setData(99, QVariant(0));
-    activeItem->setData(100, QVariant(1));
-
-    
+    if(m_currentGraphicsItem != 0)
+    {
+      m_currentGraphicsItem->resetTransform();
+      m_currentGraphicsItem->setData(98, QVariant(0));
+      m_currentGraphicsItem->setData(99, QVariant(0));
+      m_currentGraphicsItem->setData(100, QVariant(1));
+    }
+    m_rotateXAngle = 0;
+    m_rotateYAngle = 0;
+    m_translationD = 1;
+    resetTransform();
+    setViewTransform();
   }
   if(event->key() == Qt::Key_C)
   {
@@ -685,75 +730,145 @@ void MapFrame::keyPressEvent(QKeyEvent *event)
   }
 }
 
-
- void MapFrame::wheelEvent ( QWheelEvent * event )
- {
-   int tx = event->x() + horizontalScrollBar()->value();
-   int ty = event->y() + verticalScrollBar()->value();
-//    QGraphicsPixmapItem *edititem = qgraphicsitem_cast<QGraphicsPixmapItem *>(scene()->itemAt(x,y));
-QGraphicsItem *edititem = (scene()->itemAt(tx,ty));
-
-   if(edititem != 0)
-   {
-//      edititem->data(99).toDouble;
-//      int angle = edititem->data(99).toDouble() + event->delta()/50;
-//     qWarning() << edititem->boundingRect() 	;
-
-     edititem->resetTransform();
-     int sx = tx - edititem->x();
-     const int sx2 = edititem->boundingRect().width()/2;
-     int sy = ty - edititem->y();
-     const int sy2 = edititem->boundingRect().height()/2;
-     
-     if(sx < 5 && sy < 5)
-     {
-       sx = 0;
-       sy = 0;
-     }
-     QTransform t;
-     t.translate( sx, sy);
-     
-     double xangle = edititem->data(98).toDouble();
-     double yangle = edititem->data(99).toDouble();
-     double scale = edititem->data(100).toDouble();
-     if(scale == 0)
-     {
-       scale = 1;
-     }
+void MapFrame::setViewTransform()
+{
+  
+  QTransform f_t;
+  f_t.translate(horizontalScrollBar()->value() + width()/2,   verticalScrollBar()->value() + height()/2);
+  
+//      f_t.rotate(90, Qt::XAxis);
+     f_t.scale(m_translationD, m_translationD);
+//      f_t.rotate(-90, Qt::XAxis);
+  
+  f_t.rotate(m_rotateXAngle, Qt::XAxis);
+  f_t.rotate(m_rotateYAngle, Qt::YAxis);
+  f_t.translate( - (horizontalScrollBar()->value() + width()/2), - (verticalScrollBar()->value() + height()/2));
+//   setTransform(f_t);
+}
 
 
-     if(event->modifiers() == Qt::ShiftModifier)
-     {
-       yangle += event->delta()/50;
-       edititem->setData(99, QVariant(yangle));
-     }
-     else if(event->modifiers() == Qt::ControlModifier)
-     {
-       scale += scale * event->delta()/500;
-       edititem->setData(100, QVariant(scale));
-       qWarning() << scale;
-     }
-     else
-     {
-       xangle += event->delta()/50;
-       edititem->setData(98, QVariant(xangle));
-       
-     }
-     if(scale > 0)
-     {
-       t.scale(scale, scale);
-     }
+void MapFrame::wheelEvent ( QWheelEvent * event )
+{
+  if(m_ChangePerspective)
+  {
+    m_translationD += ((qreal)(event->delta())) / 2000;
+    setViewTransform();
+  }
+  else
+  {
+    if(m_itemSelected)
+    {
+      //   int tx = event->x() + horizontalScrollBar()->value();
+      //   int ty = event->y() + verticalScrollBar()->value();
+      QPointF f_pt = mapToScene(event->pos());
+      //    QGraphicsPixmapItem *edititem = qgraphicsitem_cast<QGraphicsPixmapItem *>(scene()->itemAt(x,y));
+      QGraphicsItem *edititem = (scene()->itemAt(f_pt));
+      
+      if(edititem != 0)
+      {
+	//      edititem->data(99).toDouble;
+	//      int angle = edititem->data(99).toDouble() + event->delta()/50;
+	//     qWarning() << edititem->boundingRect() 	;
+	
+	edititem->resetTransform();
+	int sx = f_pt.x() - edititem->x();
+	//     const int sx2 = edititem->boundingRect().width()/2;
+	int sy = f_pt.y() - edititem->y();
+	//     const int sy2 = edititem->boundingRect().height()/2;
+	
+	if(sx < 5 && sy < 5)
+	{
+	  sx = 0;
+	  sy = 0;
+	}
+	QTransform t;
+	t.translate( sx, sy);
+	
+	double xangle = edititem->data(98).toDouble();
+	double yangle = edititem->data(99).toDouble();
+	double scale = edititem->data(100).toDouble();
+	if(scale == 0)
+	{
+	  scale = 1;
+	}
+	
+	
+	if(event->modifiers() == Qt::ShiftModifier)
+	{
+	  yangle += event->delta()/50;
+	  edititem->setData(99, QVariant(yangle));
+	}
+	else if(event->modifiers() == Qt::ControlModifier)
+	{
+	  scale += scale * event->delta()/500;
+	  edititem->setData(100, QVariant(scale));
+	  qWarning() << scale;
+	}
+	else
+	{
+	  xangle += event->delta()/50;
+	  edititem->setData(98, QVariant(xangle));
+	  
+	}
+	if(scale > 0)
+	{
+	  t.scale(scale, scale);
+	}
+	
+	t.rotate(xangle, Qt::XAxis);
+	t.rotate(yangle, Qt::YAxis);
+	
+	t.translate( - sx, - sy);
+	
+	edititem->setTransform(t);
+	//      edititem->setData(99, QVariant(angle));
+      }
+    }
+    else
+    {
+      switch(event->modifiers())
+      {
+	case Qt::ShiftModifier:
+	{
+	  // 	  horizontalScrollBar()->triggerAction(QAbstractSlider::SliderSingleStepAdd);
+	  horizontalScrollBar()->setValue(horizontalScrollBar()->value() - event->delta()/2);
+	  break;
+	}
+	case Qt::ControlModifier:
+	{
+	  QTransform t;
+	  // 	  t.scale
+	  m_scaleF += qreal(event->delta()) * m_scaleF / 500;
+	  t.scale(m_scaleF, m_scaleF);
+	  setTransform(t);
+// 	  scale(event->delta()/1000, event->delta()/1000);
+	  break;
+	}
+	case Qt::NoModifier:
+	{
+	    verticalScrollBar()->setValue(verticalScrollBar()->value() - event->delta()/2);
+	}
+	default:
+	  break;
+      }
+    }
+  }
+  
+}
 
-     t.rotate(xangle, Qt::XAxis);
-     t.rotate(yangle, Qt::YAxis);
 
-      t.translate( - sx, - sy);
+bool MapFrame::changePerspectiveEnabled() const
+{
+  return m_ChangePerspective;
+}
 
-     edititem->setTransform(t);
-//      edititem->setData(99, QVariant(angle));
-   }
-   
- }
+bool MapFrame::changePerspective()
+{
+  m_ChangePerspective = !m_ChangePerspective;
+  return m_ChangePerspective;
+}
+
+
 
 void MapFrame::mouseDoubleClickEvent(QMouseEvent *event)
 {

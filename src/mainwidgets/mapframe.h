@@ -98,11 +98,14 @@ class MapFrame : public QGraphicsView
 
 //     QSize mapSize;
     QPoint curser;
- 
+    
+    const QGraphicsItem *activeItem() const {	return m_currentGraphicsItem;	}
     const QGraphicsItem *currentGraphicsItem() const;
     const MapObject *currentMapObject	() const;
+    
+    void removeCurrentItem();
 
-    QGraphicsItem *activeItem;
+//     QGraphicsItem *activeItem;
     //  QGraphicsPixmapItem *activePixmapItem;
 
 //     int object_typ;
@@ -120,6 +123,10 @@ class MapFrame : public QGraphicsView
     
     void setMapSize(const QSize &);
     QSize mapSize() const {	return m_smap.size();	}
+    
+    void setViewTransform();
+    bool changePerspectiveEnabled() const;
+    bool changePerspective();
     
   public slots:
     void newMap();
@@ -160,6 +167,7 @@ class MapFrame : public QGraphicsView
     void setCurrentItem(int);
     
 
+
  
   protected:
     void mouseDoubleClickEvent ( QMouseEvent * event );
@@ -175,6 +183,11 @@ class MapFrame : public QGraphicsView
     const MainWindow *m_MainWindow;
     QComboBox *fktComboBox;
     
+    bool m_ChangePerspective;
+    
+    qreal m_translationD;
+    qreal m_scaleF;
+    qreal m_rotateXAngle, m_rotateYAngle, m_rotateZAngle;
     
     Map m_smap;
     

@@ -18,54 +18,13 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef _my_string
-#define _my_string
+#ifndef _math_own
+#define _math_own
 
-#include <QtCore/QString>
-
-//#define USE_SETVALID
-
-class QSize;
-class QPoint;
+bool isPositive(int number);
 
 
-QString removeWithespace(const QString &string);
-QString removeWithespaceRef(QString &string);
-
-/*{
-  string.simplified();
-  string.remove(" ");
-  return string;
-}*/
 
 
-#ifdef USE_SETVALID
-
- QString setValid(const QString &a_string);	// if argument is an empty string, "0" will be returned 
- QString getFromValid(const QString &a_string);
- 
 #endif
 
-QString fromPoint(const QPoint &a_point);
-QString fromPoint1(const QPoint &a_point);
-QPoint  toPoint(const QString &);
-
-QString fromSize(const QSize &a_size);
-QSize toSize(const QString &);
-
-QString fromBool(bool boolean);
-/*{
-  if(boolean)
-    return "true";
-  else
-    return "false";
-}*/
-
-bool toBool(const QString &string);
-/*{
-  return (string == "true" || string.toInt() == 1);
-}*/
-
-bool toBool(const QStringRef stringref);
-
-#endif
