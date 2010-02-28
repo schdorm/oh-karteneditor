@@ -71,7 +71,7 @@ class Map
     bool load(Orientations);
     #endif
     #ifdef OH_MAPEDITOR
-    void save(const QString & a_filename = QString());
+    void save(const QString & a_filename = QString(), bool a_export = false);
     #endif
     
     // const City *ccity()	const	{	return m_city;		}

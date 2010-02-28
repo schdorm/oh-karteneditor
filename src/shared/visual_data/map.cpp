@@ -470,7 +470,7 @@ bool Map::load(const QString &a_filename)
 	      bool objects = true;
 	      QStringRef it_name;
 	      
-	      QStringRef f_file, f_position, f_name, f_tooltip;
+	      QStringRef f_file, f_position, f_name, f_tooltip, f_img;
 	      int f_role(-1);
 	      double f_zvalue(0);
 	      
@@ -513,16 +513,31 @@ bool Map::load(const QString &a_filename)
 			{
 			  f_tooltip = it->value();
 			}
+			else if(it_name == "image")
+			{
+			  f_img = it->value();
+			}
 		      }
 		      
 		      #ifdef DEBUG_MAP
 		      qWarning() << "File/Pos/Name/Tooltip" << f_file << f_position << f_name << f_tooltip;
 		      #endif
-		      
-		      MapObject newMO(f_role, f_file.toString(), toPoint(f_position.toString()), f_name.toString() , f_tooltip.toString(), f_zvalue);
-		      
 		      if(!f_file.isEmpty())
-			m_Objects[newMO.id()] = newMO;
+		      {
+			if(!f_img.isEmpty() && QFileInfo(f_img.toString()).exists())
+			{
+			  MapObject newMO(f_role, f_img.toString(), toPoint(f_position.toString()), f_name.toString() , f_tooltip.toString(), f_zvalue);
+			  m_Objects.insert(newMO.id(), newMO);
+			}
+			else
+			{
+			  MapObject newMO(f_role, f_file.toString(), toPoint(f_position.toString()), f_name.toString() , f_tooltip.toString(), f_zvalue);
+			  m_Objects.insert(newMO.id(), newMO);
+			}
+			
+		      }
+		      
+		      f_file = f_img = QStringRef();
 		      
 		      f_file = f_position = f_name = f_tooltip = QStringRef();
 		      f_role = -1;
@@ -733,7 +748,7 @@ void Map::setType(int a_type)
   m_type = a_type;
 }
 
-void Map::save(const QString &a_filename)
+void Map::save(const QString &a_filename, bool a_export)
 {
   #ifdef DEBUG_MAP
   qWarning() << "void Map::save(const QString &a_filename)" << a_filename;
@@ -742,6 +757,16 @@ void Map::save(const QString &a_filename)
     m_filename = a_filename;
   if(!m_filename.isEmpty())
   {
+    if(a_export)
+    {
+      QDir dir(QFileInfo(m_filename).absolutePath());
+      if(! dir.cd("img"))
+	if(! dir.mkdir("img"))
+	  return;
+      QFile::copy(m_background, QFileInfo(m_filename).absolutePath() + "/img/" + QFileInfo(m_background).fileName());
+    }
+    
+    
     QFile savefile(m_filename);
     savefile.open(QIODevice::WriteOnly);
     QXmlStreamWriter writer(&savefile);
@@ -827,6 +852,11 @@ void Map::save(const QString &a_filename)
       writer.writeAttribute(QXmlStreamAttribute("name",		(it->name())));
       writer.writeAttribute(QXmlStreamAttribute("position",	fromPoint(it->position())));
       writer.writeAttribute(QXmlStreamAttribute("zvalue",	QString::number(it->zValue())));
+      if(a_export)
+      {
+	writer.writeAttribute("image",	QFileInfo(it->imagepath()).fileName());
+	QFile::copy(it->imagepath(), QFileInfo(m_filename).absolutePath() + "/img/" + QFileInfo(it->imagepath()).fileName());
+      }
     }
     writer.writeEndDocument();
     savefile.close();

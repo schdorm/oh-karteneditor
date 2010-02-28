@@ -45,7 +45,7 @@
 //#include <QtCore/QSignalMapper>
 #include <QtCore/QTimer>
 #include <QtCore/QDir>
-#include <QtCore/QFile>
+#include <QtCore/QFileInfo>
  #include <QtGui/QListWidget>
  #include <QtGui/QLineEdit>
  #include <QtGui/QLabel>
@@ -150,7 +150,7 @@ void MainWindow::createActions()
   newAct->setStatusTip(tr("Create a new map"));
   newAct->setIcon(QIcon(":.img/icon_new_map_01.png"));
   connect(newAct, SIGNAL(triggered()), this, SLOT(newMap()));
-  connect(newAct, SIGNAL(triggered()), MapView, SLOT(newMap()));
+//   connect(newAct, SIGNAL(triggered()), MapView, SLOT(newMap()));
   
   openAct = new QAction(tr("&Open..."), this);
   openAct->setShortcuts(QKeySequence::Open);
@@ -293,12 +293,13 @@ void MainWindow::newMap()
     SideBar->itemListWidget->setCurrentRow(0);
   }
   existingMapFile = false;
+  MapView->newMap();
 }
 
 
 void MainWindow::loadAutoSave()
 {
-  if(QFile(SETTINGS->autosavepath()).exists())
+  if(QFileInfo(SETTINGS->autosavepath()).exists())
   {
     existingMapFile = MapView->loadMap(SETTINGS->autosavepath());
     if(!existingMapFile)
@@ -318,21 +319,24 @@ void MainWindow::loadMap()
   
   qWarning() << mapfilename;
   
-  
-  if(SETTINGS->oldlayout())
+  if(!mapfilename.isEmpty())
   {
-    SideBar->itemListWidget->clear();
-    SideBar->itemListWidget->addItems(SideBar->staticListEntries);
+    if(SETTINGS->oldlayout())
+    {
+      SideBar->itemListWidget->clear();
+      SideBar->addStaticListItems();
+    }
+    
+    
+    newMap();
+    MapView->loadMap(mapfilename);
+    
+    setWindowTitle(QFileInfo(MapView->map()->filename()).baseName() + tr(" - OpenHanse Mapeditor"));
+    
+    
+    if(SETTINGS->oldlayout())
+      SideBar->itemListWidget->setCurrentRow(0);
   }
-  
-  MapView->loadMap(mapfilename);
-  
-  setWindowTitle(QFileInfo(MapView->map()->filename()).baseName() + tr(" - OpenHanse Mapeditor"));
-
-  
-  if(SETTINGS->oldlayout())
-    SideBar->itemListWidget->setCurrentRow(0);
-  
 }
 
 
@@ -340,14 +344,14 @@ void MainWindow::autoSave()
 {
   if(!m_autoSaved)
   {
-    MapView->saveMap(SETTINGS->autosavepath());
+    MapView->map()->save(SETTINGS->autosavepath(), true);
     m_autoSaved = true;
   }
 }
 
 void MainWindow::autoSaveMap()
 {
-  MapView->saveMap(SETTINGS->autosavepath());
+  MapView->map()->save(SETTINGS->autosavepath(), true);
   m_autoSaved = true;
 }
 
@@ -355,14 +359,14 @@ void MainWindow::autoSaveMap()
  void MainWindow::saveMapAs()
  {
  
-  MapView->map()->save( QFileDialog::getSaveFileName(this, tr("Save File"), QString() , tr("OpenHanse maps (*.ohm);; All Files (*)")));
+  MapView->map()->save( QFileDialog::getSaveFileName(this, tr("Save File"), QString() , tr("OpenHanse maps (*.ohm);; All Files (*)")), true);
 
   setWindowTitle(QFileInfo(MapView->map()->filename()).baseName() + tr(" - OpenHanse Mapeditor"));
 }
 
 void MainWindow::saveMap()
 {
-  if(QFile(MapView->map()->filename()).exists())
+  if(QFileInfo(MapView->map()->filename()).exists())
   {
     MapView->map()->save();
   }
